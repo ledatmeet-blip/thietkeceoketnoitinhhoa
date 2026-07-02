@@ -2202,21 +2202,70 @@ function applyImg(el,src){
   const ph=el.querySelector('.img-ph');
   if(ph)ph.classList.add('hidden');
 }
+// ── Smart-crop config: target canvas size per image slot ──────────────────
+const IMG_CROP_CFG={
+  'logo-badge':    {w:300,h:300,q:.92},
+  'book-hero':     {w:420,h:600,q:.92},
+  'book-main':     {w:420,h:600,q:.92},
+  'book-left':     {w:420,h:600,q:.92},
+  'book-right':    {w:420,h:600,q:.92},
+  'pricing-book':  {w:480,h:640,q:.9},
+  'author':        {w:480,h:640,q:.9},
+  'footer-bg':     {w:1600,h:500,q:.82},
+  'footer-avatar': {w:300,h:300,q:.92},
+  'qr':            {w:400,h:400,q:.93},
+  'bank-qr':       {w:300,h:300,q:.93},
+};
+function _getImgCropCfg(id){
+  if(IMG_CROP_CFG[id])return IMG_CROP_CFG[id];
+  if(id.startsWith('ceo-'))         return{w:400,h:400,q:.88};
+  if(id.startsWith('chapter-'))     return{w:420,h:580,q:.9};
+  if(id.startsWith('bonus-'))       return{w:200,h:200,q:.88};
+  if(id.startsWith('testimonial-')) return{w:600,h:400,q:.88};
+  if(id.startsWith('comm-gallery')) return{w:800,h:600,q:.85};
+  return{w:800,h:600,q:.85};
+}
+function _smartCrop(file,w,h,q){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      const ctx=c.getContext('2d');
+      const srcAR=img.naturalWidth/img.naturalHeight,dstAR=w/h;
+      let sx,sy,sw,sh;
+      if(srcAR>dstAR){sh=img.naturalHeight;sw=sh*dstAR;sx=(img.naturalWidth-sw)/2;sy=0;}
+      else{sw=img.naturalWidth;sh=sw/dstAR;sx=0;sy=(img.naturalHeight-sh)/2;}
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
+      res(c.toDataURL('image/jpeg',q));
+    };
+    img.onerror=rej;
+    img.src=url;
+  });
+}
+
 function adminUpload(id){
   if(!window.adminMode)return;
   const inp=document.createElement('input');
   inp.type='file';inp.accept='image/*';
-  inp.onchange=e=>{
+  inp.onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
-    const r=new FileReader();
-    r.onload=ev=>{
-      localStorage.setItem(IMG_PREFIX+id,ev.target.result);
-      document.querySelectorAll(`[data-img="${id}"]`).forEach(el=>applyImg(el,ev.target.result));
-      // Reset ticker so it rebuilds with new images
+    const{w,h,q}=_getImgCropCfg(id);
+    showToast('🖼️ Đang xử lý ảnh...','loading',0);
+    try{
+      const data=await _smartCrop(file,w,h,q);
+      _clearLoadingToasts();
+      localStorage.setItem(IMG_PREFIX+id,data);
+      document.querySelectorAll(`[data-img="${id}"]`).forEach(el=>applyImg(el,data));
       const track=document.getElementById('ceo-ticker-track');
       if(track) delete track.dataset.built;
-    };
-    r.readAsDataURL(file);
+      showToast(`✅ Ảnh tự động cắt ${w}×${h}px`,'success',3000);
+    }catch(err){
+      _clearLoadingToasts();
+      showToast('❌ Lỗi xử lý ảnh: '+err.message,'error');
+    }
   };
   inp.click();
 }
