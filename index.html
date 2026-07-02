@@ -3395,22 +3395,13 @@ function renderApSettingsTab(){
       </div>
     </div>
     <div class="ap-card">
-      <div class="ap-card-title">🚀 Triển Khai (Vercel Deploy Hook)</div>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Cấu hình URL Deploy Hook để bấm "Triển Khai" kích hoạt Vercel rebuild ngay từ trang quản trị. Dữ liệu đã lưu vào database hiển thị ngay không cần deploy.</p>
-      <div style="background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.15);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.8rem;color:var(--muted)">
-        <strong style="color:var(--gold)">Hướng dẫn lấy Deploy Hook URL:</strong><br>
-        1. Vào <em>vercel.com</em> → Project → Settings → Git<br>
-        2. Mục <em>Deploy Hooks</em> → Tạo hook mới<br>
-        3. Copy URL và dán vào ô dưới
+      <div class="ap-card-title">🚀 Triển Khai (Vercel Deploy)</div>
+      <div style="background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.82rem;color:#86efac">
+        ✅ <strong>Deploy Hook đã được cấu hình sẵn trên server.</strong><br>
+        Mỗi khi admin lưu dữ liệu, hệ thống tự động triển khai lên Vercel sau 10 giây.<br>
+        Hoặc bấm nút bên dưới để triển khai ngay.
       </div>
-      <div class="ap-field" style="margin-bottom:12px">
-        <label class="ap-lbl">Deploy Hook URL</label>
-        <input class="ap-inp" id="ap-deploy-hook" value="${localStorage.getItem('ceo-deploy-hook')||''}" placeholder="https://api.vercel.com/v1/integrations/deploy/...">
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="ap-save" onclick="saveDeployHook()">💾 Lưu Hook URL</button>
-        <button style="display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:1px solid rgba(109,40,217,.4);background:rgba(109,40,217,.12);color:#c4b5fd;font-weight:700;font-size:.85rem;cursor:pointer" onclick="adminTriggerDeploy()">🚀 Triển Khai Ngay</button>
-      </div>
+      <button style="display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;border:1px solid rgba(109,40,217,.4);background:rgba(109,40,217,.15);color:#c4b5fd;font-weight:700;font-size:.88rem;cursor:pointer" onclick="adminTriggerDeploy()">🚀 Triển Khai Ngay</button>
     </div>
     <div class="ap-card">
       <div class="ap-card-title">Dữ Liệu Trang</div>
@@ -3523,6 +3514,7 @@ async function saveDesignNow(){
       if(!res.ok)throw new Error(await res.text());
       _clearLoadingToasts();
       showToast('✅ Đã lưu thiết kế vào database!','success');
+      _scheduleAutoDeploy(10);
       window._pendingDesign={};window._designDirty=false;
       if(btn){btn.disabled=false;btn.textContent='💾 Lưu Thiết Kế';btn.classList.remove('dirty');}
       const st=document.getElementById('ab-save-status');if(st)st.classList.remove('visible');
@@ -3538,22 +3530,30 @@ async function saveDesignNow(){
 }
 
 // ===== DEPLOY HOOK =====
+let _deployDebounceTimer=null;
+function _scheduleAutoDeploy(delaySec=10){
+  if(!_IS_LIVE)return;
+  if(_deployDebounceTimer)clearTimeout(_deployDebounceTimer);
+  _deployDebounceTimer=setTimeout(async()=>{
+    _deployDebounceTimer=null;
+    try{
+      await fetch('/api/deploy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:_AE,adminPass:_AP})});
+    }catch(e){console.warn('[deploy] auto-deploy error:',e.message);}
+  }, delaySec*1000);
+}
+
 async function adminTriggerDeploy(){
-  const hookUrl=localStorage.getItem('ceo-deploy-hook')||'';
-  if(!hookUrl){
-    showToast('⚠️ Chưa cấu hình Deploy Hook. Vào Cài Đặt → Triển Khai để thêm.','info',5000);
-    openAdminPanel();setTimeout(()=>switchApTab('settings',document.querySelector('[onclick*="settings"]')),100);
-    return;
-  }
+  if(_deployDebounceTimer){clearTimeout(_deployDebounceTimer);_deployDebounceTimer=null;}
   const btn=document.getElementById('ab-deploy-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Đang triển khai...';}
   showToast('🚀 Đang kích hoạt triển khai Vercel...','deploy',0);
   try{
-    await fetch(hookUrl,{method:'POST'});
+    const r=await fetch('/api/deploy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:_AE,adminPass:_AP})});
     _clearLoadingToasts();
-    showToast('🚀 Đã gửi lệnh triển khai! Vercel sẽ build trong ~1-2 phút.','deploy',6000);
+    if(r.ok) showToast('🚀 Đã gửi lệnh triển khai! Vercel sẽ build trong ~1-2 phút.','deploy',6000);
+    else showToast('❌ Lỗi kích hoạt deploy: '+r.status,'error');
   }catch(e){
-    _clearLoadingToasts();showToast('❌ Deploy hook lỗi: '+e.message,'error');
+    _clearLoadingToasts();showToast('❌ Deploy lỗi: '+e.message,'error');
   }finally{
     if(btn){btn.disabled=false;btn.textContent='🚀 Triển Khai';}
   }
@@ -3573,6 +3573,7 @@ async function _dbWrite(key, value) {
     } else {
       const label=key.replace(/^ceo-/,'').replace(/-v\d+$/,'').replace(/_/g,' ');
       showToast('✅ Đã lưu: '+label,'success');
+      _scheduleAutoDeploy(10);
     }
   } catch (e) {
     showToast('❌ Mất kết nối database','error');
