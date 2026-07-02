@@ -46,7 +46,7 @@ header{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.95);backdrop-
 /* ===== BRAND IDENTITY ===== */
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;line-height:1}
 /* Badge mark */
-.logo-badge{flex-shrink:0;width:48px;height:52px;position:relative}
+.logo-badge{flex-shrink:0;width:52px;height:52px;position:relative;border-radius:50%;overflow:hidden;border:2px solid rgba(201,162,39,.5);box-shadow:0 0 0 3px rgba(201,162,39,.12)}.logo-badge img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
 /* Text block */
 .logo-text{line-height:1.1}
 .logo-text .l1{display:block;font-size:.55rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(240,192,64,.65);font-family:'Segoe UI',sans-serif}
@@ -1105,31 +1105,8 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
   <div class="container">
     <div class="header-inner">
       <a class="logo" href="#">
-        <!-- Brand badge SVG -->
         <div class="logo-badge">
-          <svg width="48" height="52" viewBox="0 0 48 52" fill="none">
-            <defs>
-              <linearGradient id="badge-g" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#8B0000"/>
-                <stop offset="100%" stop-color="#4a0000"/>
-              </linearGradient>
-              <linearGradient id="gold-g" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#FFD700"/>
-                <stop offset="100%" stop-color="#C9A227"/>
-              </linearGradient>
-            </defs>
-            <!-- Shield -->
-            <path d="M24 1 L46 10 L46 28 Q46 43 24 51 Q2 43 2 28 L2 10 Z" fill="url(#badge-g)" stroke="rgba(201,162,39,0.6)" stroke-width="1.2"/>
-            <!-- Crown -->
-            <path d="M12 30 L12 23 L17.5 26.5 L24 18 L30.5 26.5 L36 23 L36 30 Z" fill="url(#gold-g)"/>
-            <rect x="12" y="30" width="24" height="3.5" rx="1.5" fill="url(#gold-g)"/>
-            <!-- Stars on crown -->
-            <circle cx="17" cy="21" r="2" fill="#FFE55C"/>
-            <circle cx="24" cy="16.5" r="2.2" fill="#FFE55C"/>
-            <circle cx="31" cy="21" r="2" fill="#FFE55C"/>
-            <!-- CEO text -->
-            <text x="24" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" fill="#C9A227" font-weight="bold" letter-spacing="1">CLB</text>
-          </svg>
+          <img src="images/logo-tron-ceo.jpg" alt="CEO Kết Nối Tinh Hoa">
         </div>
         <div class="logo-text">
           <span class="l1">CEO – Câu Lạc Bộ Lãnh Đạo</span>
@@ -1205,7 +1182,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
         <span class="book-hero-dot"></span>
         <span class="book-hero-dot"></span>
         <div class="book-hero-card" data-img="book-hero" onclick="adminUpload('book-hero')">
-          <img src="images/book-group-new.png" alt="Bộ sách CEO Kết Nối Tinh Hoa" id="img-book-hero" loading="eager">
+          <img src="images/ceo-banner-do.jpg" alt="CEO Kết Nối Tinh Hoa – Kết nối tinh hoa, Lan tỏa giá trị" id="img-book-hero" loading="eager">
         </div>
       </div>
     </div>
