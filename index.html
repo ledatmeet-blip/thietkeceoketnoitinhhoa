@@ -20,9 +20,19 @@
   --font-title:'Great Vibes',cursive;
   --font-heading:inherit;
   --font-size-scale:1;
+  --logo-size:52px;
+  --logo-l1-size:.55rem;
+  --logo-l2-size:1.8rem;
+  --logo-l3-size:.58rem;
+  --color-logo-l1:rgba(240,192,64,.65);
+  --color-logo-l2:#ffffff;
+  --color-logo-l3:#f0c040;
+  --color-nav:#777;
+  --color-body:#e8e8e8;
+  --color-heading:#ffffff;
 }
 html{scroll-behavior:smooth}
-body{background:var(--dark);color:var(--text);font-family:var(--font-body);line-height:1.6;overflow-x:hidden;font-size:calc(1rem * var(--font-size-scale))}
+body{background:var(--dark);color:var(--color-body);font-family:var(--font-body);line-height:1.6;overflow-x:hidden;font-size:calc(1rem * var(--font-size-scale))}
 a{color:var(--gold);text-decoration:none}
 img{max-width:100%;display:block}
 .container{max-width:1100px;margin:0 auto;padding:0 20px}
@@ -50,17 +60,17 @@ header{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.95);backdrop-
 /* ===== BRAND IDENTITY ===== */
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;line-height:1}
 /* Badge mark */
-.logo-badge{flex-shrink:0;width:52px;height:52px;position:relative;border-radius:50%;overflow:hidden;border:2px solid rgba(201,162,39,.5);box-shadow:0 0 0 3px rgba(201,162,39,.12)}.logo-badge img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.logo-badge{flex-shrink:0;width:var(--logo-size);height:var(--logo-size);min-width:var(--logo-size);position:relative;border-radius:50%;overflow:hidden;border:2px solid rgba(201,162,39,.5);box-shadow:0 0 0 3px rgba(201,162,39,.12);transition:width .3s,height .3s}.logo-badge img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
 /* Text block */
-.logo-text{line-height:1.1}
-.logo-text .l1{display:block;font-size:.55rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(240,192,64,.65);font-family:'Segoe UI',sans-serif}
-.logo-text .l2{display:block;font-family:var(--font-title);font-size:2rem;font-weight:400;color:#ffffff;line-height:1.05;text-shadow:0 1px 12px rgba(255,255,255,.15)}
-.logo-text .l3{display:flex;align-items:center;gap:6px;font-family:'Segoe UI',sans-serif;font-size:.58rem;font-weight:500;color:var(--gold);letter-spacing:.8px;margin-top:3px;opacity:.85}
+.logo-text{line-height:1.1;white-space:nowrap}
+.logo-text .l1{display:block;font-size:var(--logo-l1-size);font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--color-logo-l1);font-family:'Segoe UI',sans-serif}
+.logo-text .l2{display:block;font-family:var(--font-title);font-size:var(--logo-l2-size);font-weight:400;color:var(--color-logo-l2);line-height:1.05;text-shadow:0 1px 12px rgba(255,255,255,.15);white-space:nowrap}
+.logo-text .l3{display:flex;align-items:center;gap:6px;font-family:'Segoe UI',sans-serif;font-size:var(--logo-l3-size);font-weight:500;color:var(--color-logo-l3);letter-spacing:.8px;margin-top:3px;opacity:.85;white-space:nowrap}
 .logo-text .l3::before{content:'';display:inline-block;width:18px;height:1px;background:var(--gold);opacity:.6}
 .logo-text .l3::after{content:'';display:inline-block;width:18px;height:1px;background:var(--gold);opacity:.6}
 /* NAV */
 nav{display:flex;gap:0;align-items:center}
-nav a{font-size:.8rem;color:var(--muted);transition:.2s;font-weight:500;padding:6px 12px;border-radius:6px;white-space:nowrap}
+nav a{font-size:.8rem;color:var(--color-nav);transition:.2s;font-weight:500;padding:6px 12px;border-radius:6px;white-space:nowrap}
 nav a:hover{color:var(--gold);background:rgba(240,192,64,.06)}
 nav a.nav-highlight{color:var(--gold);border:1px solid rgba(240,192,64,.25);background:rgba(240,192,64,.06);font-weight:700}
 nav a.nav-highlight:hover{background:rgba(240,192,64,.15)}
@@ -3158,13 +3168,46 @@ function saveDesign(patch){
 function applyDesign(d){
   if(!d)d=loadDesign();
   const root=document.documentElement;
-  if(d.fontBody) root.style.setProperty('--font-body',d.fontBody);
-  if(d.fontTitle) root.style.setProperty('--font-title',d.fontTitle);
-  if(d.fontSize) root.style.setProperty('--font-size-scale',d.fontSize);
-  if(d.goldColor){
-    // Re-derive gold2 as a slightly darker shade (simple approach)
-    root.style.setProperty('--gold',d.goldColor);
-  }
+  const set=(k,v)=>{if(v!=null&&v!=='')root.style.setProperty(k,v);};
+  set('--font-body',d.fontBody);
+  set('--font-title',d.fontTitle);
+  set('--font-size-scale',d.fontSize);
+  set('--gold',d.goldColor);
+  set('--logo-size',d.logoSize?d.logoSize+'px':null);
+  set('--logo-l2-size',d.logoL2Size?d.logoL2Size+'rem':null);
+  set('--logo-l1-size',d.logoL1Size?d.logoL1Size+'rem':null);
+  set('--logo-l3-size',d.logoL3Size?d.logoL3Size+'rem':null);
+  set('--color-logo-l1',d.colorLogoL1);
+  set('--color-logo-l2',d.colorLogoL2);
+  set('--color-logo-l3',d.colorLogoL3);
+  set('--color-nav',d.colorNav);
+  set('--color-body',d.colorBody);
+  set('--color-heading',d.colorHeading);
+}
+function _colorRow(label,key,defVal,d){
+  const v=d[key]||defVal;
+  return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+    <span style="font-size:.82rem;color:var(--text)">${label}</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:28px;height:28px;border-radius:6px;background:${v};border:2px solid rgba(255,255,255,.15)"></div>
+      <input type="color" value="${v}" style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none"
+        oninput="saveDesign({'${key}':this.value});this.previousElementSibling.style.background=this.value">
+      <button onclick="saveDesign({'${key}':''});renderApDesignTab()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--muted);font-size:.72rem;padding:4px 8px;cursor:pointer">Reset</button>
+    </div>
+  </div>`;
+}
+function _sliderRow(label,key,min,max,step,defVal,unit,d){
+  const v=d[key]!=null?d[key]:defVal;
+  return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:.82rem;color:var(--text)">${label}</span>
+      <strong id="sv-${key}" style="color:var(--gold);font-size:.82rem">${v}${unit}</strong>
+    </div>
+    <input type="range" min="${min}" max="${max}" step="${step}" value="${v}"
+      style="width:100%;accent-color:var(--gold)"
+      oninput="document.getElementById('sv-${key}').textContent=this.value+'${unit}';saveDesign({'${key}':parseFloat(this.value)})">
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px"><span>${min}${unit}</span><span>${max}${unit}</span></div>
+  </div>`;
 }
 function renderApDesignTab(){
   const d=loadDesign();
@@ -3174,60 +3217,77 @@ function renderApDesignTab(){
   const authorSrc=localStorage.getItem('ceo_img_author')||'images/author.jpg';
   const curFontBody=d.fontBody||"'Segoe UI',system-ui,sans-serif";
   const curFontTitle=d.fontTitle||"'Great Vibes',cursive";
-  const curSize=d.fontSize||1;
   const curGold=d.goldColor||'#f0c040';
   const tab=document.getElementById('ap-tab-design');
   tab.innerHTML=`
   <div class="ap-tab-hdr"><h2>🎨 Thiết Kế & Hình Ảnh</h2></div>
   <div style="display:flex;flex-direction:column;gap:18px">
 
-    <!-- IMAGES SECTION -->
+    <!-- IMAGES -->
     <div class="ap-card">
       <div class="ap-card-title">🖼️ Hình Ảnh & Logo</div>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Click vào từng ảnh để thay thế. Thay đổi áp dụng ngay lập tức.</p>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Click vào từng ảnh để thay thế ngay lập tức.</p>
       <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
         <div style="text-align:center">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">LOGO NAVBAR</div>
-          <img src="${logoBadgeSrc}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('logo-badge');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay logo">
-          <div style="font-size:.66rem;color:var(--muted);margin-top:4px">64×64px</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.5px">LOGO NAVBAR</div>
+          <img src="${logoBadgeSrc}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('logo-badge');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay">
         </div>
         <div style="text-align:center">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">BANNER HERO</div>
-          <img src="${heroBannerSrc}" class="design-img-thumb hero-thumb" onclick="adminUpload('book-hero');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay banner hero">
-          <div style="font-size:.66rem;color:var(--muted);margin-top:4px">Banner chính</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.5px">BANNER HERO</div>
+          <img src="${heroBannerSrc}" class="design-img-thumb hero-thumb" onclick="adminUpload('book-hero');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay">
         </div>
         <div style="text-align:center">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">LOGO FOOTER</div>
-          <img src="${footerAvSrc||'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect width=%2264%22 height=%2264%22 fill=%22%23222%22 rx=%2232%22/><text x=%2232%22 y=%2238%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2224%22>👑</text></svg>'}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('footer-avatar');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay logo footer">
-          <div style="font-size:.66rem;color:var(--muted);margin-top:4px">Footer logo</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.5px">LOGO FOOTER</div>
+          <img src="${footerAvSrc||'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect width=%2264%22 height=%2264%22 fill=%22%23222%22 rx=%2232%22/><text x=%2232%22 y=%2238%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2224%22>👑</text></svg>'}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('footer-avatar');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay">
         </div>
         <div style="text-align:center">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;font-weight:600">ẢNH TÁC GIẢ</div>
-          <img src="${authorSrc}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('author');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay ảnh tác giả">
-          <div style="font-size:.66rem;color:var(--muted);margin-top:4px">Tác giả</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.5px">TÁC GIẢ</div>
+          <img src="${authorSrc}" class="design-img-thumb" style="border-radius:50%;width:64px;height:64px" onclick="adminUpload('author');setTimeout(()=>renderApDesignTab(),800)" title="Click để thay">
         </div>
       </div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
-        <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:600">CÁC HÌNH KHÁC (click vào trực tiếp trên trang khi bật Admin Mode)</div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;font-weight:600">HÌNH KHÁC</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${['chapter-1','chapter-2','chapter-3','chapter-4','chapter-5','testimonial-1','testimonial-2','testimonial-3','footer-bg','qr','pricing-book'].map(id=>{
+          ${['chapter-1','chapter-2','chapter-3','chapter-4','chapter-5','testimonial-1','testimonial-2','testimonial-3','testimonial-4','testimonial-5','footer-bg','qr','pricing-book'].map(id=>{
             const s=localStorage.getItem('ceo_img_'+id)||DEFAULT_IMGS[id]||'';
-            return `<div onclick="adminUpload('${id}');setTimeout(()=>renderApDesignTab(),800)" title="Thay ${id}" style="width:48px;height:36px;border-radius:6px;overflow:hidden;border:1.5px solid rgba(255,255,255,.12);cursor:pointer;background:var(--dark3);position:relative;flex-shrink:0">
-              ${s?`<img src="${s}" style="width:100%;height:100%;object-fit:cover;display:block">`:`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--muted);text-align:center;padding:2px">${id}</div>`}
-              <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:.2s;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;opacity:0" onmouseenter="this.style.opacity='1';this.style.background='rgba(0,0,0,.6)'" onmouseleave="this.style.opacity='0';this.style.background='rgba(0,0,0,0)'">📷</div>
+            return `<div onclick="adminUpload('${id}');setTimeout(()=>renderApDesignTab(),800)" title="Thay: ${id}" style="width:52px;height:38px;border-radius:6px;overflow:hidden;border:1.5px solid rgba(255,255,255,.12);cursor:pointer;background:var(--dark3);position:relative;flex-shrink:0">
+              ${s?`<img src="${s}" style="width:100%;height:100%;object-fit:cover;display:block">`:`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:var(--muted);text-align:center;padding:3px;word-break:break-all">${id}</div>`}
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;opacity:0;background:rgba(0,0,0,0);transition:.2s" onmouseenter="this.style.opacity='1';this.style.background='rgba(0,0,0,.6)'" onmouseleave="this.style.opacity='0';this.style.background='transparent'">📷</div>
             </div>`;
           }).join('')}
         </div>
       </div>
     </div>
 
+    <!-- LOGO SIZE -->
+    <div class="ap-card">
+      <div class="ap-card-title">🔴 Kích Thước Logo</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <img src="${logoBadgeSrc}" style="border-radius:50%;object-fit:cover;width:${d.logoSize||52}px;height:${d.logoSize||52}px;border:2px solid rgba(201,162,39,.5);flex-shrink:0;transition:.3s" id="logo-preview-img">
+        <div style="flex:1">
+          ${_sliderRow('Kích thước logo (px)','logoSize',30,120,2,52,'px',d)}
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${[36,48,52,64,72,88,100].map(s=>`<button onclick="saveDesign({logoSize:${s}});renderApDesignTab()" style="padding:5px 12px;border-radius:6px;border:1.5px solid ${(d.logoSize||52)==s?'var(--gold)':'rgba(255,255,255,.12)'};background:${(d.logoSize||52)==s?'rgba(240,192,64,.1)':'var(--dark3)'};color:${(d.logoSize||52)==s?'var(--gold)':'var(--muted)'};font-size:.78rem;cursor:pointer">${s}px</button>`).join('')}
+      </div>
+    </div>
+
+    <!-- LOGO TEXT SIZE -->
+    <div class="ap-card">
+      <div class="ap-card-title">✏️ Kích Thước Chữ Logo</div>
+      <div style="margin-bottom:14px;padding:12px;border-radius:8px;background:var(--dark3);font-family:var(--font-title);font-size:${d.logoL2Size||1.8}rem;color:var(--color-logo-l2);white-space:nowrap">Kết Nối Tinh Hoa</div>
+      ${_sliderRow('Chữ logo lớn (rem)','logoL2Size',0.8,3.5,0.1,1.8,'rem',d)}
+      ${_sliderRow('Chữ phụ trên logo (rem)','logoL1Size',0.35,0.9,0.05,0.55,'rem',d)}
+      ${_sliderRow('Chữ phụ dưới logo (rem)','logoL3Size',0.35,0.9,0.05,0.58,'rem',d)}
+    </div>
+
     <!-- FONT BODY -->
     <div class="ap-card">
-      <div class="ap-card-title">🔤 Font Chữ Nội Dung (Body)</div>
-      <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Font dùng cho toàn bộ văn bản, mô tả, nội dung chính.</p>
+      <div class="ap-card-title">🔤 Font Chữ Nội Dung</div>
       <div class="design-font-grid">
         ${BODY_FONTS.map(f=>`
-        <button class="design-font-btn${curFontBody===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontBody:'${f.value}'});renderApDesignTab()">
+        <button class="design-font-btn${curFontBody===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontBody:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
           ${f.label}<br><span style="font-size:.72rem;opacity:.6">Aa Bb Cc</span>
         </button>`).join('')}
       </div>
@@ -3235,49 +3295,47 @@ function renderApDesignTab(){
 
     <!-- FONT TITLE -->
     <div class="ap-card">
-      <div class="ap-card-title">✍️ Font Tiêu Đề & Logo (Title)</div>
-      <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Font dùng cho logo "Kết Nối Tinh Hoa", tiêu đề nổi bật.</p>
+      <div class="ap-card-title">✍️ Font Logo & Tiêu Đề</div>
       <div class="design-font-grid">
         ${TITLE_FONTS.map(f=>`
-        <button class="design-font-btn${curFontTitle===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontTitle:'${f.value}'});renderApDesignTab()">
+        <button class="design-font-btn${curFontTitle===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontTitle:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
           ${f.label}<br><span style="font-size:1.1rem;opacity:.8">Kết Nối</span>
         </button>`).join('')}
       </div>
     </div>
 
-    <!-- FONT SIZE -->
+    <!-- FONT SIZE GLOBAL -->
     <div class="ap-card">
       <div class="ap-card-title">📏 Cỡ Chữ Tổng Thể</div>
-      <div class="design-size-row">
-        <span style="font-size:.8rem;color:var(--muted)">Nhỏ hơn</span>
-        <input type="range" min="0.85" max="1.2" step="0.05" value="${curSize}" oninput="this.nextElementSibling.textContent=Math.round(this.value*100)+'%';saveDesign({fontSize:parseFloat(this.value)})">
-        <span class="design-size-val">${Math.round(curSize*100)}%</span>
-        <span style="font-size:.8rem;color:var(--muted)">Lớn hơn</span>
-      </div>
-      <div class="design-preview-text" style="font-family:var(--font-body);font-size:calc(1rem * ${curSize})">
-        <strong style="font-family:var(--font-title);font-size:1.6em">Kết Nối Tinh Hoa</strong><br>
-        CEO Kết Nối Tinh Hoa – Câu Lạc Bộ Lãnh Đạo hàng đầu Việt Nam. Kiến Tạo Giá Trị · Lan Tỏa Tinh Hoa
+      ${_sliderRow('Tỉ lệ cỡ chữ toàn trang','fontSize',0.8,1.3,0.05,1,'x',d)}
+      <div style="margin-top:10px;padding:12px;border-radius:8px;background:var(--dark3);font-family:var(--font-body);font-size:calc(1rem * ${d.fontSize||1})">
+        CEO Kết Nối Tinh Hoa – Câu Lạc Bộ Lãnh Đạo · Kiến Tạo Giá Trị
       </div>
     </div>
 
-    <!-- GOLD COLOR -->
+    <!-- COLORS -->
     <div class="ap-card">
-      <div class="ap-card-title">🌟 Màu Vàng Gold</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <input type="color" value="${curGold}" style="width:48px;height:48px;border:none;border-radius:8px;cursor:pointer;background:none;padding:0" oninput="saveDesign({goldColor:this.value})">
+      <div class="ap-card-title">🎨 Màu Sắc Chữ</div>
+      ${_colorRow('🌟 Màu vàng Gold (accent)','goldColor','#f0c040',d)}
+      ${_colorRow('📝 Chữ nội dung chính','colorBody','#e8e8e8',d)}
+      ${_colorRow('🔗 Link điều hướng Navbar','colorNav','#777777',d)}
+      ${_colorRow('🏷️ Logo – dòng phụ trên','colorLogoL1','#f0c040',d)}
+      ${_colorRow('✨ Logo – tên chính (Kết Nối Tinh Hoa)','colorLogoL2','#ffffff',d)}
+      ${_colorRow('📌 Logo – dòng phụ dưới','colorLogoL3','#f0c040',d)}
+      <div style="margin-top:12px">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;font-weight:600">PRESET MÀU VÀNG GOLD</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${['#f0c040','#e6a800','#ffd700','#d4af37','#b8972a','#c9a227','#ffcc44','#e8b84b'].map(c=>`
-          <div onclick="saveDesign({goldColor:'${c}'});renderApDesignTab()" title="${c}" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curGold?'#fff':'transparent'};transition:.2s"></div>`).join('')}
+          ${['#f0c040','#e6a800','#ffd700','#d4af37','#c9a227','#b8860b','#ffcc44','#e8b84b'].map(c=>`
+          <div onclick="saveDesign({goldColor:'${c}'})" title="${c}" style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curGold?'#fff':'transparent'};transition:.15s"></div>`).join('')}
         </div>
       </div>
-      <div style="margin-top:10px;font-size:.78rem;color:var(--muted)">Màu hiện tại: <strong style="color:var(--gold)">${curGold}</strong></div>
     </div>
 
     <!-- RESET -->
     <div class="ap-card" style="background:rgba(220,38,38,.04);border-color:rgba(220,38,38,.15)">
       <div class="ap-card-title" style="color:#ef4444">♻️ Khôi Phục Mặc Định</div>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Xóa tất cả tùy chỉnh thiết kế, trở về giao diện gốc.</p>
-      <button class="ap-btn ap-btn-d" style="padding:10px 18px;font-size:.82rem" onclick="if(confirm('Khôi phục thiết kế về mặc định?')){localStorage.removeItem('${DESIGN_KEY}');applyDesign({fontBody:'',fontTitle:'',fontSize:1,goldColor:''});document.documentElement.style.removeProperty('--font-body');document.documentElement.style.removeProperty('--font-title');document.documentElement.style.removeProperty('--font-size-scale');document.documentElement.style.removeProperty('--gold');renderApDesignTab()}">⚠️ Reset Thiết Kế</button>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Xóa tất cả tùy chỉnh font/màu/size, trở về giao diện gốc.</p>
+      <button class="ap-btn ap-btn-d" style="padding:10px 18px;font-size:.82rem" onclick="if(confirm('Khôi phục thiết kế về mặc định?')){localStorage.removeItem(DESIGN_KEY);const r=document.documentElement;['--font-body','--font-title','--font-size-scale','--gold','--logo-size','--logo-l2-size','--logo-l1-size','--logo-l3-size','--color-logo-l1','--color-logo-l2','--color-logo-l3','--color-nav','--color-body','--color-heading'].forEach(k=>r.style.removeProperty(k));renderApDesignTab()}">⚠️ Reset Thiết Kế</button>
     </div>
   </div>`;
 }
