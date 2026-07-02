@@ -1112,6 +1112,26 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .design-size-row input[type=range]{flex:1;accent-color:var(--gold)}
 .design-size-val{min-width:36px;text-align:right;font-weight:700;color:var(--gold);font-size:.9rem}
 .design-preview-text{margin-top:10px;padding:12px;border-radius:8px;background:var(--dark3);font-size:1rem;line-height:1.5;color:var(--text)}
+/* ===== TOAST NOTIFICATIONS ===== */
+#admin-toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:340px}
+.a-toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:.85rem;font-weight:600;color:#fff;box-shadow:0 4px 24px rgba(0,0,0,.5);pointer-events:auto;animation:toastIn .28s ease;border:1px solid rgba(255,255,255,.1)}
+.a-toast.success{background:linear-gradient(135deg,#14532d,#166534)}
+.a-toast.error{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
+.a-toast.loading{background:linear-gradient(135deg,#1e3a5f,#1d4ed8)}
+.a-toast.info{background:linear-gradient(135deg,#27272a,#3f3f46)}
+.a-toast.deploy{background:linear-gradient(135deg,#4c1d95,#6d28d9)}
+.a-toast-close{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:1rem;padding:0 0 0 6px;line-height:1}
+.a-toast-close:hover{color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* Design save button dirty state */
+#design-save-btn{transition:all .2s}
+#design-save-btn.dirty{background:linear-gradient(135deg,var(--gold),var(--gold2))!important;color:#000!important;animation:savePulse 2s ease-in-out infinite}
+@keyframes savePulse{0%,100%{box-shadow:0 0 0 0 rgba(240,192,64,.4)}50%{box-shadow:0 0 0 6px rgba(240,192,64,0)}}
+/* Admin bar deploy btn */
+.ab-deploy-btn{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:6px;border:1px solid rgba(120,80,200,.5);background:rgba(109,40,217,.15);color:#c4b5fd;font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
+.ab-deploy-btn:hover{background:rgba(109,40,217,.35);color:#fff}
+.ab-save-status{font-size:.72rem;color:rgba(240,192,64,.6);font-style:italic;display:none}
+.ab-save-status.visible{display:block}
 </style>
 </head>
 <body>
@@ -1123,11 +1143,16 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 </div>
 
 <!-- ADMIN BAR -->
+<div id="admin-toast"></div>
 <div id="admin-bar">
-  <span class="admin-mode-label">⚙️ CHẾ ĐỘ QUẢN TRỊ – Click vào ảnh để thay thế</span>
-  <div style="display:flex;gap:8px">
-    <button onclick="openAdminPanel()" style="background:rgba(240,192,64,.2);color:var(--gold);border:1px solid rgba(240,192,64,.35);border-radius:6px;padding:4px 14px;cursor:pointer;font-size:.8rem;font-weight:700">📋 Mở Bảng Quản Trị</button>
-    <button id="btn-admin-off">Thoát Admin</button>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="admin-mode-label">⚙️ CHẾ ĐỘ QUẢN TRỊ</span>
+    <span class="ab-save-status" id="ab-save-status">Có thay đổi chưa lưu...</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button onclick="openAdminPanel()" style="background:rgba(240,192,64,.2);color:var(--gold);border:1px solid rgba(240,192,64,.35);border-radius:6px;padding:4px 14px;cursor:pointer;font-size:.8rem;font-weight:700">📋 Bảng Quản Trị</button>
+    <button class="ab-deploy-btn" onclick="adminTriggerDeploy()" id="ab-deploy-btn" title="Triển khai lên server">🚀 Triển Khai</button>
+    <button id="btn-admin-off">Thoát</button>
   </div>
 </div>
 
@@ -3191,8 +3216,8 @@ function _colorRow(label,key,defVal,d){
     <div style="display:flex;align-items:center;gap:10px">
       <div style="width:28px;height:28px;border-radius:6px;background:${v};border:2px solid rgba(255,255,255,.15)"></div>
       <input type="color" value="${v}" style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none"
-        oninput="saveDesign({'${key}':this.value});this.previousElementSibling.style.background=this.value">
-      <button onclick="saveDesign({'${key}':''});renderApDesignTab()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--muted);font-size:.72rem;padding:4px 8px;cursor:pointer">Reset</button>
+        oninput="_previewDesignPatch({'${key}':this.value});this.previousElementSibling.style.background=this.value">
+      <button onclick="_previewDesignPatch({'${key}':''});renderApDesignTab()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--muted);font-size:.72rem;padding:4px 8px;cursor:pointer">Reset</button>
     </div>
   </div>`;
 }
@@ -3205,12 +3230,13 @@ function _sliderRow(label,key,min,max,step,defVal,unit,d){
     </div>
     <input type="range" min="${min}" max="${max}" step="${step}" value="${v}"
       style="width:100%;accent-color:var(--gold)"
-      oninput="document.getElementById('sv-${key}').textContent=this.value+'${unit}';saveDesign({'${key}':parseFloat(this.value)})">
+      oninput="document.getElementById('sv-${key}').textContent=this.value+'${unit}';_previewDesignPatch({'${key}':parseFloat(this.value)})">
     <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px"><span>${min}${unit}</span><span>${max}${unit}</span></div>
   </div>`;
 }
 function renderApDesignTab(){
-  const d=loadDesign();
+  // Merge saved design with pending (not-yet-saved) changes
+  const d={...loadDesign(),...window._pendingDesign};
   const logoBadgeSrc=localStorage.getItem('ceo_img_logo-badge')||'images/logo-tron-ceo.jpg';
   const heroBannerSrc=localStorage.getItem('ceo_img_book-hero')||'images/ceo-banner-do.jpg';
   const footerAvSrc=localStorage.getItem('ceo_img_footer-avatar')||'';
@@ -3218,9 +3244,17 @@ function renderApDesignTab(){
   const curFontBody=d.fontBody||"'Segoe UI',system-ui,sans-serif";
   const curFontTitle=d.fontTitle||"'Great Vibes',cursive";
   const curGold=d.goldColor||'#f0c040';
+  const isDirty=window._designDirty||Object.keys(window._pendingDesign).length>0;
   const tab=document.getElementById('ap-tab-design');
   tab.innerHTML=`
-  <div class="ap-tab-hdr"><h2>🎨 Thiết Kế & Hình Ảnh</h2></div>
+  <div class="ap-tab-hdr" style="position:sticky;top:0;background:var(--dark2);z-index:10;padding-bottom:12px;margin-bottom:0;border-bottom:1px solid rgba(255,255,255,.06)">
+    <h2>🎨 Thiết Kế & Hình Ảnh</h2>
+    <button id="design-save-btn" onclick="saveDesignNow()" class="${isDirty?'dirty':''}"
+      style="display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:8px;border:none;background:${isDirty?'linear-gradient(135deg,var(--gold),var(--gold2))':'rgba(240,192,64,.15)'};color:${isDirty?'#000':'var(--gold)'};font-weight:700;font-size:.88rem;cursor:pointer;transition:.2s">
+      💾 ${isDirty?'Lưu Thay Đổi ●':'Lưu Thiết Kế'}
+    </button>
+  </div>
+  ${isDirty?`<div style="padding:10px 14px;border-radius:8px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);font-size:.8rem;color:var(--gold);margin-bottom:4px">⚠️ Bạn có thay đổi chưa lưu. Nhấn <strong>Lưu Thay Đổi</strong> để đồng bộ vào database.</div>`:''}
   <div style="display:flex;flex-direction:column;gap:18px">
 
     <!-- IMAGES -->
@@ -3269,7 +3303,7 @@ function renderApDesignTab(){
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${[36,48,52,64,72,88,100].map(s=>`<button onclick="saveDesign({logoSize:${s}});renderApDesignTab()" style="padding:5px 12px;border-radius:6px;border:1.5px solid ${(d.logoSize||52)==s?'var(--gold)':'rgba(255,255,255,.12)'};background:${(d.logoSize||52)==s?'rgba(240,192,64,.1)':'var(--dark3)'};color:${(d.logoSize||52)==s?'var(--gold)':'var(--muted)'};font-size:.78rem;cursor:pointer">${s}px</button>`).join('')}
+        ${[36,48,52,64,72,88,100].map(s=>`<button onclick="_previewDesignPatch({logoSize:${s}});renderApDesignTab()" style="padding:5px 12px;border-radius:6px;border:1.5px solid ${(d.logoSize||52)==s?'var(--gold)':'rgba(255,255,255,.12)'};background:${(d.logoSize||52)==s?'rgba(240,192,64,.1)':'var(--dark3)'};color:${(d.logoSize||52)==s?'var(--gold)':'var(--muted)'};font-size:.78rem;cursor:pointer">${s}px</button>`).join('')}
       </div>
     </div>
 
@@ -3287,7 +3321,7 @@ function renderApDesignTab(){
       <div class="ap-card-title">🔤 Font Chữ Nội Dung</div>
       <div class="design-font-grid">
         ${BODY_FONTS.map(f=>`
-        <button class="design-font-btn${curFontBody===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontBody:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
+        <button class="design-font-btn${curFontBody===f.value?' active':''}" style="font-family:${f.value}" onclick="_previewDesignPatch({fontBody:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
           ${f.label}<br><span style="font-size:.72rem;opacity:.6">Aa Bb Cc</span>
         </button>`).join('')}
       </div>
@@ -3298,7 +3332,7 @@ function renderApDesignTab(){
       <div class="ap-card-title">✍️ Font Logo & Tiêu Đề</div>
       <div class="design-font-grid">
         ${TITLE_FONTS.map(f=>`
-        <button class="design-font-btn${curFontTitle===f.value?' active':''}" style="font-family:${f.value}" onclick="saveDesign({fontTitle:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
+        <button class="design-font-btn${curFontTitle===f.value?' active':''}" style="font-family:${f.value}" onclick="_previewDesignPatch({fontTitle:'${f.value.replace(/'/g,"\\'")}'});renderApDesignTab()">
           ${f.label}<br><span style="font-size:1.1rem;opacity:.8">Kết Nối</span>
         </button>`).join('')}
       </div>
@@ -3326,7 +3360,7 @@ function renderApDesignTab(){
         <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;font-weight:600">PRESET MÀU VÀNG GOLD</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           ${['#f0c040','#e6a800','#ffd700','#d4af37','#c9a227','#b8860b','#ffcc44','#e8b84b'].map(c=>`
-          <div onclick="saveDesign({goldColor:'${c}'})" title="${c}" style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curGold?'#fff':'transparent'};transition:.15s"></div>`).join('')}
+          <div onclick="_previewDesignPatch({goldColor:'${c}'})" title="${c}" style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===curGold?'#fff':'transparent'};transition:.15s"></div>`).join('')}
         </div>
       </div>
     </div>
@@ -3361,6 +3395,24 @@ function renderApSettingsTab(){
       </div>
     </div>
     <div class="ap-card">
+      <div class="ap-card-title">🚀 Triển Khai (Vercel Deploy Hook)</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Cấu hình URL Deploy Hook để bấm "Triển Khai" kích hoạt Vercel rebuild ngay từ trang quản trị. Dữ liệu đã lưu vào database hiển thị ngay không cần deploy.</p>
+      <div style="background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.15);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.8rem;color:var(--muted)">
+        <strong style="color:var(--gold)">Hướng dẫn lấy Deploy Hook URL:</strong><br>
+        1. Vào <em>vercel.com</em> → Project → Settings → Git<br>
+        2. Mục <em>Deploy Hooks</em> → Tạo hook mới<br>
+        3. Copy URL và dán vào ô dưới
+      </div>
+      <div class="ap-field" style="margin-bottom:12px">
+        <label class="ap-lbl">Deploy Hook URL</label>
+        <input class="ap-inp" id="ap-deploy-hook" value="${localStorage.getItem('ceo-deploy-hook')||''}" placeholder="https://api.vercel.com/v1/integrations/deploy/...">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="ap-save" onclick="saveDeployHook()">💾 Lưu Hook URL</button>
+        <button style="display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:1px solid rgba(109,40,217,.4);background:rgba(109,40,217,.12);color:#c4b5fd;font-weight:700;font-size:.85rem;cursor:pointer" onclick="adminTriggerDeploy()">🚀 Triển Khai Ngay</button>
+      </div>
+    </div>
+    <div class="ap-card">
       <div class="ap-card-title">Dữ Liệu Trang</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
         <div class="ap-stat"><strong>${loadCeoProfiles().length}</strong><span>CEO profiles</span></div>
@@ -3376,9 +3428,13 @@ function saveApAnn(){
   const txt=(document.getElementById('ap-ann-text').value||'').trim();
   localStorage.setItem('ceo-ann-text',txt);
   const bar=document.getElementById('ann-bar');
-  if(bar&&txt){
-    bar.innerHTML=txt+' &nbsp;|&nbsp; <strong id="countdown-ann">--:--:--</strong>';
-  }
+  if(bar&&txt){bar.innerHTML=txt+' &nbsp;|&nbsp; <strong id="countdown-ann">--:--:--</strong>';}
+  showToast('✅ Đã cập nhật thông báo banner','success');
+}
+function saveDeployHook(){
+  const url=(document.getElementById('ap-deploy-hook').value||'').trim();
+  _lsSet('ceo-deploy-hook',url);
+  showToast(url?'✅ Đã lưu Deploy Hook URL':'✅ Đã xóa Deploy Hook URL','success');
 }
 
 // === Enable Admin also opens panel if already admin ===
@@ -3426,6 +3482,83 @@ const _dbReady = _IS_LIVE
   : Promise.resolve();
 
 // Write a key-value pair to Neon DB
+// ===== TOAST SYSTEM =====
+function showToast(msg, type='info', duration=3500){
+  const c=document.getElementById('admin-toast');
+  if(!c)return;
+  // Remove existing loading toasts when showing result
+  if(type!=='loading') c.querySelectorAll('.a-toast.loading').forEach(t=>t.remove());
+  const t=document.createElement('div');
+  t.className=`a-toast ${type}`;
+  t.innerHTML=`<span>${msg}</span><button class="a-toast-close" onclick="this.parentElement.remove()">×</button>`;
+  c.appendChild(t);
+  if(duration>0) setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';t.style.transition='.3s';setTimeout(()=>t.remove(),300);},duration);
+}
+function _clearLoadingToasts(){document.getElementById('admin-toast')?.querySelectorAll('.a-toast.loading').forEach(t=>t.remove());}
+
+// ===== PENDING DESIGN BUFFER =====
+window._pendingDesign={};
+window._designDirty=false;
+function _previewDesignPatch(patch){
+  Object.assign(window._pendingDesign, patch);
+  applyDesign({...loadDesign(),...window._pendingDesign});
+  if(!window._designDirty){
+    window._designDirty=true;
+    const btn=document.getElementById('design-save-btn');
+    if(btn) btn.classList.add('dirty');
+    const st=document.getElementById('ab-save-status');
+    if(st){st.textContent='Có thay đổi chưa lưu...';st.classList.add('visible');}
+  }
+}
+async function saveDesignNow(){
+  const btn=document.getElementById('design-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Đang lưu...';}
+  showToast('💾 Đang lưu thiết kế...','loading',0);
+  const merged={...loadDesign(),...window._pendingDesign};
+  _lsSet(DESIGN_KEY,JSON.stringify(merged));
+  applyDesign(merged);
+  if(_IS_LIVE){
+    try{
+      const res=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:_AE,adminPass:_AP,key:DESIGN_KEY,value:merged})});
+      if(!res.ok)throw new Error(await res.text());
+      _clearLoadingToasts();
+      showToast('✅ Đã lưu thiết kế vào database!','success');
+      window._pendingDesign={};window._designDirty=false;
+      if(btn){btn.disabled=false;btn.textContent='💾 Lưu Thiết Kế';btn.classList.remove('dirty');}
+      const st=document.getElementById('ab-save-status');if(st)st.classList.remove('visible');
+    }catch(e){
+      _clearLoadingToasts();showToast('❌ Lỗi lưu: '+e.message,'error');
+      if(btn){btn.disabled=false;btn.textContent='💾 Lưu Thiết Kế';}
+    }
+  } else {
+    _clearLoadingToasts();showToast('✅ Đã lưu (localhost)','success');
+    window._pendingDesign={};window._designDirty=false;
+    if(btn){btn.disabled=false;btn.textContent='💾 Lưu Thiết Kế';btn.classList.remove('dirty');}
+  }
+}
+
+// ===== DEPLOY HOOK =====
+async function adminTriggerDeploy(){
+  const hookUrl=localStorage.getItem('ceo-deploy-hook')||'';
+  if(!hookUrl){
+    showToast('⚠️ Chưa cấu hình Deploy Hook. Vào Cài Đặt → Triển Khai để thêm.','info',5000);
+    openAdminPanel();setTimeout(()=>switchApTab('settings',document.querySelector('[onclick*="settings"]')),100);
+    return;
+  }
+  const btn=document.getElementById('ab-deploy-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Đang triển khai...';}
+  showToast('🚀 Đang kích hoạt triển khai Vercel...','deploy',0);
+  try{
+    await fetch(hookUrl,{method:'POST'});
+    _clearLoadingToasts();
+    showToast('🚀 Đã gửi lệnh triển khai! Vercel sẽ build trong ~1-2 phút.','deploy',6000);
+  }catch(e){
+    _clearLoadingToasts();showToast('❌ Deploy hook lỗi: '+e.message,'error');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🚀 Triển Khai';}
+  }
+}
+
 async function _dbWrite(key, value) {
   if (!_IS_LIVE) return;
   try {
@@ -3434,8 +3567,17 @@ async function _dbWrite(key, value) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminEmail: _AE, adminPass: _AP, key, value })
     });
-    if (!res.ok) console.warn('[DB] Write error', key, await res.text());
-  } catch (e) { console.warn('[DB] Write failed:', e.message); }
+    if (!res.ok){
+      showToast('❌ Lỗi lưu database: '+key,'error');
+      console.warn('[DB] Write error', key, await res.text());
+    } else {
+      const label=key.replace(/^ceo-/,'').replace(/-v\d+$/,'').replace(/_/g,' ');
+      showToast('✅ Đã lưu: '+label,'success');
+    }
+  } catch (e) {
+    showToast('❌ Mất kết nối database','error');
+    console.warn('[DB] Write failed:', e.message);
+  }
 }
 
 // Upload a base64 data URI to Vercel Blob → returns public CDN URL
