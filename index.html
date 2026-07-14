@@ -1095,6 +1095,50 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .nav-admin-btn:hover{background:rgba(122,0,0,.28);color:#fff}
 .admin-mode .nav-admin-btn{border-color:rgba(240,192,64,.3);background:rgba(240,192,64,.1);color:var(--gold)}
 @media(max-width:900px){.ap-sidebar{width:52px}.ap-nav-btn span:not(.ap-ico){display:none}.ap-two-col{grid-template-columns:1fr}.ap-form-grid{grid-template-columns:1fr}}
+/* ===== CEO PROFILE OVERLAY ===== */
+#ceo-profile-overlay{position:fixed;inset:0;z-index:8500;background:var(--dark);overflow-y:auto;display:none;flex-direction:column;animation:fadeIn .22s ease}
+#ceo-profile-overlay.open{display:flex}
+.cpo-topbar{position:sticky;top:0;z-index:10;background:rgba(4,2,0,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;padding:12px 20px}
+.cpo-back{display:flex;align-items:center;gap:6px;background:none;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.7);font-size:.82rem;font-weight:600;padding:7px 14px;cursor:pointer;transition:.2s}
+.cpo-back:hover{background:rgba(255,255,255,.08);color:#fff}
+.cpo-topbar-title{font-size:.88rem;font-weight:700;color:#fff}
+.cpo-hero{position:relative;min-height:220px;display:flex;align-items:flex-end;overflow:hidden}
+.cpo-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center top;filter:blur(18px);opacity:.35;transform:scale(1.12)}
+.cpo-hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(4,2,0,.3) 0%,rgba(4,2,0,.85) 80%,var(--dark) 100%)}
+.cpo-hero-content{position:relative;z-index:2;display:flex;align-items:flex-end;gap:22px;padding:28px 24px 24px;width:100%;max-width:900px;margin:0 auto}
+.cpo-avatar{width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--gold);box-shadow:0 0 0 5px rgba(240,192,64,.15),0 8px 28px rgba(0,0,0,.6);flex-shrink:0;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.cpo-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.cpo-info{flex:1;min-width:0}
+.cpo-info h2{font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:4px}
+.cpo-info .cpo-role{font-size:.85rem;color:var(--muted);margin-bottom:10px}
+.cpo-info .cpo-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.cpo-info .cpo-loc{font-size:.78rem;color:var(--muted)}
+.cpo-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:50px;font-size:.7rem;font-weight:700;background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);margin-bottom:8px}
+.cpo-body{max-width:900px;margin:0 auto;width:100%;padding:0 20px 60px}
+.cpo-bio-section{padding:20px 0 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:24px}
+.cpo-bio-section p{font-size:.88rem;color:rgba(255,255,255,.75);line-height:1.7}
+.cpo-section-title{font-size:1rem;font-weight:800;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.cpo-section-title span{font-size:.75rem;font-weight:600;color:var(--muted)}
+.cpo-prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:32px}
+.cpo-prod-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;transition:.25s;cursor:pointer;display:flex;flex-direction:column}
+.cpo-prod-card:hover{border-color:rgba(240,192,64,.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.cpo-prod-thumb{width:100%;aspect-ratio:16/9;background:var(--dark4);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.cpo-prod-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cpo-prod-badge{position:absolute;top:8px;left:8px;font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:50px;background:var(--gold);color:#1a0a00}
+.cpo-prod-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:6px}
+.cpo-prod-name{font-size:.85rem;font-weight:700;color:#fff;line-height:1.35}
+.cpo-prod-desc{font-size:.75rem;color:var(--muted);line-height:1.5;flex:1}
+.cpo-prod-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.cpo-prod-price{font-size:.88rem;font-weight:800;color:var(--gold)}
+.cpo-prod-old{font-size:.72rem;color:var(--muted);text-decoration:line-through}
+.cpo-prod-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(240,192,64,.4);background:rgba(240,192,64,.1);color:var(--gold);font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s;text-decoration:none}
+.cpo-prod-btn:hover{background:rgba(240,192,64,.2)}
+.cpo-empty-prods{padding:32px;text-align:center;color:var(--muted);font-size:.85rem;border:1px dashed rgba(255,255,255,.1);border-radius:12px}
+.admin-mode .cpo-prod-thumb{cursor:pointer}
+.admin-mode .cpo-prod-thumb::after{content:"📷 Thay ảnh";position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;opacity:0;transition:.2s;pointer-events:none}
+.admin-mode .cpo-prod-thumb:hover::after{opacity:1}
+@media(max-width:600px){.cpo-hero-content{flex-direction:column;align-items:flex-start;gap:14px}.cpo-avatar{width:80px;height:80px}.cpo-info h2{font-size:1.15rem}.cpo-prods{grid-template-columns:1fr 1fr}}
+
 /* ===== ADMIN IMAGE OVERLAY – shows on ALL [data-img] elements when adminMode ===== */
 .admin-mode [data-img]{position:relative;cursor:pointer}
 .admin-mode [data-img]::after{content:"📷 Thay ảnh";position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;opacity:0;transition:.2s;border-radius:inherit;pointer-events:none;z-index:5}
@@ -1143,6 +1187,14 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 </div>
 
 <!-- ADMIN BAR -->
+<div id="ceo-profile-overlay">
+  <div class="cpo-topbar">
+    <button class="cpo-back" onclick="closeCeoProfile()">← Quay lại</button>
+    <span class="cpo-topbar-title" id="cpo-topbar-name"></span>
+  </div>
+  <div id="cpo-hero"></div>
+  <div class="cpo-body" id="cpo-body"></div>
+</div>
 <div id="admin-toast"></div>
 <div id="admin-bar">
   <div style="display:flex;align-items:center;gap:10px">
@@ -2856,6 +2908,7 @@ function openCeoEditor(id){
       <div class="ap-field ap-form-full"><label class="ap-lbl">Tags lĩnh vực (cách nhau bằng dấu phẩy)</label><input class="ap-inp" id="ee-tags" value="${p.tags||''}" placeholder="Công nghệ, SaaS, AI"></div>
       <div class="ap-field"><label class="ap-lbl">Địa điểm</label><input class="ap-inp" id="ee-loc" value="${p.loc||''}" placeholder="Hà Nội"></div>
       <div class="ap-field"><label class="ap-lbl">Mã kích hoạt</label><input class="ap-inp" id="ee-unlock-code" value="${p.unlockCode||''}" placeholder="CEO-C1-2025"></div>
+      <div class="ap-field ap-form-full"><label class="ap-lbl">Giới thiệu bản thân (hiện trên trang hồ sơ)</label><textarea class="ap-inp" id="ee-bio" rows="3" style="resize:vertical" placeholder="Mô tả ngắn về CEO, lĩnh vực hoạt động...">${p.bio||''}</textarea></div>
     </div>
     <div class="ap-form-actions">
       <button class="ap-save" onclick="saveCeoProfileForm()">💾 Lưu hồ sơ</button>
@@ -2887,6 +2940,7 @@ function saveCeoProfileForm(){
   const loc=(document.getElementById('ee-loc').value||'').trim();
   const emoji=(document.getElementById('ee-emoji').value||'👔').trim();
   const unlockCode=(document.getElementById('ee-unlock-code').value||'').trim();
+  const bio=(document.getElementById('ee-bio')?.value||'').trim();
   if(!name){document.getElementById('ee-name').focus();return;}
   const profiles=loadCeoProfiles();
   // Check for uploaded image in preview
@@ -2895,7 +2949,7 @@ function saveCeoProfileForm(){
   if(_editingCeoId){
     const idx=profiles.findIndex(p=>p.id===_editingCeoId);
     if(idx>=0){
-      const updated={...profiles[idx],code,name,role,tags,loc,emoji,unlockCode};
+      const updated={...profiles[idx],code,name,role,tags,loc,emoji,unlockCode,bio};
       if(img&&!img.startsWith('data:image')==false)updated.img=img;
       profiles[idx]=updated;
       // Save custom unlock code
@@ -2905,7 +2959,7 @@ function saveCeoProfileForm(){
     }
   } else {
     const newId='c'+(Date.now()%100000);
-    const newProfile={id:newId,code,name,role,tags,loc,emoji,unlockCode,img};
+    const newProfile={id:newId,code,name,role,tags,loc,emoji,unlockCode,bio,img,products:[]};
     profiles.push(newProfile);
     if(img)localStorage.setItem(IMG_PREFIX+'ceo-'+newId,img);
     if(unlockCode)localStorage.setItem('ceo-code-'+newId,unlockCode);
@@ -4250,7 +4304,7 @@ function _setCeoUnlockedUI(card){
 }
 function clickCeoCard(card){
   const id=card.dataset.ceoId;
-  if(localStorage.getItem('ceo-unlocked-'+id))return;
+  if(localStorage.getItem('ceo-unlocked-'+id)){openCeoProfile(id);return;}
   _unlockCeoId=id;
   _unlockCeoName=card.querySelector('.ceo-card-name').textContent;
   document.getElementById('unlock-ceo-title').textContent='🔓 Kết nối với '+_unlockCeoName;
@@ -4322,6 +4376,169 @@ function searchCeos(val){
   document.querySelectorAll('.ceo-card').forEach(function(card){
     card.style.display=(!q||card.textContent.toLowerCase().includes(q))?'':'none';
   });
+}
+
+// ===== CEO PROFILE OVERLAY =====
+let _cpoCurrentId=null;
+function openCeoProfile(id){
+  const profiles=loadCeoProfiles();
+  const p=profiles.find(x=>x.id===id);
+  if(!p)return;
+  _cpoCurrentId=id;
+  const imgSrc=p.img||localStorage.getItem(IMG_PREFIX+'ceo-'+id)||'';
+  document.getElementById('cpo-topbar-name').textContent=p.name;
+  // Hero
+  document.getElementById('cpo-hero').innerHTML=`
+    <div class="cpo-hero">
+      ${imgSrc?`<div class="cpo-hero-bg" style="background-image:url('${imgSrc}')"></div>`:''}
+      <div class="cpo-hero-overlay"></div>
+      <div class="cpo-hero-content">
+        <div class="cpo-avatar ${window.adminMode?'admin-mode-av':''}" onclick="${window.adminMode?'apUploadCeoImg(\''+id+'\')':''}" title="${window.adminMode?'Click để thay ảnh':''}">
+          ${imgSrc?`<img src="${imgSrc}" alt="${p.name}">`:`<span>${p.emoji||'👔'}</span>`}
+        </div>
+        <div class="cpo-info">
+          <div class="cpo-badge">✓ Đã kết nối</div>
+          <h2>${p.name}</h2>
+          <div class="cpo-role">${p.role}</div>
+          <div class="cpo-tags">${(p.tags||'').split(',').filter(t=>t.trim()).map(t=>`<span class="ceo-tag">${t.trim()}</span>`).join('')}</div>
+          ${p.loc?`<div class="cpo-loc">📍 ${p.loc}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  // Body
+  const prods=p.products||[];
+  const prodsHtml=prods.length?prods.map(pr=>buildCpoProductCard(pr,id)).join('')
+    :`<div class="cpo-empty-prods">${window.adminMode?'<button class="ap-save" onclick="cpoAddProduct()">+ Thêm sản phẩm đầu tiên</button>':'Chưa có sản phẩm nào.'}</div>`;
+  document.getElementById('cpo-body').innerHTML=`
+    ${p.bio?`<div class="cpo-bio-section"><p>${p.bio.replace(/\n/g,'<br>')}</p></div>`:''}
+    <div class="cpo-section-title">📦 Sản phẩm &amp; Dịch vụ <span>(${prods.length} mục)</span>
+      ${window.adminMode?`<button class="ap-save" style="margin-left:auto;padding:6px 14px;font-size:.75rem" onclick="cpoAddProduct()">+ Thêm</button>`:''}
+    </div>
+    <div class="cpo-prods" id="cpo-prods-grid">${prodsHtml}</div>`;
+  document.getElementById('ceo-profile-overlay').classList.add('open');
+  document.getElementById('ceo-profile-overlay').scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+function closeCeoProfile(){
+  document.getElementById('ceo-profile-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  _cpoCurrentId=null;
+}
+function buildCpoProductCard(pr,ceoId){
+  const imgKey='cpo-prod-'+ceoId+'-'+pr.id;
+  const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+imgKey)||'';
+  return `<div class="cpo-prod-card" onclick="${pr.link?'window.open(\''+pr.link+'\',\'_blank\')':''}" data-prod-id="${pr.id}">
+    <div class="cpo-prod-thumb" data-img="${imgKey}" onclick="${window.adminMode?'event.stopPropagation();cpoProdUploadImg(\''+ceoId+'\',\''+pr.id+'\')':''}" >
+      ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:`<span>🖼️</span>`}
+      ${pr.badge?`<span class="cpo-prod-badge">${pr.badge}</span>`:''}
+    </div>
+    <div class="cpo-prod-body">
+      <div class="cpo-prod-name">${pr.name}</div>
+      ${pr.desc?`<div class="cpo-prod-desc">${pr.desc}</div>`:''}
+      <div class="cpo-prod-footer">
+        <div>
+          ${pr.price?`<div class="cpo-prod-price">${pr.price}</div>`:''}
+          ${pr.oldPrice?`<div class="cpo-prod-old">${pr.oldPrice}</div>`:''}
+        </div>
+        ${pr.link?`<a class="cpo-prod-btn" href="${pr.link}" target="_blank" onclick="event.stopPropagation()">Xem ngay</a>`:''}
+        ${window.adminMode?`<button class="cpo-prod-btn" style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#f87171" onclick="event.stopPropagation();cpoDeleteProduct('${ceoId}','${pr.id}')">🗑</button>`:''}
+      </div>
+      ${window.adminMode?`<button class="ap-save" style="width:100%;margin-top:8px;padding:6px;font-size:.75rem" onclick="event.stopPropagation();cpoEditProduct('${ceoId}','${pr.id}')">✏️ Sửa</button>`:''}
+    </div>
+  </div>`;
+}
+function cpoProdUploadImg(ceoId,prodId){
+  if(!window.adminMode)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    showToast('🖼️ Đang xử lý ảnh...','loading',0);
+    try{
+      const data=await _smartCrop(file,640,360,.9);
+      _clearLoadingToasts();
+      const imgKey=IMG_PREFIX+'cpo-prod-'+ceoId+'-'+prodId;
+      localStorage.setItem(imgKey,data);
+      // Update profile products array
+      const profiles=loadCeoProfiles();
+      const pidx=profiles.findIndex(p=>p.id===ceoId);
+      if(pidx>=0){
+        const prs=profiles[pidx].products||[];
+        const ridx=prs.findIndex(r=>r.id===prodId);
+        if(ridx>=0){prs[ridx].img=data;profiles[pidx].products=prs;saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);}
+      }
+      // Update DOM thumbnail
+      const thumb=document.querySelector(`[data-prod-id="${prodId}"] .cpo-prod-thumb`);
+      if(thumb){thumb.innerHTML=`<img src="${data}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;if(profiles[pidx]?.products?.find(r=>r.id===prodId)?.badge){thumb.innerHTML+=`<span class="cpo-prod-badge">${profiles[pidx].products.find(r=>r.id===prodId).badge}</span>`;}}
+      showToast('✅ Đã cập nhật ảnh sản phẩm','success');
+    }catch(err){_clearLoadingToasts();showToast('❌ Lỗi: '+err.message,'error');}
+  };inp.click();
+}
+function cpoAddProduct(){
+  const ceoId=_cpoCurrentId;if(!ceoId)return;
+  const profiles=loadCeoProfiles();
+  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+  const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',badge:'',img:'',link:''};
+  if(!profiles[pidx].products)profiles[pidx].products=[];
+  profiles[pidx].products.push(newProd);
+  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  openCeoProfile(ceoId);
+  setTimeout(()=>cpoEditProduct(ceoId,newProd.id),100);
+}
+function cpoDeleteProduct(ceoId,prodId){
+  if(!confirm('Xóa sản phẩm này?'))return;
+  const profiles=loadCeoProfiles();
+  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+  profiles[pidx].products=(profiles[pidx].products||[]).filter(r=>r.id!==prodId);
+  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  openCeoProfile(ceoId);
+}
+function cpoEditProduct(ceoId,prodId){
+  const profiles=loadCeoProfiles();
+  const p=profiles.find(x=>x.id===ceoId);if(!p)return;
+  const pr=(p.products||[]).find(r=>r.id===prodId);if(!pr)return;
+  const imgKey=IMG_PREFIX+'cpo-prod-'+ceoId+'-'+prodId;
+  const imgSrc=pr.img||localStorage.getItem(imgKey)||'';
+  // Inject inline edit form below product card
+  const existing=document.getElementById('cpo-edit-form');if(existing)existing.remove();
+  const form=document.createElement('div');
+  form.id='cpo-edit-form';
+  form.style.cssText='grid-column:1/-1;background:var(--dark4);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px';
+  form.innerHTML=`<div style="font-weight:700;color:var(--gold);margin-bottom:4px">✏️ Sửa sản phẩm</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="ap-lbl">Tên sản phẩm</label><input class="ap-inp" id="cpe-name" value="${pr.name||''}"></div>
+      <div><label class="ap-lbl">Badge (VD: Hot, Mới)</label><input class="ap-inp" id="cpe-badge" value="${pr.badge||''}"></div>
+      <div><label class="ap-lbl">Giá</label><input class="ap-inp" id="cpe-price" value="${pr.price||''}"></div>
+      <div><label class="ap-lbl">Giá gốc (gạch ngang)</label><input class="ap-inp" id="cpe-oldprice" value="${pr.oldPrice||''}"></div>
+      <div style="grid-column:1/-1"><label class="ap-lbl">Link (URL sản phẩm)</label><input class="ap-inp" id="cpe-link" value="${pr.link||''}" placeholder="https://..."></div>
+      <div style="grid-column:1/-1"><label class="ap-lbl">Mô tả ngắn</label><textarea class="ap-inp" id="cpe-desc" rows="2" style="resize:vertical">${pr.desc||''}</textarea></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:80px;height:50px;border-radius:8px;overflow:hidden;background:var(--dark3);flex-shrink:0">${imgSrc?`<img src="${imgSrc}" alt="" style="width:100%;height:100%;object-fit:cover">`:''}</div>
+      <button class="ap-save" style="padding:8px 16px;font-size:.8rem" onclick="cpoProdUploadImg('${ceoId}','${prodId}')">📷 Thay ảnh</button>
+      <button class="ap-save" style="margin-left:auto;padding:8px 20px" onclick="cpeSaveProd('${ceoId}','${prodId}')">💾 Lưu</button>
+      <button class="ap-cancel" style="padding:8px 14px" onclick="document.getElementById('cpo-edit-form').remove()">Hủy</button>
+    </div>`;
+  const grid=document.getElementById('cpo-prods-grid');
+  if(grid)grid.appendChild(form);
+  form.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function cpeSaveProd(ceoId,prodId){
+  const profiles=loadCeoProfiles();
+  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+  const prs=profiles[pidx].products||[];
+  const ridx=prs.findIndex(r=>r.id===prodId);if(ridx<0)return;
+  prs[ridx]={...prs[ridx],
+    name:(document.getElementById('cpe-name').value||'').trim(),
+    badge:(document.getElementById('cpe-badge').value||'').trim(),
+    price:(document.getElementById('cpe-price').value||'').trim(),
+    oldPrice:(document.getElementById('cpe-oldprice').value||'').trim(),
+    link:(document.getElementById('cpe-link').value||'').trim(),
+    desc:(document.getElementById('cpe-desc').value||'').trim(),
+  };
+  profiles[pidx].products=prs;
+  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  showToast('✅ Đã lưu sản phẩm','success');
+  openCeoProfile(ceoId);
 }
 
 // ===== COMMUNITY GALLERY =====
