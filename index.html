@@ -1134,6 +1134,20 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .cpo-prod-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(240,192,64,.4);background:rgba(240,192,64,.1);color:var(--gold);font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s;text-decoration:none}
 .cpo-prod-btn:hover{background:rgba(240,192,64,.2)}
 .cpo-empty-prods{padding:32px;text-align:center;color:var(--muted);font-size:.85rem;border:1px dashed rgba(255,255,255,.1);border-radius:12px}
+/* Info table */
+.cpo-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.cpo-info-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px}
+.cpo-info-card.full{grid-column:1/-1}
+.cpo-info-card-title{font-size:.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.cpo-info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
+.cpo-info-row:last-child{border-bottom:none}
+.cpo-info-label{color:var(--muted);flex-shrink:0;min-width:110px}
+.cpo-info-val{color:#e8e8e8;text-align:right;line-height:1.5}
+.cpo-industries-list{font-size:.8rem;color:rgba(255,255,255,.8);line-height:1.8;white-space:pre-line}
+.cpo-docs-list{display:flex;flex-direction:column;gap:5px}
+.cpo-doc-item{font-size:.8rem;color:#86efac;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.cpo-club-role-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:.72rem;font-weight:700;background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.25)}
+@media(max-width:600px){.cpo-info-grid{grid-template-columns:1fr}.cpo-info-card.full{grid-column:1}}
 .admin-mode .cpo-prod-thumb{cursor:pointer}
 .admin-mode .cpo-prod-thumb::after{content:"📷 Thay ảnh";position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;opacity:0;transition:.2s;pointer-events:none}
 .admin-mode .cpo-prod-thumb:hover::after{opacity:1}
@@ -2736,6 +2750,16 @@ function galAdminAddVideo(){
 
 // ===== ADMIN PANEL =====
 const CEO_PROFILES_KEY = 'ceo-profiles-v2';
+const DEFAULT_CEO_MEMBERS=[
+  {code:'001',name:'Trần Thị Luyến',dob:'02/06/1982',phone:'0966823313',clubRole:'Chủ Tịch CLB',title:'GĐ',degree:'Thạc sĩ',company:'Công ty cổ phần thương mại và du lịch Hải An\nĐịa chỉ: Số 26/193/30 Phố Bồ Đề - P Bồ Đề - TP Hà Nội\nMST: 0101873991',industries:'',docs:'1. Giấy phép kinh doanh\n2. Hồ sơ năng lực\n3. Chứng nhận\n4. Căn cước công dân',feeDate:'22/6',emoji:'👩‍💼',tags:'Du lịch,Thương mại',loc:'Hà Nội'},
+  {code:'002',name:'Nguyễn Thị Hương',dob:'31/12/1974',phone:'0849541886',clubRole:'Phó CT CLB',title:'Chủ Tịch HĐTV',degree:'Thạc sĩ',company:'CÔNG TY TNHH HR ESSENCE\nĐịa chỉ: 429 Hoàng Quốc Việt, Phường Nghĩa Đô, TP Hà Nội\nMST: 0110915306',industries:'Kinh doanh thực phẩm dinh dưỡng',docs:'1. Giấy phép kinh doanh\n2. Chứng nhận halal\n3. Giấy tờ liên quan tới sản phẩm\n4. CCCD',feeDate:'22/6',emoji:'👩‍💼',tags:'Thực phẩm,Dinh dưỡng',loc:'Hà Nội'},
+  {code:'003',name:'Nguyễn Thị Hoài Thanh',dob:'18/10/1979',phone:'0363611119',clubRole:'',title:'GĐ',degree:'Đại Học',company:'Cty CS GLOABAL, MIMIZA, Dưỡng Sinh Hồ Tộc',industries:'1. Chuyên gia chuyển giao chuỗi CSSK chủ động công nghệ\n2. Kinh doanh các sản phẩm công nghệ về chăm sóc sức khỏe chủ động',docs:'1. Giấy phép kinh doanh\n2. Giấy tờ liên quan đến các sản phẩm kinh doanh\n3. CCCD',feeDate:'24/6',emoji:'👩‍💼',tags:'Sức khỏe,Công nghệ',loc:''},
+  {code:'004',name:'Mai Ái Hoa',dob:'10/04/1972',phone:'0763587269',clubRole:'',title:'GĐ',degree:'Cao Đẳng',company:'Trà Ô Long làng La Boong',industries:'Kinh doanh dịch vụ phục vụ đồ uống, cà phê, trà sữa, nước trái cây',docs:'1. Giấy phép kinh doanh\n2. Giấy chứng nhận ATTP\n3. Giấy tờ liên quan sản phẩm\n4. CCCD',feeDate:'24/6',emoji:'🍵',tags:'F&B,Đồ uống',loc:''},
+  {code:'005',name:'Nguyễn Thị Bích Lợi',dob:'16/03/1974',phone:'0912217297',clubRole:'',title:'CT HĐQT',degree:'Đại Học',company:'Tập đoàn Làm đẹp toàn cầu Global Beauty Group',industries:'1. Tư vấn, Cố vấn Setup, Coaching, Đào tạo chuẩn hoá ngành Spa, TMV làm đẹp\n2. Cung cấp dòng hàng Dược Mỹ phẩm Spa chuyên nghiệp Hàn Quốc',docs:'',feeDate:'25/6',emoji:'💄',tags:'Làm đẹp,Spa',loc:''},
+  {code:'006',name:'Nguyễn Thị Tâm',dob:'13/05/1974',phone:'0913574041',clubRole:'',title:'GĐ',degree:'Đại Học',company:'Madame Tam Nguyen',industries:'Kinh doanh trang sức ngọc trai - Khăn lụa - Sản phẩm dưỡng móng từ công nghệ tế bào gốc',docs:'',feeDate:'26/6',emoji:'💎',tags:'Trang sức,Làm đẹp',loc:''},
+  {code:'007',name:'Nguyễn Thị Kim Dung',dob:'25/10/1955',phone:'0913204454',clubRole:'',title:'Chủ Tịch',degree:'Tiến Sỹ',company:'Công Ty TNHH TM & XNK ADT\nĐịa chỉ: 73 Tôn Đức Thắng - Phường Văn Miếu - TP Hà Nội\nMST: 0101060189',industries:'1. Rượu Vang Nhập Khẩu\n2. Bán Buôn Bán Lẻ Rượu Vang Nhập Khẩu\n3. Bán quà tặng liên quan đến Rượu Vang\n4. Kinh doanh Hầm Rượu Vang tại 73 Tôn Đức Thắng - Hà Nội',docs:'1. Giấy phép kinh doanh\n2. Hồ sơ năng lực\n3. Chứng nhận\n4. Căn cước công dân',feeDate:'8/7/2026',emoji:'🍷',tags:'Rượu vang,Xuất nhập khẩu',loc:'Hà Nội'},
+  {code:'008',name:'Đinh Thị Ngân',dob:'28/12/1979',phone:'0975605779',clubRole:'',title:'Phó TGĐ',degree:'Đại Học',company:'Công Ty TNHH TM & XNK ADT\nĐịa chỉ: 73 Tôn Đức Thắng - Phường Văn Miếu - TP Hà Nội\nMST: 0101060189',industries:'1. Rượu Vang Nhập Khẩu\n2. Bán Buôn Bán Lẻ Rượu Vang Nhập Khẩu\n3. Bán quà tặng liên quan đến Rượu Vang\n4. Kinh doanh Hầm Rượu Vang tại 73 Tôn Đức Thắng - Hà Nội',docs:'1. Giấy phép kinh doanh\n2. Hồ sơ năng lực\n3. Chứng nhận\n4. Căn cước công dân',feeDate:'8/7/2026',emoji:'🍷',tags:'Rượu vang,Xuất nhập khẩu',loc:'Hà Nội'},
+];
 let _apCurrentTab = 'ceo';
 let _editingCeoId = null;
 
@@ -2769,18 +2793,17 @@ function switchApTab(tab, btn){
 // --- CEO PROFILES ---
 function initCeoProfiles(){
   if(localStorage.getItem(CEO_PROFILES_KEY)) return;
-  const cards = document.querySelectorAll('#ceo-page .ceo-card');
-  const profiles = [];
-  cards.forEach(card=>{
-    const id = card.dataset.ceoId;
-    const code = (card.querySelector('.ceo-code')?.textContent||'').replace('CEO #','').trim();
-    const name = card.querySelector('.ceo-card-name')?.textContent||'';
-    const role = card.querySelector('.ceo-card-role')?.textContent||'';
-    const tags = Array.from(card.querySelectorAll('.ceo-tag')).map(t=>t.textContent).join(',');
-    const loc = (card.querySelector('.ceo-loc')?.textContent||'').replace('📍 ','');
-    const emoji = card.querySelector('.ceo-emoji')?.textContent||'👔';
-    const img = localStorage.getItem(IMG_PREFIX+'ceo-'+id)||'';
-    profiles.push({id,code,name,role,tags,loc,emoji,img,unlockCode:'CEO-'+id.toUpperCase()+'-2025'});
+  const profiles = DEFAULT_CEO_MEMBERS.map((m,i)=>{
+    const id='c'+(i+1);
+    return {
+      id, code:m.code, name:m.name, role:m.title+(m.company?(' — '+(m.company.split('\n')[0])):''),
+      tags:m.tags||'', loc:m.loc||'', emoji:m.emoji||'👔', img:'',
+      unlockCode:'CEO-'+String(i+1).padStart(3,'0')+'-2025',
+      bio:'', products:[],
+      dob:m.dob, phone:m.phone, clubRole:m.clubRole, title:m.title,
+      degree:m.degree, company:m.company, industries:m.industries,
+      docs:m.docs, feeDate:m.feeDate,
+    };
   });
   localStorage.setItem(CEO_PROFILES_KEY, JSON.stringify(profiles));
 }
@@ -2828,7 +2851,10 @@ function renderApCeoTab(){
   tab.innerHTML = `
   <div class="ap-tab-hdr">
     <h2>👤 Hồ Sơ CEO</h2>
-    <button class="ap-add-btn" onclick="openCeoEditor(null)">+ Thêm CEO mới</button>
+    <div style="display:flex;gap:8px">
+      <button class="ap-btn" style="font-size:.78rem;padding:7px 12px;border-color:rgba(240,192,64,.3);color:var(--gold)" onclick="resetCeoToRealData()" title="Tải lại 8 thành viên thật từ danh sách">🔄 Tải dữ liệu thật</button>
+      <button class="ap-add-btn" onclick="openCeoEditor(null)">+ Thêm CEO mới</button>
+    </div>
   </div>
   <div class="ap-stats">
     <div class="ap-stat"><strong>${profiles.length}</strong><span>Tổng hồ sơ</span></div>
@@ -2907,8 +2933,18 @@ function openCeoEditor(id){
       <div class="ap-field ap-form-full"><label class="ap-lbl">Chức danh / Công ty</label><input class="ap-inp" id="ee-role" value="${p.role||''}" placeholder="CEO & Founder — TechVision Vietnam"></div>
       <div class="ap-field ap-form-full"><label class="ap-lbl">Tags lĩnh vực (cách nhau bằng dấu phẩy)</label><input class="ap-inp" id="ee-tags" value="${p.tags||''}" placeholder="Công nghệ, SaaS, AI"></div>
       <div class="ap-field"><label class="ap-lbl">Địa điểm</label><input class="ap-inp" id="ee-loc" value="${p.loc||''}" placeholder="Hà Nội"></div>
-      <div class="ap-field"><label class="ap-lbl">Mã kích hoạt</label><input class="ap-inp" id="ee-unlock-code" value="${p.unlockCode||''}" placeholder="CEO-C1-2025"></div>
-      <div class="ap-field ap-form-full"><label class="ap-lbl">Giới thiệu bản thân (hiện trên trang hồ sơ)</label><textarea class="ap-inp" id="ee-bio" rows="3" style="resize:vertical" placeholder="Mô tả ngắn về CEO, lĩnh vực hoạt động...">${p.bio||''}</textarea></div>
+      <div class="ap-field"><label class="ap-lbl">Mã kích hoạt</label><input class="ap-inp" id="ee-unlock-code" value="${p.unlockCode||''}" placeholder="CEO-001-2025"></div>
+      <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:12px;margin-top:4px;font-size:.78rem;font-weight:700;color:var(--gold)">📋 Thông tin hồ sơ thành viên</div>
+      <div class="ap-field"><label class="ap-lbl">Ngày sinh</label><input class="ap-inp" id="ee-dob" value="${p.dob||''}" placeholder="DD/MM/YYYY"></div>
+      <div class="ap-field"><label class="ap-lbl">Số điện thoại</label><input class="ap-inp" id="ee-phone" value="${p.phone||''}" placeholder="0912345678"></div>
+      <div class="ap-field"><label class="ap-lbl">Chức vụ</label><input class="ap-inp" id="ee-title" value="${p.title||''}" placeholder="GĐ / Chủ Tịch HĐQT..."></div>
+      <div class="ap-field"><label class="ap-lbl">Học vị</label><input class="ap-inp" id="ee-degree" value="${p.degree||''}" placeholder="Đại Học / Thạc sĩ / Tiến sỹ"></div>
+      <div class="ap-field"><label class="ap-lbl">Vai trò trong CLB</label><input class="ap-inp" id="ee-club-role" value="${p.clubRole||''}" placeholder="Chủ Tịch CLB / Phó CT CLB..."></div>
+      <div class="ap-field"><label class="ap-lbl">Ngày nộp phí</label><input class="ap-inp" id="ee-fee-date" value="${p.feeDate||''}" placeholder="22/6/2025"></div>
+      <div class="ap-field ap-form-full"><label class="ap-lbl">Tên doanh nghiệp & địa chỉ</label><textarea class="ap-inp" id="ee-company" rows="3" style="resize:vertical" placeholder="Tên công ty&#10;Địa chỉ: ...&#10;MST: ...">${p.company||''}</textarea></div>
+      <div class="ap-field ap-form-full"><label class="ap-lbl">Ngành nghề đăng ký</label><textarea class="ap-inp" id="ee-industries" rows="3" style="resize:vertical" placeholder="1. Ngành nghề thứ nhất&#10;2. Ngành nghề thứ hai...">${p.industries||''}</textarea></div>
+      <div class="ap-field ap-form-full"><label class="ap-lbl">Hồ sơ đã có</label><textarea class="ap-inp" id="ee-docs" rows="3" style="resize:vertical" placeholder="1. Giấy phép kinh doanh&#10;2. CCCD...">${p.docs||''}</textarea></div>
+      <div class="ap-field ap-form-full"><label class="ap-lbl">Giới thiệu bản thân</label><textarea class="ap-inp" id="ee-bio" rows="2" style="resize:vertical" placeholder="Mô tả ngắn về CEO...">${p.bio||''}</textarea></div>
     </div>
     <div class="ap-form-actions">
       <button class="ap-save" onclick="saveCeoProfileForm()">💾 Lưu hồ sơ</button>
@@ -2933,40 +2969,59 @@ function closeCeoEditor(){
   if(slot)slot.innerHTML='';
 }
 function saveCeoProfileForm(){
-  const code=(document.getElementById('ee-code').value||'').trim();
-  const name=(document.getElementById('ee-name').value||'').trim();
-  const role=(document.getElementById('ee-role').value||'').trim();
-  const tags=(document.getElementById('ee-tags').value||'').trim();
-  const loc=(document.getElementById('ee-loc').value||'').trim();
-  const emoji=(document.getElementById('ee-emoji').value||'👔').trim();
-  const unlockCode=(document.getElementById('ee-unlock-code').value||'').trim();
-  const bio=(document.getElementById('ee-bio')?.value||'').trim();
+  const g=id=>((document.getElementById(id)||{}).value||'').trim();
+  const code=g('ee-code'),name=g('ee-name'),role=g('ee-role'),tags=g('ee-tags');
+  const loc=g('ee-loc'),emoji=g('ee-emoji')||'👔',unlockCode=g('ee-unlock-code');
+  const bio=g('ee-bio'),dob=g('ee-dob'),phone=g('ee-phone'),title=g('ee-title');
+  const degree=g('ee-degree'),clubRole=g('ee-club-role'),feeDate=g('ee-fee-date');
+  const company=g('ee-company'),industries=g('ee-industries'),docs=g('ee-docs');
   if(!name){document.getElementById('ee-name').focus();return;}
   const profiles=loadCeoProfiles();
-  // Check for uploaded image in preview
   const prevImg=document.querySelector('#ap-edit-prev img');
   const img=prevImg?prevImg.src:'';
+  const extra={code,name,role,tags,loc,emoji,unlockCode,bio,dob,phone,title,degree,clubRole,feeDate,company,industries,docs};
   if(_editingCeoId){
     const idx=profiles.findIndex(p=>p.id===_editingCeoId);
     if(idx>=0){
-      const updated={...profiles[idx],code,name,role,tags,loc,emoji,unlockCode,bio};
-      if(img&&!img.startsWith('data:image')==false)updated.img=img;
+      const updated={...profiles[idx],...extra};
+      if(img&&img.startsWith('data:image'))updated.img=img;
       profiles[idx]=updated;
-      // Save custom unlock code
       if(unlockCode)localStorage.setItem('ceo-code-'+_editingCeoId,unlockCode);
-      // Save image
-      if(img)localStorage.setItem(IMG_PREFIX+'ceo-'+_editingCeoId,img);
+      if(img&&img.startsWith('data:image'))localStorage.setItem(IMG_PREFIX+'ceo-'+_editingCeoId,img);
     }
   } else {
     const newId='c'+(Date.now()%100000);
-    const newProfile={id:newId,code,name,role,tags,loc,emoji,unlockCode,bio,img,products:[]};
-    profiles.push(newProfile);
+    profiles.push({id:newId,...extra,img,products:[]});
     if(img)localStorage.setItem(IMG_PREFIX+'ceo-'+newId,img);
     if(unlockCode)localStorage.setItem('ceo-code-'+newId,unlockCode);
   }
   saveCeoProfiles(profiles);
+  _dbWrite(CEO_PROFILES_KEY,profiles);
+  showToast('✅ Đã lưu hồ sơ CEO','success');
   renderCeoGrid();
   renderApCeoTab();
+}
+function resetCeoToRealData(){
+  if(!confirm('Tải lại 8 thành viên thật từ bảng danh sách? Dữ liệu cũ (ảnh, sản phẩm) sẽ được giữ lại nếu trùng mã.'))return;
+  const existing=loadCeoProfiles();
+  const profiles=DEFAULT_CEO_MEMBERS.map((m,i)=>{
+    const id='c'+(i+1);
+    const old=existing.find(p=>p.id===id)||{};
+    return{
+      id,code:m.code,name:m.name,
+      role:(m.title||'')+(m.company?' — '+(m.company.split('\n')[0]):''),
+      tags:m.tags||'',loc:m.loc||'',emoji:m.emoji||'👔',
+      img:old.img||'',unlockCode:old.unlockCode||('CEO-'+String(i+1).padStart(3,'0')+'-2025'),
+      bio:old.bio||'',products:old.products||[],
+      dob:m.dob,phone:m.phone,clubRole:m.clubRole,title:m.title,
+      degree:m.degree,company:m.company,industries:m.industries,docs:m.docs,feeDate:m.feeDate,
+    };
+  });
+  saveCeoProfiles(profiles);
+  _dbWrite(CEO_PROFILES_KEY,profiles);
+  renderCeoGrid();
+  renderApCeoTab();
+  showToast('✅ Đã tải lại 8 thành viên thật','success');
 }
 function deleteCeoProfile(id){
   if(!confirm('Xóa hồ sơ CEO này?'))return;
@@ -4388,29 +4443,67 @@ function openCeoProfile(id){
   const imgSrc=p.img||localStorage.getItem(IMG_PREFIX+'ceo-'+id)||'';
   document.getElementById('cpo-topbar-name').textContent=p.name;
   // Hero
+  // Hero (with club role badge)
+  const heroBadges=[
+    p.clubRole?`<span class="cpo-club-role-badge">👑 ${p.clubRole}</span>`:'',
+    `<span class="cpo-badge">✓ Đã kết nối</span>`,
+  ].filter(Boolean).join(' ');
   document.getElementById('cpo-hero').innerHTML=`
     <div class="cpo-hero">
       ${imgSrc?`<div class="cpo-hero-bg" style="background-image:url('${imgSrc}')"></div>`:''}
       <div class="cpo-hero-overlay"></div>
       <div class="cpo-hero-content">
-        <div class="cpo-avatar ${window.adminMode?'admin-mode-av':''}" onclick="${window.adminMode?'apUploadCeoImg(\''+id+'\')':''}" title="${window.adminMode?'Click để thay ảnh':''}">
+        <div class="cpo-avatar" onclick="${window.adminMode?'apUploadCeoImg(\''+id+'\')':''}" style="${window.adminMode?'cursor:pointer':''}" title="${window.adminMode?'Click để thay ảnh':''}">
           ${imgSrc?`<img src="${imgSrc}" alt="${p.name}">`:`<span>${p.emoji||'👔'}</span>`}
         </div>
         <div class="cpo-info">
-          <div class="cpo-badge">✓ Đã kết nối</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${heroBadges}</div>
           <h2>${p.name}</h2>
-          <div class="cpo-role">${p.role}</div>
+          <div class="cpo-role">${p.title||''}${p.degree?' · '+p.degree:''}</div>
           <div class="cpo-tags">${(p.tags||'').split(',').filter(t=>t.trim()).map(t=>`<span class="ceo-tag">${t.trim()}</span>`).join('')}</div>
           ${p.loc?`<div class="cpo-loc">📍 ${p.loc}</div>`:''}
         </div>
       </div>
     </div>`;
-  // Body
+  // --- Body sections ---
+  // 1. Bio
+  const bioHtml=p.bio?`<div class="cpo-bio-section"><p>${p.bio.replace(/\n/g,'<br>')}</p></div>`:'';
+  // 2. Info grid
+  const infoRows=[
+    ['Mã số thành viên', p.code?'CEO '+p.code:''],
+    ['Ngày sinh', p.dob||''],
+    ['Số điện thoại', p.phone||''],
+    ['Học vị', p.degree||''],
+    ['Chức vụ', p.title||''],
+    ['Vai trò trong CLB', p.clubRole||''],
+    ['Ngày nộp phí', p.feeDate||''],
+  ].filter(r=>r[1]);
+  const infoHtml=infoRows.length?`
+    <div class="cpo-info-grid">
+      <div class="cpo-info-card">
+        <div class="cpo-info-card-title">ℹ️ Thông tin cá nhân</div>
+        ${infoRows.map(r=>`<div class="cpo-info-row"><span class="cpo-info-label">${r[0]}</span><span class="cpo-info-val">${r[1]}</span></div>`).join('')}
+      </div>
+      ${p.company?`<div class="cpo-info-card">
+        <div class="cpo-info-card-title">🏢 Doanh nghiệp</div>
+        <div style="font-size:.82rem;color:#e8e8e8;line-height:1.7;white-space:pre-line">${p.company}</div>
+      </div>`:''}
+      ${p.industries?`<div class="cpo-info-card full">
+        <div class="cpo-info-card-title">📋 Ngành nghề đăng ký</div>
+        <div class="cpo-industries-list">${p.industries}</div>
+      </div>`:''}
+      ${p.docs?`<div class="cpo-info-card full">
+        <div class="cpo-info-card-title">📁 Hồ sơ đã có</div>
+        <div class="cpo-docs-list">${p.docs.split('\n').filter(d=>d.trim()).map(d=>`<div class="cpo-doc-item">✅ <span>${d.trim()}</span></div>`).join('')}</div>
+      </div>`:''}
+    </div>`:'';
+  // 3. Products
   const prods=p.products||[];
   const prodsHtml=prods.length?prods.map(pr=>buildCpoProductCard(pr,id)).join('')
     :`<div class="cpo-empty-prods">${window.adminMode?'<button class="ap-save" onclick="cpoAddProduct()">+ Thêm sản phẩm đầu tiên</button>':'Chưa có sản phẩm nào.'}</div>`;
   document.getElementById('cpo-body').innerHTML=`
-    ${p.bio?`<div class="cpo-bio-section"><p>${p.bio.replace(/\n/g,'<br>')}</p></div>`:''}
+    ${bioHtml}
+    ${infoHtml}
     <div class="cpo-section-title">📦 Sản phẩm &amp; Dịch vụ <span>(${prods.length} mục)</span>
       ${window.adminMode?`<button class="ap-save" style="margin-left:auto;padding:6px 14px;font-size:.75rem" onclick="cpoAddProduct()">+ Thêm</button>`:''}
     </div>
