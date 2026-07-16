@@ -1,9 +1,27 @@
-const { put } = require('@vercel/blob');
+const { createClient } = require('@supabase/supabase-js');
+
+const BUCKET = 'ceo-site';
+
+function getSupabase() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 // Disable body parser so we receive raw binary stream
 module.exports.config = {
   api: { bodyParser: false }
 };
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,8 +43,9 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return res.status(503).json({ error: 'Blob storage not configured' });
+  const supabase = getSupabase();
+  if (!supabase) {
+    return res.status(503).json({ error: 'Storage not configured' });
   }
 
   try {
@@ -35,14 +54,17 @@ module.exports = async (req, res) => {
       .slice(0, 100);
     const contentType = req.headers['content-type'] || 'image/jpeg';
 
-    // req is a Node.js IncomingMessage (Readable stream) — pass directly to put()
-    const blob = await put(`ceo-site/${filename}`, req, {
-      access: 'public',
-      contentType,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
+    const body = await readBody(req);
 
-    return res.json({ url: blob.url });
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(filename, body, { contentType, upsert: true });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filename);
+
+    return res.json({ url: urlData.publicUrl });
   } catch (err) {
     console.error('[upload]', err.message);
     return res.status(500).json({ error: err.message });

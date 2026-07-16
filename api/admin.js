@@ -1,11 +1,13 @@
-const { neon } = require('@neondatabase/serverless');
+const postgres = require('postgres');
 
 let _sql = null;
 let _tableReady = false;
 
 function getSql() {
-  if (!process.env.DATABASE_URL) return null;
-  if (!_sql) _sql = neon(process.env.DATABASE_URL);
+  const connStr = process.env.SUPABASE_DATABASE_URL;
+  if (!connStr) return null;
+  // ssl: 'require' + prepare: false — required for Supabase's pooled (pgbouncer transaction-mode) connection
+  if (!_sql) _sql = postgres(connStr, { ssl: 'require', prepare: false });
   return _sql;
 }
 
@@ -54,7 +56,7 @@ module.exports = async (req, res) => {
       return res.json({ success: true, action: 'deleted', key });
     }
 
-    // Normalize value: Neon expects a JS value for JSONB, not a JSON string
+    // Normalize value: cast to jsonb expects a JSON string, not a raw JS value
     const jsonValue = typeof value === 'string' ? value : JSON.stringify(value);
 
     await sql`
