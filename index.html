@@ -4541,7 +4541,7 @@ function renderApSettingsTab(){
     <div class="ap-card">
       <div class="ap-card-title">Tài Khoản Quản Trị</div>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;color:var(--muted)">
-        <div>📧 Email: <strong style="color:var(--gold)">${_AE}</strong></div>
+        ${_ADMINS.map(a=>`<div>📧 Email: <strong style="color:var(--gold)">${a.email}</strong></div>`).join('')}
         <div>🔑 Mật khẩu đã được mã hóa</div>
         <div>✅ Tự động kích hoạt khi đăng nhập bằng email quản trị</div>
       </div>
@@ -4823,8 +4823,17 @@ localStorage.setItem = function(key, value) {
 };
 
 // ===== ADMIN LOGIN =====
-const _AE = 'ledat.meet@gmail.com';
-const _AP = atob('TGQ4MkAwNTEwMTE='); // base64 encoded for basic obfuscation
+const _ADMINS = [
+  {email:'ledat.meet@gmail.com', pass: atob('TGQ4MkAwNTEwMTE='), name:'Lê Minh Châu'},
+  {email:'tuvanabc08@gmail.com', pass: atob('YWRtaW4xMjNAODg4'), name:'Quản Trị Viên'}
+]; // base64 encoded for basic obfuscation
+function _findAdmin(email){
+  const e=(email||'').trim().toLowerCase();
+  return _ADMINS.find(a=>a.email.toLowerCase()===e)||null;
+}
+function _isAdminEmail(email){ return !!_findAdmin(email); }
+const _AE = _ADMINS[0].email;
+const _AP = _ADMINS[0].pass;
 function openAdminLogin(){
   document.getElementById('adm-email-inp').value='';
   document.getElementById('adm-pw-inp').value='';
@@ -4837,11 +4846,12 @@ function submitAdminLogin(){
   const em=(document.getElementById('adm-email-inp').value||'').trim().toLowerCase();
   const pw=document.getElementById('adm-pw-inp').value||'';
   const err=document.getElementById('adm-err-msg');
-  if(em!==_AE){err.textContent='Email không có quyền quản trị.';return;}
-  if(pw!==_AP){err.textContent='Mật khẩu không đúng.';return;}
+  const admin=_findAdmin(em);
+  if(!admin){err.textContent='Email không có quyền quản trị.';return;}
+  if(pw!==admin.pass){err.textContent='Mật khẩu không đúng.';return;}
   closeAdminLogin();
   enableAdmin();
-  if(!currentUser) loginSuccess({name:'Lê Minh Châu',email:_AE,picture:''});
+  if(!currentUser) loginSuccess({name:admin.name,email:admin.email,picture:''});
 }
 
 // ===== BANK INFO =====
@@ -5229,7 +5239,7 @@ function loginSuccess(user){
   localStorage.setItem('ceo_user', JSON.stringify(user));
   closeLogin();
   updateUserUI(user);
-  const isAdmin = user.email && user.email.toLowerCase() === _AE.toLowerCase();
+  const isAdmin = _isAdminEmail(user.email);
   if(isAdmin){
     enableAdmin();
     // Auto mark as member so membership modal doesn't show for admin
@@ -5435,7 +5445,7 @@ function _findJoinRequest(email){
 }
 // Returns 'pending' | 'approved' | 'rejected' | null (no request yet)
 function _getJoinStatus(email){
-  if(email && email.toLowerCase()===_AE.toLowerCase())return 'approved';
+  if(_isAdminEmail(email))return 'approved';
   const req=_findJoinRequest(email);
   if(req)return req.status;
   // Grandfather members who activated before this approval gate existed
