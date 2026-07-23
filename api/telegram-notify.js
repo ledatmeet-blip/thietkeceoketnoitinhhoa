@@ -52,6 +52,7 @@ function buildMessage(event, data = {}) {
         `📱 ${data.phone || '—'}\n` +
         `📦 Sản phẩm: *${data.productName || '—'}*\n` +
         (data.sellerName ? `🏢 Từ: ${data.sellerName}\n` : '') +
+        (data.payMethod ? `💳 Thanh toán: ${data.payMethod}\n` : '') +
         (data.note ? `💬 Ghi chú: ${data.note}\n` : '') +
         `⏳ Chờ admin liên hệ xác nhận\n` +
         `🕐 ${now}`;
