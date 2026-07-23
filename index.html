@@ -5867,41 +5867,40 @@ function closeWsTicketModal(){
   document.getElementById('ws-ticket-modal').classList.remove('open');
   document.body.style.overflow='';
 }
-// Render vé thành 1 file ảnh PNG (dùng ảnh thiệp mời admin upload làm nền nếu có) rồi tải về máy
+// Render vé thành 1 file ảnh PNG — ảnh thiệp mời admin upload hiển thị ĐẦY ĐỦ, nguyên vẹn ở trên,
+// thông tin khách được đặt thành 1 khối riêng bên dưới (không đè/che lên ảnh thiệp mời)
 function _downloadWsTicket(){
   const $=id=>document.getElementById(id).textContent;
   const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
-  const w=1000,h=700;
+  const w=1000,imgH=700,infoH=340;
   const c=document.createElement('canvas');
-  c.width=w;c.height=h;
+  c.width=w;
   const ctx=c.getContext('2d');
 
-  function drawInfo(){
-    // Ô thông tin bán trong suốt để chữ luôn đọc được dù ảnh nền là gì
-    const panelY=h-330;
-    ctx.fillStyle='rgba(10,10,10,.82)';
-    ctx.fillRect(0,panelY,w,330);
+  function drawInfoPanel(panelY){
+    ctx.fillStyle='#0f0f0f';
+    ctx.fillRect(0,panelY,w,infoH);
     ctx.strokeStyle='rgba(240,192,64,.6)';
-    ctx.lineWidth=2;
+    ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(0,panelY);ctx.lineTo(w,panelY);ctx.stroke();
 
     ctx.fillStyle='#f0c040';
     ctx.font='bold 24px Arial';
-    ctx.fillText('🎟️ VÉ THAM DỰ',40,panelY+42);
+    ctx.fillText('🎟️ VÉ THAM DỰ',40,panelY+46);
     ctx.textAlign='right';
-    ctx.fillText($('wst-code'),w-40,panelY+42);
+    ctx.fillText($('wst-code'),w-40,panelY+46);
     ctx.textAlign='left';
 
     ctx.fillStyle='#ffffff';
     ctx.font='bold 27px Arial';
-    ctx.fillText($('wst-event-name'),40,panelY+82);
+    ctx.fillText($('wst-event-name'),40,panelY+88);
 
     const fields=[['Họ và tên',$('wst-name')],['Điện thoại',$('wst-phone')]];
     if(document.getElementById('wst-email-row').style.display!=='none')fields.push(['Email',$('wst-email')]);
     if(document.getElementById('wst-role-row').style.display!=='none')fields.push(['Chức vụ',$('wst-role')]);
     fields.push(['Thời gian',$('wst-datetime')]);
     fields.push(['Địa điểm',$('wst-location')]);
-    let y=panelY+120;
+    let y=panelY+128;
     fields.forEach(([label,val])=>{
       ctx.fillStyle='#999';
       ctx.font='15px Arial';
@@ -5915,26 +5914,35 @@ function _downloadWsTicket(){
     });
     ctx.fillStyle='rgba(255,255,255,.4)';
     ctx.font='12px Arial';
-    ctx.fillText('Vui lòng xuất trình vé này (bản in hoặc ảnh) khi tham dự sự kiện.',40,h-16);
+    ctx.fillText('Vui lòng xuất trình vé này (bản in hoặc ảnh) khi tham dự sự kiện.',40,panelY+infoH-16);
 
     _finishWsTicketImage(c,'ve-tham-du-'+$('wst-code').replace('#',''));
   }
 
   if(bgSrc){
     const img=new Image();
-    img.onload=()=>{ctx.drawImage(img,0,0,w,h);drawInfo();};
-    img.onerror=()=>{ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,w,h);drawInfo();};
+    img.onload=()=>{
+      c.height=imgH+infoH;
+      ctx.drawImage(img,0,0,w,imgH); // ảnh thiệp mời admin upload — hiển thị trọn vẹn, không cắt/che
+      drawInfoPanel(imgH);
+    };
+    img.onerror=()=>{
+      c.height=infoH;
+      ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,w,infoH);
+      drawInfoPanel(0);
+    };
     img.src=bgSrc;
   }else{
     // Không có ảnh thiệp mời — nền gradient tối + viền vàng mặc định
-    const grad=ctx.createLinearGradient(0,0,w,h);
+    c.height=imgH+infoH;
+    const grad=ctx.createLinearGradient(0,0,w,imgH);
     grad.addColorStop(0,'#1a1a1a');grad.addColorStop(1,'#0a0a0a');
-    ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle='#f0c040';ctx.lineWidth=4;ctx.strokeRect(10,10,w-20,h-20);
-    ctx.fillStyle='#f0c040';ctx.font='bold 30px Arial';ctx.textAlign='center';
-    ctx.fillText('CEO KẾT NỐI TINH HOA',w/2,h-370);
+    ctx.fillStyle=grad;ctx.fillRect(0,0,w,imgH);
+    ctx.strokeStyle='#f0c040';ctx.lineWidth=4;ctx.strokeRect(10,10,w-20,imgH-20);
+    ctx.fillStyle='#f0c040';ctx.font='bold 34px Arial';ctx.textAlign='center';
+    ctx.fillText('CEO KẾT NỐI TINH HOA',w/2,imgH/2);
     ctx.textAlign='left';
-    drawInfo();
+    drawInfoPanel(imgH);
   }
 }
 // Lưu/chia sẻ ảnh vé — nhiều lớp dự phòng vì thẻ <a download> không hoạt động trên
