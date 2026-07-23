@@ -605,8 +605,8 @@ nav a.nav-highlight:hover{background:rgba(240,192,64,.15)}
 .ws-edit-panel{display:none;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);flex-direction:column;gap:10px}
 .admin-mode .ws-edit-panel{display:flex}
 /* Workshop Registration Modal */
-#ws-reg-modal,#ws-appt-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1500;display:none;align-items:center;justify-content:center;padding:16px}
-#ws-reg-modal.open,#ws-appt-modal.open{display:flex}
+#ws-reg-modal,#ws-appt-modal,#ws-ticket-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1500;display:none;align-items:center;justify-content:center;padding:16px}
+#ws-reg-modal.open,#ws-appt-modal.open,#ws-ticket-modal.open{display:flex}
 .ws-modal-box{background:var(--dark2);border:1px solid rgba(240,192,64,.18);border-radius:18px;width:min(500px,98vw);max-height:92vh;overflow-y:auto;padding:28px;position:relative}
 .ws-modal-title{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:4px}
 .ws-modal-sub{font-size:.82rem;color:var(--muted);margin-bottom:20px}
@@ -929,6 +929,12 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .bank-lbl{font-size:.75rem;color:var(--muted)}
 .bank-val{font-size:.82rem;font-weight:700;color:var(--text)}
 .bank-val.gold{color:var(--gold)}
+.ws-ticket-card{background:repeating-linear-gradient(135deg,var(--dark4),var(--dark4) 10px,var(--dark3) 10px,var(--dark3) 20px);background:var(--dark4);border:2px dashed rgba(240,192,64,.35);border-radius:14px;padding:16px 18px;margin:14px 0}
+.ws-ticket-head{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;font-weight:800;color:var(--gold);letter-spacing:.03em;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed rgba(240,192,64,.25)}
+.ws-ticket-event{font-size:.95rem;font-weight:800;color:#fff;margin-bottom:10px}
+.ws-ticket-row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:.8rem}
+.ws-ticket-row span{color:var(--muted)}
+.ws-ticket-row strong{color:var(--text);text-align:right}
 .payment-warn{text-align:center;font-size:.77rem;color:var(--muted);margin-bottom:16px;line-height:1.55;background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.1);border-radius:8px;padding:10px 14px}
 .payment-warn strong{color:var(--gold)}
 .payment-done-btn{width:100%;padding:13px;border-radius:50px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:800;font-size:.94rem;border:none;cursor:pointer;transition:.2s;margin-bottom:8px}
@@ -2003,6 +2009,42 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
   </div>
 </div>
 
+<!-- Workshop Ticket / Payment Modal (shown right after registration) -->
+<div id="ws-ticket-modal">
+  <div class="ws-modal-box" style="max-width:440px">
+    <button class="ws-modal-close" onclick="closeWsTicketModal()">✕</button>
+    <div class="ws-modal-title">🎉 Đăng Ký Thành Công!</div>
+    <div class="ws-modal-sub">Vé tham dự của bạn đã sẵn sàng</div>
+
+    <div id="wst-payment-block">
+      <div class="payment-bank-info" style="margin-top:10px">
+        <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val" id="wst-bank-name">—</span></div>
+        <div class="bank-row"><span class="bank-lbl">Số tài khoản</span><span class="bank-val" id="wst-account">—</span></div>
+        <div class="bank-row"><span class="bank-lbl">Chủ tài khoản</span><span class="bank-val" id="wst-owner">—</span></div>
+        <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold" id="wst-amount">—</span></div>
+        <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="wst-content">—</span></div>
+      </div>
+      <div class="payment-warn">⚠️ Vui lòng chuyển khoản đúng nội dung để xác nhận suất tham dự.</div>
+    </div>
+
+    <div class="ws-ticket-card">
+      <div class="ws-ticket-head">
+        <span>🎟️ VÉ THAM DỰ</span>
+        <span id="wst-code">#000000</span>
+      </div>
+      <div class="ws-ticket-event" id="wst-event-name">Workshop CEO Kết Nối Tinh Hoa</div>
+      <div class="ws-ticket-row"><span>Họ và tên</span><strong id="wst-name">—</strong></div>
+      <div class="ws-ticket-row"><span>Điện thoại</span><strong id="wst-phone">—</strong></div>
+      <div class="ws-ticket-row" id="wst-email-row"><span>Email</span><strong id="wst-email">—</strong></div>
+      <div class="ws-ticket-row" id="wst-role-row"><span>Chức vụ</span><strong id="wst-role">—</strong></div>
+      <div class="ws-ticket-row"><span>Thời gian</span><strong id="wst-datetime">—</strong></div>
+      <div class="ws-ticket-row"><span>Địa điểm</span><strong id="wst-location">—</strong></div>
+    </div>
+
+    <button class="ws-modal-submit" onclick="closeWsTicketModal()">✅ Đã Hiểu</button>
+  </div>
+</div>
+
 <!-- CEO Appointment Modal -->
 <div id="ws-appt-modal">
   <div class="ws-modal-box">
@@ -3061,7 +3103,7 @@ const IMG_CROP_CFG={
   'book-left':     {w:420,h:600,q:.92},
   'book-right':    {w:420,h:600,q:.92},
   'pricing-book':  {w:480,h:640,q:.9},
-  'workshop-poster':{w:480,h:640,q:.92},
+  'workshop-poster':{w:480,h:640,q:.92,mode:'contain'},
   'author':        {w:480,h:640,q:.9},
   'footer-bg':     {w:1600,h:500,q:.82},
   'footer-avatar': {w:300,h:300,q:.92},
@@ -3078,7 +3120,7 @@ function _getImgCropCfg(id){
   if(id.startsWith('comm-gallery')) return{w:800,h:600,q:.85};
   return{w:800,h:600,q:.85};
 }
-function _smartCrop(file,w,h,q){
+function _smartCrop(file,w,h,q,mode){
   return new Promise((res,rej)=>{
     const img=new Image();
     const url=URL.createObjectURL(file);
@@ -3087,11 +3129,20 @@ function _smartCrop(file,w,h,q){
       const c=document.createElement('canvas');
       c.width=w;c.height=h;
       const ctx=c.getContext('2d');
-      const srcAR=img.naturalWidth/img.naturalHeight,dstAR=w/h;
-      let sx,sy,sw,sh;
-      if(srcAR>dstAR){sh=img.naturalHeight;sw=sh*dstAR;sx=(img.naturalWidth-sw)/2;sy=0;}
-      else{sw=img.naturalWidth;sh=sw/dstAR;sx=0;sy=(img.naturalHeight-sh)/2;}
-      ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
+      if(mode==='contain'){
+        // Fit toàn bộ ảnh trong khung, không cắt — tránh mất chữ/logo nằm sát góc (poster, ảnh tài liệu)
+        ctx.fillStyle='#1a1a1a';
+        ctx.fillRect(0,0,w,h);
+        const scale=Math.min(w/img.naturalWidth,h/img.naturalHeight);
+        const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+        ctx.drawImage(img,0,0,img.naturalWidth,img.naturalHeight,(w-dw)/2,(h-dh)/2,dw,dh);
+      }else{
+        const srcAR=img.naturalWidth/img.naturalHeight,dstAR=w/h;
+        let sx,sy,sw,sh;
+        if(srcAR>dstAR){sh=img.naturalHeight;sw=sh*dstAR;sx=(img.naturalWidth-sw)/2;sy=0;}
+        else{sw=img.naturalWidth;sh=sw/dstAR;sx=0;sy=(img.naturalHeight-sh)/2;}
+        ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
+      }
       res(c.toDataURL('image/jpeg',q));
     };
     img.onerror=rej;
@@ -3105,10 +3156,10 @@ function adminUpload(id){
   inp.type='file';inp.accept='image/*';
   inp.onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
-    const{w,h,q}=_getImgCropCfg(id);
+    const{w,h,q,mode}=_getImgCropCfg(id);
     showToast('🖼️ Đang xử lý ảnh...','loading',0);
     try{
-      const data=await _smartCrop(file,w,h,q);
+      const data=await _smartCrop(file,w,h,q,mode);
       _clearLoadingToasts();
       localStorage.setItem(IMG_PREFIX+id,data);
       document.querySelectorAll(`[data-img="${id}"]`).forEach(el=>applyImg(el,data));
@@ -5729,8 +5780,39 @@ function submitWsReg(){
   const updEv={..._loadWsEvent(),seatsTaken:(parseInt(ev.seatsTaken)||0)+1};
   _saveWsEvent(updEv);_wsRender(updEv);
   closeWsRegModal();
-  showToast('🎉 Đăng ký thành công! Chúng tôi sẽ liên hệ xác nhận sớm.','success');
   _tgNotify('workshop_reg',{name:reg.name,phone:reg.phone,email:reg.email,role:reg.role,event:reg.event,amount:wsPrice});
+  openWsTicketModal(reg,updEv,wsPrice);
+}
+function openWsTicketModal(reg,ev,wsPrice){
+  const $=id=>document.getElementById(id);
+  const payBlock=$('wst-payment-block');
+  if(wsPrice>0){
+    const b=loadBank();
+    $('wst-bank-name').textContent=b.bank_name;
+    $('wst-account').textContent=b.account;
+    $('wst-owner').textContent=b.owner;
+    $('wst-amount').textContent=wsPrice.toLocaleString('vi-VN')+'đ';
+    $('wst-content').textContent=(reg.id.replace('reg','TIX')+' '+reg.name).toUpperCase().slice(0,40);
+    payBlock.style.display='';
+  }else{
+    payBlock.style.display='none';
+  }
+  $('wst-code').textContent='#'+reg.id.replace('reg','').slice(-6);
+  $('wst-event-name').textContent=reg.event||'Workshop CEO Kết Nối Tinh Hoa';
+  $('wst-name').textContent=reg.name;
+  $('wst-phone').textContent=reg.phone;
+  const emailRow=$('wst-email-row');
+  if(reg.email){emailRow.style.display='';$('wst-email').textContent=reg.email;}else{emailRow.style.display='none';}
+  const roleRow=$('wst-role-row');
+  if(reg.role){roleRow.style.display='';$('wst-role').textContent=reg.role;}else{roleRow.style.display='none';}
+  $('wst-datetime').textContent=(ev.date||'--/--/----')+' · '+(ev.time||'--:-- – --:--');
+  $('wst-location').textContent=ev.location||'Hà Nội';
+  $('ws-ticket-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeWsTicketModal(){
+  document.getElementById('ws-ticket-modal').classList.remove('open');
+  document.body.style.overflow='';
 }
 
 // --- CEO Appointment Modal ---
@@ -5912,19 +5994,32 @@ function _ceoUnlockKey(id,email){
   const e=(email||'').trim().toLowerCase();
   return e?'ceo-unlocked-'+id+'::'+e:null;
 }
+const CEO_UNLOCK_TTL_MS=24*60*60*1000; // Kết nối chỉ hiển thị trong 24 giờ, sau đó tự đóng lại
 function _isCeoUnlockedForUser(id,email){
   const k=_ceoUnlockKey(id,email);
-  return !!k && localStorage.getItem(k)==='1';
+  if(!k)return false;
+  const raw=localStorage.getItem(k);
+  if(!raw)return false;
+  let at=0;
+  try{at=JSON.parse(raw).at||0;}catch(e){at=0;} // dữ liệu cũ dạng '1' (không có mốc thời gian) → coi như đã hết hạn
+  if(!at||Date.now()-at>CEO_UNLOCK_TTL_MS){localStorage.removeItem(k);return false;}
+  return true;
 }
-// Admin dashboard aggregate: true if ANY account on this browser has unlocked it
+// Admin dashboard aggregate: true if ANY account on this browser has unlocked it (còn hạn 24h)
 function _isCeoUnlockedAnywhere(id){
   const prefix='ceo-unlocked-'+id+'::';
-  return Object.keys(localStorage).some(k=>k.startsWith(prefix)&&localStorage.getItem(k)==='1');
+  return Object.keys(localStorage).some(k=>{
+    if(!k.startsWith(prefix))return false;
+    let at=0;
+    try{at=JSON.parse(localStorage.getItem(k)).at||0;}catch(e){at=0;}
+    return at&&Date.now()-at<=CEO_UNLOCK_TTL_MS;
+  });
 }
 function _initCeoUnlocks(){
   document.querySelectorAll('.ceo-card').forEach(function(card){
     const id=card.dataset.ceoId;
     if(_isCeoUnlockedForUser(id,currentUser?.email)){_setCeoUnlockedUI(card);}
+    else{_setCeoLockedUI(card);}
   });
 }
 function _setCeoUnlockedUI(card){
@@ -5933,6 +6028,14 @@ function _setCeoUnlockedUI(card){
   const btn=card.querySelector('.ceo-btn');
   if(btn){btn.textContent='✓ Đã kết nối';btn.className='ceo-btn connected';btn.onclick=null;}
 }
+function _setCeoLockedUI(card){
+  const badge=card.querySelector('.ceo-card-status');
+  if(badge){badge.textContent='🔒 Chưa kết nối';badge.className='ceo-card-status locked';}
+  const btn=card.querySelector('.ceo-btn');
+  if(btn){btn.textContent='Kết nối';btn.className='ceo-btn connect';btn.onclick=function(e){e.stopPropagation();clickCeoCard(this.closest('.ceo-card'));};}
+}
+// Tự động re-check mỗi 5 phút để đóng lại hồ sơ ngay khi hết hạn 24h mà không cần reload trang
+setInterval(_initCeoUnlocks,5*60*1000);
 // Opens the unlock/payment prompt for a given CEO profile object (works from any entry point,
 // not just a rendered card — booth links, marketplace fallbacks, etc. all route through this).
 function _promptCeoUnlock(p){
@@ -5958,7 +6061,7 @@ function confirmCeoUnlock(){
   const num=_unlockCeoId.replace('c','').padStart(3,'0');
   document.getElementById('pay-content').textContent='CEO'+num+' KET NOI';
   document.getElementById('ceo-payment-modal').classList.add('open');
-  // Save lead + notify: user intends to pay 299K to connect with this CEO
+  // Save lead + notify: user intends to pay 99K to connect with this CEO (kết nối có hiệu lực 24h)
   const userName=currentUser?.name||currentUser?.email||'Khách';
   window._ceoConnectLeadId=_saveLead({
     source:'ceo_connect',
@@ -5967,10 +6070,10 @@ function confirmCeoUnlock(){
     email:currentUser?.email||'',
     profession:'',
     note:'Kết nối CEO: '+_unlockCeoName+' (Mã CEO'+num+')',
-    amount:299000,
+    amount:99000,
     status:'new',
   });
-  _tgNotify('ceo_connect_intent',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:299000});
+  _tgNotify('ceo_connect_intent',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:99000});
 }
 function closePaymentModal(){
   document.getElementById('ceo-payment-modal').classList.remove('open');
@@ -5985,7 +6088,7 @@ function showActivateModal(){
   if(window._ceoConnectLeadId) _updateLeadStatus(window._ceoConnectLeadId,'pending');
   const num=(_unlockCeoId||'').replace('c','').padStart(3,'0');
   const userName=currentUser?.name||currentUser?.email||'Khách';
-  _tgNotify('ceo_connect_paid',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:299000,payContent:'CEO'+num+' KET NOI'});
+  _tgNotify('ceo_connect_paid',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:99000,payContent:'CEO'+num+' KET NOI'});
 }
 function closeActivateModal(){
   document.getElementById('ceo-activate-modal').classList.remove('open');
@@ -5997,7 +6100,7 @@ function submitActivationCode(){
   const def='CEO-'+_unlockCeoId.toUpperCase()+'-2025';
   if(code===stored||code===def||code==='TINHHOA2025'){
     const unlockKey=_ceoUnlockKey(_unlockCeoId,currentUser?.email);
-    if(unlockKey) localStorage.setItem(unlockKey,'1');
+    if(unlockKey) localStorage.setItem(unlockKey,JSON.stringify({at:Date.now()}));
     const card=document.querySelector('[data-ceo-id="'+_unlockCeoId+'"]');
     if(card)_setCeoUnlockedUI(card);
     closeActivateModal();
@@ -6009,7 +6112,7 @@ function submitActivationCode(){
     // Mark lead confirmed + notify
     if(window._ceoConnectLeadId){_updateLeadStatus(window._ceoConnectLeadId,'confirmed');window._ceoConnectLeadId=null;}
     const userName=currentUser?.name||currentUser?.email||'Khách';
-    _tgNotify('ceo_unlock',{name:userName,ceoName:_unlockCeoName,amount:299000,message:'✅ Kết nối CEO thành công, thanh toán 299K đã được xác nhận'});
+    _tgNotify('ceo_unlock',{name:userName,ceoName:_unlockCeoName,amount:99000,message:'✅ Kết nối CEO thành công, thanh toán 99K đã được xác nhận'});
   } else {
     document.getElementById('activate-err-msg').textContent='Mã không đúng. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.';
     document.getElementById('activate-code-inp').select();
@@ -7286,7 +7389,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
       <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val bank-editable" id="pay-bank-name" onclick="adminEditBank('bank_name')">MB Bank</span></div>
       <div class="bank-row"><span class="bank-lbl">Số tài khoản</span><span class="bank-val bank-editable" id="pay-account" onclick="adminEditBank('account')">0123 4567 890</span></div>
       <div class="bank-row"><span class="bank-lbl">Chủ tài khoản</span><span class="bank-val bank-editable" id="pay-owner" onclick="adminEditBank('owner')">NGUYEN VAN A</span></div>
-      <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold">299,000đ</span></div>
+      <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold">99,000đ</span></div>
       <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="pay-content">CEO001 KET NOI</span></div>
     </div>
     <div class="bank-edit-hint">✏️ Admin: click vào tên ngân hàng / số TK / chủ TK để chỉnh sửa</div>
@@ -7323,8 +7426,8 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
       <div class="unlock-feat-row">Nhắn tin trong cộng đồng CEO Tinh Hoa</div>
     </div>
     <div class="unlock-price-wrap">
-      <div class="unlock-price-amt">299,000đ</div>
-      <div class="unlock-price-note">Một lần thanh toán · Kết nối vĩnh viễn</div>
+      <div class="unlock-price-amt">99,000đ</div>
+      <div class="unlock-price-note">Một lần thanh toán · Hiển thị kết nối trong 24 giờ</div>
     </div>
     <button class="unlock-pay-btn" onclick="confirmCeoUnlock()">🤝 Xác Nhận Kết Nối</button>
     <button class="unlock-cancel-x" onclick="closeUnlockModal()">Hủy</button>
@@ -7336,7 +7439,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
   <div class="success-ceo-box">
     <div class="success-ceo-icon">🎉</div>
     <h3>Kết nối thành công!</h3>
-    <p>Bạn đã kết nối thành công với <strong id="success-ceo-name-display">CEO</strong>.<br>Hồ sơ đầy đủ và thông tin liên hệ đã được mở khóa.</p>
+    <p>Bạn đã kết nối thành công với <strong id="success-ceo-name-display">CEO</strong>.<br>Hồ sơ đầy đủ và thông tin liên hệ đã được mở khóa trong <strong>24 giờ</strong>.</p>
     <button class="success-ceo-btn" onclick="closeSuccessModal()">🤝 Xem Hồ Sơ CEO</button>
     <button class="success-ceo-close" onclick="closeSuccessModal()">Đóng</button>
   </div>
