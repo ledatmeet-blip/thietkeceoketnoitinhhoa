@@ -956,6 +956,11 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .activate-submit:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(240,192,64,.4)}
 .activate-back{width:100%;padding:10px;background:transparent;border:1.5px solid rgba(255,255,255,.1);color:var(--muted);border-radius:50px;cursor:pointer;font-size:.85rem}
 .activate-back:hover{color:var(--text)}
+#ceo-code-popup{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1009;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-code-popup.open{display:flex}
+.ceo-code-display{background:var(--dark4);border:2px dashed rgba(240,192,64,.4);border-radius:12px;padding:16px;font-size:1.7rem;font-weight:900;letter-spacing:4px;color:var(--gold);cursor:pointer;margin-bottom:8px;user-select:all}
+.ceo-code-display:hover{background:rgba(240,192,64,.08)}
+.ceo-code-hint{font-size:.72rem;color:var(--muted);margin-bottom:20px}
 /* CEO BANK INFO edit for admin */
 .admin-mode .payment-qr-wrap::after{content:"📷 Upload QR";position:absolute;inset:0;background:rgba(122,0,0,.8);display:grid;place-items:center;font-size:.75rem;font-weight:700;color:#fff;opacity:0;transition:.2s}
 .admin-mode .payment-qr-wrap:hover::after{opacity:1}
@@ -6089,6 +6094,25 @@ function showActivateModal(){
   const num=(_unlockCeoId||'').replace('c','').padStart(3,'0');
   const userName=currentUser?.name||currentUser?.email||'Khách';
   _tgNotify('ceo_connect_paid',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:99000,payContent:'CEO'+num+' KET NOI'});
+  // Tự sinh mã kích hoạt ngẫu nhiên "CEO"+6 số, báo popup cho khách sau 3-5 giây (mô phỏng nhận SMS/Zalo)
+  clearTimeout(window._ceoCodeTimer);
+  const genCode='CEO'+String(Math.floor(100000+Math.random()*900000));
+  localStorage.setItem('ceo-code-'+_unlockCeoId,genCode);
+  window._ceoCodeTimer=setTimeout(()=>{_showCeoCodePopup(genCode);},3000+Math.random()*2000);
+}
+function _showCeoCodePopup(code){
+  const disp=document.getElementById('ceo-code-display-val');
+  if(disp)disp.textContent=code;
+  document.getElementById('ceo-code-popup').classList.add('open');
+}
+function closeCeoCodePopup(){
+  document.getElementById('ceo-code-popup').classList.remove('open');
+  document.getElementById('activate-code-inp')?.focus();
+}
+function _copyCeoCode(el){
+  navigator.clipboard?.writeText(el.textContent.trim()).then(()=>{
+    showToast('📋 Đã copy mã kích hoạt','success',2000);
+  }).catch(()=>{});
 }
 function closeActivateModal(){
   document.getElementById('ceo-activate-modal').classList.remove('open');
@@ -7409,6 +7433,18 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
     <div class="activate-err" id="activate-err-msg"></div>
     <button class="activate-submit" onclick="submitActivationCode()">🔓 Kích Hoạt Ngay</button>
     <button class="activate-back" onclick="closeActivateModal();document.getElementById('ceo-payment-modal').classList.add('open')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- CEO ACTIVATION CODE POPUP (mã tự sinh, báo cho khách sau khi bấm "Đã chuyển khoản") -->
+<div id="ceo-code-popup">
+  <div class="activate-box">
+    <div class="activate-icon">📩</div>
+    <h3>Đã Nhận Thanh Toán!</h3>
+    <p>Đây là mã kích hoạt của bạn — nhập vào ô bên dưới để mở khóa kết nối.</p>
+    <div class="ceo-code-display" id="ceo-code-display-val" onclick="_copyCeoCode(this)">CEO000000</div>
+    <div class="ceo-code-hint">👆 Bấm vào mã để copy</div>
+    <button class="activate-submit" onclick="closeCeoCodePopup()">✅ Đã Nhận Mã</button>
   </div>
 </div>
 
