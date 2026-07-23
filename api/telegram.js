@@ -2,7 +2,7 @@ export const config = { runtime: 'edge' };
 
 const BOT_TOKEN    = process.env.TELEGRAM_BOT_TOKEN;
 const GEMINI_KEY   = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 const ADMIN_ID     = process.env.TELEGRAM_ADMIN_CHAT_ID;
 const SITE_URL     = 'https://ceoketnoitinhhoa.vn';
 
@@ -123,7 +123,7 @@ async function askAI(chatId, history) {
       body: JSON.stringify({
         contents: history,
         systemInstruction: { parts: [{ text: fullSystem }] },
-        generationConfig: { temperature: 0.85, maxOutputTokens: 1024 },
+        generationConfig: { temperature: 0.85, maxOutputTokens: 2048 },
       }),
     }
   );
