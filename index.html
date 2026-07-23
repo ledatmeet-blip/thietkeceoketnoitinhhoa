@@ -584,6 +584,16 @@ nav a.nav-highlight:hover{background:rgba(240,192,64,.15)}
 .admin-mode .ws-img-wrap{cursor:pointer}
 .ws-box{background:var(--dark3);border:2px solid rgba(240,192,64,.35);border-radius:var(--radius);padding:30px;position:relative}
 .ws-event-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);border-radius:50px;padding:5px 16px;font-size:.74rem;color:var(--gold);font-weight:800;margin-bottom:14px;letter-spacing:.3px}
+.ws-hot-flag{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;font-size:.72rem;font-weight:900;padding:6px 16px;border-radius:50px;margin:0 0 12px 8px;letter-spacing:.3px;animation:ws-hot-pulse 1.4s ease-in-out infinite;vertical-align:middle}
+@keyframes ws-hot-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,.55)}50%{transform:scale(1.06);box-shadow:0 0 0 9px rgba(220,38,38,0)}}
+.ws-countdown-wrap{margin:16px 0}
+.ws-countdown-label{font-size:.78rem;color:var(--gold);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ws-countdown-boxes{display:flex;gap:8px}
+.ws-cd-box{background:rgba(0,0,0,.35);border:1px solid rgba(240,192,64,.35);border-radius:8px;padding:8px 4px;min-width:56px;text-align:center}
+.ws-cd-num{font-size:1.3rem;font-weight:900;color:var(--gold);line-height:1}
+.ws-cd-label{font-size:.62rem;color:var(--muted);margin-top:3px}
+.ws-btn-reg.ws-reg-closed{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.ws-btn-reg.ws-reg-closed:hover{opacity:.5;transform:none}
 .ws-title{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.25;margin-bottom:6px}
 .ws-title span{color:var(--gold)}
 .ws-meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
@@ -1937,6 +1947,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
       <!-- Right: Event details -->
       <div class="ws-box">
         <div class="ws-event-badge">🎤 <span id="ws-badge-text">WORKSHOP ĐỘC QUYỀN</span></div>
+        <span class="ws-hot-flag" id="ws-hot-flag" style="display:none">🔥 SỰ KIỆN SẮP DIỄN RA — HOT HOT</span>
         <div class="ws-title" id="ws-title-display">Kết Nối <span id="ws-title-accent-display">Tinh Hoa CEO 2025</span></div>
         <div class="ws-meta-row">
           <div class="ws-meta-item">📅 <strong id="ws-date-display">--/--/----</strong></div>
@@ -1955,8 +1966,17 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
           <div class="ws-hl">Networking cao cấp, mở rộng quan hệ</div>
           <div class="ws-hl">Cơ hội hợp tác kinh doanh trực tiếp</div>
         </div>
+        <div class="ws-countdown-wrap" id="ws-countdown-wrap" style="display:none">
+          <div class="ws-countdown-label">⏳ Đăng ký đóng lại sau:</div>
+          <div class="ws-countdown-boxes">
+            <div class="ws-cd-box"><div class="ws-cd-num" id="ws-cd-days">00</div><div class="ws-cd-label">Ngày</div></div>
+            <div class="ws-cd-box"><div class="ws-cd-num" id="ws-cd-hrs">00</div><div class="ws-cd-label">Giờ</div></div>
+            <div class="ws-cd-box"><div class="ws-cd-num" id="ws-cd-min">00</div><div class="ws-cd-label">Phút</div></div>
+            <div class="ws-cd-box"><div class="ws-cd-num" id="ws-cd-sec">00</div><div class="ws-cd-label">Giây</div></div>
+          </div>
+        </div>
         <div class="ws-btn-row">
-          <button class="ws-btn-reg" onclick="openWsRegModal()">🎟️ Đăng Ký Tham Dự</button>
+          <button class="ws-btn-reg" id="ws-reg-btn" onclick="openWsRegModal()">🎟️ Đăng Ký Tham Dự</button>
           <button class="ws-btn-appt" onclick="openWsApptModal()">📅 Đặt Lịch Hẹn CEO</button>
         </div>
         <div class="ws-seats-bar">
@@ -5788,6 +5808,64 @@ function _wsRender(ev){
   if($('wse-highlights'))$('wse-highlights').value=Array.isArray(ev.highlights)?ev.highlights.join('\n'):'';
   if($('wse-seats-taken'))$('wse-seats-taken').value=ev.seatsTaken||0;
   if($('wse-seats-total'))$('wse-seats-total').value=ev.seatsTotal||50;
+  _wsUpdateCountdown(ev);
+}
+
+// ===== ĐẾM NGƯỢC SỰ KIỆN + TỰ ĐỘNG ĐÓNG ĐĂNG KÝ KHI HẾT GIỜ =====
+// ev.date dạng "dd/mm/yyyy", ev.time dạng "HH:MM-HH:MM" (lấy giờ bắt đầu)
+function _wsParseTargetDate(ev){
+  const dm=(ev.date||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!dm)return null;
+  const tm=(ev.time||'').match(/(\d{1,2}):(\d{2})/);
+  const hh=tm?parseInt(tm[1]):0,min=tm?parseInt(tm[2]):0;
+  const d=new Date(parseInt(dm[3]),parseInt(dm[2])-1,parseInt(dm[1]),hh,min,0,0);
+  return isNaN(d.getTime())?null:d;
+}
+function _wsSetRegOpen(isOpen){
+  const btn=document.getElementById('ws-reg-btn');
+  if(!btn)return;
+  if(isOpen){
+    btn.classList.remove('ws-reg-closed');
+    btn.textContent='🎟️ Đăng Ký Tham Dự';
+    btn.onclick=openWsRegModal;
+  }else{
+    btn.classList.add('ws-reg-closed');
+    btn.textContent='⛔ Đã Hết Hạn Đăng Ký';
+    btn.onclick=null;
+  }
+}
+let _wsCountdownInterval=null;
+function _wsUpdateCountdown(ev){
+  if(_wsCountdownInterval){clearInterval(_wsCountdownInterval);_wsCountdownInterval=null;}
+  const target=_wsParseTargetDate(ev);
+  const hotFlag=document.getElementById('ws-hot-flag');
+  const cdWrap=document.getElementById('ws-countdown-wrap');
+  if(!target){
+    if(hotFlag)hotFlag.style.display='none';
+    if(cdWrap)cdWrap.style.display='none';
+    _wsSetRegOpen(true);
+    return;
+  }
+  const p=n=>String(n).padStart(2,'0');
+  function tick(){
+    const left=target.getTime()-Date.now();
+    if(left<=0){
+      if(hotFlag)hotFlag.style.display='none';
+      if(cdWrap)cdWrap.style.display='none';
+      _wsSetRegOpen(false);
+      clearInterval(_wsCountdownInterval);_wsCountdownInterval=null;
+      return;
+    }
+    if(hotFlag)hotFlag.style.display='inline-flex';
+    if(cdWrap)cdWrap.style.display='';
+    _wsSetRegOpen(true);
+    document.getElementById('ws-cd-days').textContent=p(Math.floor(left/86400000));
+    document.getElementById('ws-cd-hrs').textContent=p(Math.floor((left%86400000)/3600000));
+    document.getElementById('ws-cd-min').textContent=p(Math.floor((left%3600000)/60000));
+    document.getElementById('ws-cd-sec').textContent=p(Math.floor((left%60000)/1000));
+  }
+  tick();
+  _wsCountdownInterval=setInterval(tick,1000);
 }
 function wsSaveEvent(){
   const g=id=>document.getElementById(id)?.value?.trim()||'';
@@ -5808,6 +5886,11 @@ function wsSaveEvent(){
 // --- Registration Modal ---
 function openWsRegModal(){
   const ev=_loadWsEvent();
+  const target=_wsParseTargetDate(ev);
+  if(target&&Date.now()>=target.getTime()){
+    showToast('⛔ Sự kiện đã bắt đầu, đăng ký đã đóng.','error');
+    return;
+  }
   const nm=document.getElementById('ws-reg-event-name');
   if(nm)nm.textContent=(ev.title1||'Workshop')+' '+(ev.title2||'CEO Kết Nối Tinh Hoa');
   ['wsr-name','wsr-phone','wsr-email','wsr-role','wsr-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
