@@ -3,7 +3,8 @@ export const config = { runtime: 'edge' };
 const BOT_TOKEN    = process.env.TELEGRAM_BOT_TOKEN;
 const GEMINI_KEY   = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
-const ADMIN_ID     = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const ADMIN_IDS    = (process.env.TELEGRAM_ADMIN_CHAT_ID || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
 const SITE_URL     = 'https://ceoketnoitinhhoa.vn';
 
 // ── Conversation memory (per chat, in-memory — sống trong lúc function còn "ấm") ──
@@ -170,7 +171,7 @@ export default async function handler(req) {
   const from   = msg.from || {};
 
   // Bảo mật: chỉ admin
-  if (ADMIN_ID && chatId !== String(ADMIN_ID)) {
+  if (ADMIN_IDS.length && !ADMIN_IDS.includes(chatId)) {
     await tgSend(chatId, '🔒 Bot này chỉ dành cho admin CLB CEO Kết Nối Tinh Hoa.');
     return new Response('ok');
   }

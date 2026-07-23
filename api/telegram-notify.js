@@ -2,7 +2,8 @@
 export const config = { runtime: 'edge' };
 
 const BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
-const ADMIN_ID   = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const ADMIN_IDS  = (process.env.TELEGRAM_ADMIN_CHAT_ID || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
 const AE         = process.env.ADMIN_EMAIL;
 const AP         = process.env.ADMIN_PASS;
 
@@ -154,7 +155,7 @@ export default async function handler(req) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  if (!BOT_TOKEN || !ADMIN_ID) {
+  if (!BOT_TOKEN || !ADMIN_IDS.length) {
     return new Response(JSON.stringify({ ok: false, error: 'Bot not configured' }), {
       status: 503, headers: { 'Content-Type': 'application/json' },
     });
@@ -163,14 +164,15 @@ export default async function handler(req) {
   const { event, data = {} } = body;
   const text = buildMessage(event, data);
 
-  const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: ADMIN_ID, text, parse_mode: 'Markdown' }),
-  });
+  const results = await Promise.all(ADMIN_IDS.map(chatId =>
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
+    }).then(r => r.json()).catch(() => ({ ok: false }))
+  ));
 
-  const result = await r.json().catch(() => ({}));
-  return new Response(JSON.stringify({ ok: result.ok }), {
+  return new Response(JSON.stringify({ ok: results.some(r => r.ok) }), {
     headers: { 'Content-Type': 'application/json' },
   });
 }
