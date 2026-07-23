@@ -309,7 +309,7 @@ nav a.nav-highlight:hover{background:rgba(240,192,64,.15)}
 .ce-del-row:hover{color:#ef4444}
 .ce-add-row{display:flex;align-items:center;gap:8px;padding:10px 0}
 @media(max-width:700px){.sm-grid{grid-template-columns:1fr}.showcase-products-row{gap:10px}.sp-card,.sp-add-card{width:180px}.sp-img{height:140px}}
-#gal-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:800;display:none;align-items:center;justify-content:center}
+#gal-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:2100;display:none;align-items:center;justify-content:center}
 #gal-lightbox.open{display:flex}
 #gal-lightbox img{max-width:min(92vw,1000px);max-height:90vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 60px rgba(0,0,0,.8)}
 #gal-lb-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:.2s}
@@ -5917,10 +5917,7 @@ function _downloadWsTicket(){
     ctx.font='12px Arial';
     ctx.fillText('Vui lòng xuất trình vé này (bản in hoặc ảnh) khi tham dự sự kiện.',40,h-16);
 
-    const a=document.createElement('a');
-    a.download='ve-tham-du-'+$('wst-code').replace('#','')+'.png';
-    a.href=c.toDataURL('image/png');
-    a.click();
+    _finishWsTicketImage(c,'ve-tham-du-'+$('wst-code').replace('#',''));
   }
 
   if(bgSrc){
@@ -5939,6 +5936,40 @@ function _downloadWsTicket(){
     ctx.textAlign='left';
     drawInfo();
   }
+}
+// Lưu/chia sẻ ảnh vé — nhiều lớp dự phòng vì thẻ <a download> không hoạt động trên
+// Safari iOS / trình duyệt trong app Zalo, Facebook (chỉ mở ảnh chứ không tải về).
+// Luôn hiện ảnh trong lightbox để khách nhấn giữ lưu thủ công dù các cách khác có lỗi.
+function _finishWsTicketImage(canvas,filename){
+  const dataUrl=canvas.toDataURL('image/png');
+  _showImageLightbox(dataUrl,'👆 Nhấn giữ vào ảnh để lưu về máy (hoặc dùng nút chia sẻ/tải nếu vừa hiện ra)');
+  canvas.toBlob(blob=>{
+    if(!blob)return;
+    const file=new File([blob],filename+'.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'Vé tham dự'}).catch(()=>{});
+      return;
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename+'.png';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  },'image/png');
+}
+function _showImageLightbox(src,caption){
+  const lb=document.getElementById('gal-lightbox');
+  document.getElementById('gal-lb-img').src=src;
+  let cap=document.getElementById('gal-lb-caption');
+  if(!cap){
+    cap=document.createElement('div');
+    cap.id='gal-lb-caption';
+    cap.style.cssText='position:fixed;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:.85rem;background:rgba(0,0,0,.6);padding:8px 16px;max-width:92vw;margin:0 auto;border-radius:50px;width:fit-content';
+    lb.appendChild(cap);
+  }
+  cap.textContent=caption||'';
+  cap.style.display=caption?'block':'none';
+  lb.classList.add('open');
 }
 
 // --- CEO Appointment Modal ---
