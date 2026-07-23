@@ -1976,6 +1976,12 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
             <input class="ws-inp" id="wse-seats-taken" placeholder="Số đã đăng ký (VD: 23)" type="number">
             <input class="ws-inp" id="wse-seats-total" placeholder="Tổng suất (VD: 50)" type="number">
           </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+            <div class="ws-img-wrap" data-img="workshop-ticket-bg" onclick="adminUpload('workshop-ticket-bg')" style="width:80px;height:56px;min-height:56px;aspect-ratio:unset;flex-shrink:0;cursor:pointer">
+              <div class="img-ph" style="height:100%;min-height:56px"><p style="font-size:.5rem">Ảnh thiệp mời</p></div>
+            </div>
+            <div style="font-size:.72rem;color:var(--muted);line-height:1.5">🖼️ Ảnh thiệp mời / vé — dùng làm nền cho vé khách tải về sau khi đăng ký. Bấm ảnh để upload.</div>
+          </div>
           <button onclick="wsSaveEvent()" style="padding:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border:none;border-radius:8px;font-weight:800;font-size:.84rem;cursor:pointer">💾 Lưu thông tin sự kiện</button>
         </div>
       </div>
@@ -2022,17 +2028,24 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
     <div class="ws-modal-sub">Vé tham dự của bạn đã sẵn sàng</div>
 
     <div id="wst-payment-block">
-      <div class="payment-bank-info" style="margin-top:10px">
+      <div class="payment-qr-wrap" data-img="bank-qr" onclick="window.adminMode&&adminUpload('bank-qr')" style="margin:10px auto 14px">
+        <div class="payment-qr-ph" id="wst-qr-ph">
+          <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx=".5"/><rect x="14" y="3" width="7" height="7" rx=".5"/><rect x="3" y="14" width="7" height="7" rx=".5"/><rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/><rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/><rect x="19" y="14" width="2" height="2" fill="currentColor" stroke="none"/><rect x="14" y="19" width="7" height="2" fill="currentColor" stroke="none"/></svg>
+          <span>Admin: vào chế độ quản trị<br>rồi nhấn vào đây để upload QR</span>
+        </div>
+        <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+      </div>
+      <div class="payment-bank-info">
         <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val" id="wst-bank-name">—</span></div>
         <div class="bank-row"><span class="bank-lbl">Số tài khoản</span><span class="bank-val" id="wst-account">—</span></div>
         <div class="bank-row"><span class="bank-lbl">Chủ tài khoản</span><span class="bank-val" id="wst-owner">—</span></div>
         <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold" id="wst-amount">—</span></div>
         <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="wst-content">—</span></div>
       </div>
-      <div class="payment-warn">⚠️ Vui lòng chuyển khoản đúng nội dung để xác nhận suất tham dự.</div>
+      <div class="payment-warn">⚠️ Quét QR hoặc chuyển khoản đúng nội dung để xác nhận suất tham dự.</div>
     </div>
 
-    <div class="ws-ticket-card">
+    <div class="ws-ticket-card" id="wst-ticket-card">
       <div class="ws-ticket-head">
         <span>🎟️ VÉ THAM DỰ</span>
         <span id="wst-code">#000000</span>
@@ -2046,7 +2059,8 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
       <div class="ws-ticket-row"><span>Địa điểm</span><strong id="wst-location">—</strong></div>
     </div>
 
-    <button class="ws-modal-submit" onclick="closeWsTicketModal()">✅ Đã Hiểu</button>
+    <button class="ws-modal-submit" onclick="_downloadWsTicket()">📥 Tải Vé (Ảnh)</button>
+    <button class="activate-back" onclick="closeWsTicketModal()">Đóng</button>
   </div>
 </div>
 
@@ -3109,6 +3123,7 @@ const IMG_CROP_CFG={
   'book-right':    {w:420,h:600,q:.92},
   'pricing-book':  {w:480,h:640,q:.9},
   'workshop-poster':{w:480,h:640,q:.92,mode:'contain'},
+  'workshop-ticket-bg':{w:1000,h:700,q:.9,mode:'contain'},
   'author':        {w:480,h:640,q:.9},
   'footer-bg':     {w:1600,h:500,q:.82},
   'footer-avatar': {w:300,h:300,q:.92},
@@ -5818,6 +5833,79 @@ function openWsTicketModal(reg,ev,wsPrice){
 function closeWsTicketModal(){
   document.getElementById('ws-ticket-modal').classList.remove('open');
   document.body.style.overflow='';
+}
+// Render vé thành 1 file ảnh PNG (dùng ảnh thiệp mời admin upload làm nền nếu có) rồi tải về máy
+function _downloadWsTicket(){
+  const $=id=>document.getElementById(id).textContent;
+  const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
+  const w=1000,h=700;
+  const c=document.createElement('canvas');
+  c.width=w;c.height=h;
+  const ctx=c.getContext('2d');
+
+  function drawInfo(){
+    // Ô thông tin bán trong suốt để chữ luôn đọc được dù ảnh nền là gì
+    const panelY=h-330;
+    ctx.fillStyle='rgba(10,10,10,.82)';
+    ctx.fillRect(0,panelY,w,330);
+    ctx.strokeStyle='rgba(240,192,64,.6)';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(0,panelY);ctx.lineTo(w,panelY);ctx.stroke();
+
+    ctx.fillStyle='#f0c040';
+    ctx.font='bold 24px Arial';
+    ctx.fillText('🎟️ VÉ THAM DỰ',40,panelY+42);
+    ctx.textAlign='right';
+    ctx.fillText($('wst-code'),w-40,panelY+42);
+    ctx.textAlign='left';
+
+    ctx.fillStyle='#ffffff';
+    ctx.font='bold 27px Arial';
+    ctx.fillText($('wst-event-name'),40,panelY+82);
+
+    const fields=[['Họ và tên',$('wst-name')],['Điện thoại',$('wst-phone')]];
+    if(document.getElementById('wst-email-row').style.display!=='none')fields.push(['Email',$('wst-email')]);
+    if(document.getElementById('wst-role-row').style.display!=='none')fields.push(['Chức vụ',$('wst-role')]);
+    fields.push(['Thời gian',$('wst-datetime')]);
+    fields.push(['Địa điểm',$('wst-location')]);
+    let y=panelY+120;
+    fields.forEach(([label,val])=>{
+      ctx.fillStyle='#999';
+      ctx.font='15px Arial';
+      ctx.fillText(label,40,y);
+      ctx.fillStyle='#fff';
+      ctx.font='bold 18px Arial';
+      ctx.textAlign='right';
+      ctx.fillText(val,w-40,y);
+      ctx.textAlign='left';
+      y+=34;
+    });
+    ctx.fillStyle='rgba(255,255,255,.4)';
+    ctx.font='12px Arial';
+    ctx.fillText('Vui lòng xuất trình vé này (bản in hoặc ảnh) khi tham dự sự kiện.',40,h-16);
+
+    const a=document.createElement('a');
+    a.download='ve-tham-du-'+$('wst-code').replace('#','')+'.png';
+    a.href=c.toDataURL('image/png');
+    a.click();
+  }
+
+  if(bgSrc){
+    const img=new Image();
+    img.onload=()=>{ctx.drawImage(img,0,0,w,h);drawInfo();};
+    img.onerror=()=>{ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,w,h);drawInfo();};
+    img.src=bgSrc;
+  }else{
+    // Không có ảnh thiệp mời — nền gradient tối + viền vàng mặc định
+    const grad=ctx.createLinearGradient(0,0,w,h);
+    grad.addColorStop(0,'#1a1a1a');grad.addColorStop(1,'#0a0a0a');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#f0c040';ctx.lineWidth=4;ctx.strokeRect(10,10,w-20,h-20);
+    ctx.fillStyle='#f0c040';ctx.font='bold 30px Arial';ctx.textAlign='center';
+    ctx.fillText('CEO KẾT NỐI TINH HOA',w/2,h-370);
+    ctx.textAlign='left';
+    drawInfo();
+  }
 }
 
 // --- CEO Appointment Modal ---
