@@ -11,7 +11,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --dark:#070f0a;--dark2:#0b1810;--dark3:#0f2116;--dark4:#152c1e;
+  --dark:#0a1a11;--dark2:#102a1b;--dark3:#163823;--dark4:#1e4830;
   --gold:#16a34a;--gold2:#066839;--gold-dim:rgba(22,163,74,0.12);
   --ceo-red:#7a0000;--ceo-red2:#5c0000;
   --text:#e8e8e8;--muted:#777;--green:#22c55e;
@@ -33,10 +33,12 @@
 }
 html{scroll-behavior:smooth}
 body{background:
-    radial-gradient(ellipse 1300px 900px at 15% -8%,rgba(22,163,74,.12),transparent 60%),
-    radial-gradient(ellipse 1100px 800px at 100% 15%,rgba(6,104,57,.14),transparent 55%),
-    radial-gradient(ellipse 1000px 900px at 0% 100%,rgba(6,104,57,.10),transparent 55%),
-    linear-gradient(160deg,var(--dark2) 0%,var(--dark) 45%,#050b07 100%);
+    linear-gradient(105deg,transparent 30%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 55%,transparent 70%),
+    radial-gradient(ellipse 1400px 950px at 15% -8%,rgba(34,197,94,.22),transparent 62%),
+    radial-gradient(ellipse 1200px 850px at 100% 15%,rgba(22,163,74,.24),transparent 58%),
+    radial-gradient(ellipse 1100px 950px at 0% 100%,rgba(6,104,57,.20),transparent 58%),
+    radial-gradient(ellipse 900px 700px at 80% 90%,rgba(22,163,74,.16),transparent 55%),
+    linear-gradient(160deg,var(--dark3) 0%,var(--dark) 45%,#081a10 100%);
   background-attachment:fixed;background-color:var(--dark);color:var(--color-body);font-family:var(--font-body);line-height:1.6;overflow-x:hidden;font-size:calc(1rem * var(--font-size-scale))}
 a{color:var(--gold);text-decoration:none}
 img{max-width:100%;display:block}
@@ -60,7 +62,7 @@ img{max-width:100%;display:block}
 #countdown-ann{font-weight:700;color:var(--gold);letter-spacing:1px}
 
 /* HEADER */
-header{position:sticky;top:0;z-index:200;background:rgba(7,15,10,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(22,163,74,.15);padding:12px 0}
+header{position:sticky;top:0;z-index:200;background:rgba(10,26,17,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(22,163,74,.15);padding:12px 0}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
 /* ===== BRAND IDENTITY ===== */
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;line-height:1}
@@ -873,8 +875,8 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .ceo-card:hover{border-color:rgba(22,163,74,.3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.4)}
 .ceo-card-img{width:100%;aspect-ratio:1;background:var(--dark4);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:3.5rem}
 .ceo-card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.ceo-code{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);color:var(--gold);font-size:.63rem;font-weight:800;padding:3px 8px;border-radius:50px;letter-spacing:.5px}
-.ceo-card-status{position:absolute;top:8px;right:8px;font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:50px}
+.ceo-code{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);color:var(--gold);font-size:.63rem;font-weight:800;padding:3px 8px;border-radius:50px;letter-spacing:.5px}
+.ceo-card-status{position:absolute;bottom:8px;right:8px;font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:50px;backdrop-filter:blur(4px)}
 .ceo-card-status.locked{background:rgba(0,0,0,.78);color:#888;border:1px solid rgba(255,255,255,.1)}
 .ceo-card-status.unlocked{background:rgba(16,185,129,.18);color:#10b981}
 .ceo-card-body{padding:13px}
@@ -951,12 +953,8 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .bank-lbl{font-size:.75rem;color:var(--muted)}
 .bank-val{font-size:.82rem;font-weight:700;color:var(--text)}
 .bank-val.gold{color:var(--gold)}
-.ws-ticket-card{background:repeating-linear-gradient(135deg,var(--dark4),var(--dark4) 10px,var(--dark3) 10px,var(--dark3) 20px);background:var(--dark4);border:2px dashed rgba(22,163,74,.35);border-radius:14px;padding:16px 18px;margin:14px 0}
-.ws-ticket-head{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;font-weight:800;color:var(--gold);letter-spacing:.03em;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed rgba(22,163,74,.25)}
-.ws-ticket-event{font-size:.95rem;font-weight:800;color:#fff;margin-bottom:10px}
-.ws-ticket-row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:.8rem}
-.ws-ticket-row span{color:var(--muted)}
-.ws-ticket-row strong{color:var(--text);text-align:right}
+.wst-spinner{width:30px;height:30px;border:3px solid rgba(22,163,74,.2);border-top-color:var(--gold);border-radius:50%;animation:wst-spin .8s linear infinite}
+@keyframes wst-spin{to{transform:rotate(360deg)}}
 .payment-warn{text-align:center;font-size:.77rem;color:var(--muted);margin-bottom:16px;line-height:1.55;background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.1);border-radius:8px;padding:10px 14px}
 .payment-warn strong{color:var(--gold)}
 .pd-pay-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 4px}
@@ -1027,7 +1025,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 /* CEO PAGE FOOTER */
 .ceo-page-footer{position:relative;margin-top:0;overflow:hidden;min-height:200px}
 .ceo-pf-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a0800,#050300);background-size:cover;background-position:center top;filter:blur(24px);opacity:.2;transform:scale(1.12)}
-.ceo-pf-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,15,10,.4) 0%,rgba(4,8,6,.98) 100%)}
+.ceo-pf-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,26,17,.4) 0%,rgba(6,15,10,.98) 100%)}
 .ceo-pf-content{position:relative;z-index:1;padding:44px 0 28px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .ceo-pf-logo{font-family:var(--font-title);font-size:2rem;color:#fff;text-shadow:0 2px 24px rgba(22,163,74,.25);line-height:1}
 .ceo-pf-tagline{font-size:.72rem;color:rgba(22,163,74,.65);letter-spacing:2px;text-transform:uppercase;font-weight:600}
@@ -2073,10 +2071,18 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 
 <!-- Workshop Ticket / Payment Modal (shown right after registration) -->
 <div id="ws-ticket-modal">
-  <div class="ws-modal-box" style="max-width:440px">
+  <div class="ws-modal-box" style="max-width:620px">
     <button class="ws-modal-close" onclick="closeWsTicketModal()">✕</button>
     <div class="ws-modal-title">🎉 Đăng Ký Thành Công!</div>
     <div class="ws-modal-sub">Vé tham dự của bạn đã sẵn sàng</div>
+
+    <div id="wst-preview-wrap" style="margin-bottom:14px">
+      <div id="wst-preview-loading" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px 20px;background:var(--dark4);border-radius:14px;color:var(--muted);font-size:.85rem">
+        <div class="wst-spinner"></div>
+        <span>Đang tạo vé...</span>
+      </div>
+      <img id="wst-preview-img" src="" alt="Vé tham dự" style="display:none;width:100%;border-radius:14px;cursor:zoom-in;box-shadow:0 12px 36px rgba(0,0,0,.5)" onclick="_showImageLightbox(this.src,'👆 Nhấn giữ vào ảnh để lưu về máy')">
+    </div>
 
     <div id="wst-payment-block">
       <div class="payment-qr-wrap" data-img="bank-qr" onclick="window.adminMode&&adminUpload('bank-qr')" style="margin:10px auto 14px">
@@ -2094,20 +2100,6 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
         <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="wst-content">—</span></div>
       </div>
       <div class="payment-warn">⚠️ Quét QR hoặc chuyển khoản đúng nội dung để xác nhận suất tham dự.</div>
-    </div>
-
-    <div class="ws-ticket-card" id="wst-ticket-card">
-      <div class="ws-ticket-head">
-        <span>🎟️ VÉ THAM DỰ</span>
-        <span id="wst-code">#000000</span>
-      </div>
-      <div class="ws-ticket-event" id="wst-event-name">Workshop CEO Kết Nối Tinh Hoa</div>
-      <div class="ws-ticket-row"><span>Họ và tên</span><strong id="wst-name">—</strong></div>
-      <div class="ws-ticket-row"><span>Điện thoại</span><strong id="wst-phone">—</strong></div>
-      <div class="ws-ticket-row" id="wst-email-row"><span>Email</span><strong id="wst-email">—</strong></div>
-      <div class="ws-ticket-row" id="wst-role-row"><span>Chức vụ</span><strong id="wst-role">—</strong></div>
-      <div class="ws-ticket-row"><span>Thời gian</span><strong id="wst-datetime">—</strong></div>
-      <div class="ws-ticket-row"><span>Địa điểm</span><strong id="wst-location">—</strong></div>
     </div>
 
     <button class="ws-modal-submit" onclick="_downloadWsTicket()">📥 Tải Vé (Ảnh)</button>
@@ -3781,9 +3773,9 @@ function buildCeoCardHTML(p){
     <div class="ceo-card-img" data-img="ceo-${p.id}" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-${p.id}')}">
       <span class="ceo-emoji" ${imgSrc?'style="display:none"':''}>${p.emoji||'👔'}</span>
       ${imgHtml}
-    </div>
     <span class="ceo-code">CEO #${p.code}</span>
     <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+    </div>
     <button class="ceo-card-edit-btn" onclick="event.stopPropagation();ceoCardQuickEdit('${p.id}',this)">✏️ Sửa</button>
     <div class="ceo-card-body">
       <div class="ceo-card-name">${p.name}</div>
@@ -5451,6 +5443,11 @@ function memGoStep2(){
     status:'pending',
   });
   _tgNotify('membership_paid',{name:userName,email:userEmail,amount:497000,note:'Chờ xác nhận mã kích hoạt'});
+  // Tự sinh mã kích hoạt ngẫu nhiên "MEM"+6 số, báo popup cho khách sau 3-5 giây (mô phỏng nhận SMS/Zalo)
+  clearTimeout(window._memCodeTimer);
+  const genCode='MEM'+String(Math.floor(100000+Math.random()*900000));
+  localStorage.setItem('mem-code',genCode);
+  window._memCodeTimer=setTimeout(()=>{_showCeoCodePopup(genCode,'mem-code-inp-field');},3000+Math.random()*2000);
 }
 function memGoStep1(){ _showMemStep(1); }
 function skipMembership(){ closeMembershipModal(); }
@@ -5939,6 +5936,8 @@ function submitWsReg(){
   _tgNotify('workshop_reg',{name:reg.name,phone:reg.phone,email:reg.email,role:reg.role,event:reg.event,amount:wsPrice});
   openWsTicketModal(reg,updEv,wsPrice);
 }
+let _wsTicketData=null;
+let _wsTicketCanvas=null;
 function openWsTicketModal(reg,ev,wsPrice){
   const $=id=>document.getElementById(id);
   const payBlock=$('wst-payment-block');
@@ -5953,27 +5952,32 @@ function openWsTicketModal(reg,ev,wsPrice){
   }else{
     payBlock.style.display='none';
   }
-  $('wst-code').textContent='#'+reg.id.replace('reg','').slice(-6);
-  $('wst-event-name').textContent=reg.event||'Workshop CEO Kết Nối Tinh Hoa';
-  $('wst-name').textContent=reg.name;
-  $('wst-phone').textContent=reg.phone;
-  const emailRow=$('wst-email-row');
-  if(reg.email){emailRow.style.display='';$('wst-email').textContent=reg.email;}else{emailRow.style.display='none';}
-  const roleRow=$('wst-role-row');
-  if(reg.role){roleRow.style.display='';$('wst-role').textContent=reg.role;}else{roleRow.style.display='none';}
-  $('wst-datetime').textContent=(ev.date||'--/--/----')+' · '+(ev.time||'--:-- – --:--');
-  $('wst-location').textContent=ev.location||'Hà Nội';
+  _wsTicketData={
+    code:'#'+reg.id.replace('reg','').slice(-6),
+    eventName:reg.event||'Workshop CEO Kết Nối Tinh Hoa',
+    name:reg.name,phone:reg.phone,email:reg.email||'',role:reg.role||'',
+    datetime:(ev.date||'--/--/----')+' · '+(ev.time||'--:-- – --:--'),
+    location:ev.location||'Hà Nội',
+  };
+  _wsTicketCanvas=null;
+  const img=$('wst-preview-img'),loading=$('wst-preview-loading');
+  img.style.display='none';loading.style.display='flex';
   $('ws-ticket-modal').classList.add('open');
   document.body.style.overflow='hidden';
+  _buildWsTicketCanvas(_wsTicketData,c=>{
+    _wsTicketCanvas=c;
+    img.src=c.toDataURL('image/png');
+    img.style.display='block';loading.style.display='none';
+  });
 }
 function closeWsTicketModal(){
   document.getElementById('ws-ticket-modal').classList.remove('open');
   document.body.style.overflow='';
 }
-// Render vé thành 1 file ảnh PNG — ảnh thiệp mời admin upload hiển thị ĐẦY ĐỦ, nguyên vẹn ở trên,
-// thông tin khách được đặt thành 1 khối riêng bên dưới (không đè/che lên ảnh thiệp mời)
-function _downloadWsTicket(){
-  const $=id=>document.getElementById(id).textContent;
+// Vẽ vé thành canvas — ảnh thiệp mời admin upload hiển thị ĐẦY ĐỦ, nguyên vẹn ở trên,
+// thông tin khách được đặt thành 1 khối riêng bên dưới (không đè/che lên ảnh thiệp mời).
+// Dùng chung cho cả preview trong modal lẫn file tải về, đảm bảo 2 bên khớp nhau 100%.
+function _buildWsTicketCanvas(data,done){
   const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
   const w=1000,imgH=700,infoH=340;
   const c=document.createElement('canvas');
@@ -5991,18 +5995,18 @@ function _downloadWsTicket(){
     ctx.font='bold 24px Arial';
     ctx.fillText('🎟️ VÉ THAM DỰ',40,panelY+46);
     ctx.textAlign='right';
-    ctx.fillText($('wst-code'),w-40,panelY+46);
+    ctx.fillText(data.code,w-40,panelY+46);
     ctx.textAlign='left';
 
     ctx.fillStyle='#ffffff';
     ctx.font='bold 27px Arial';
-    ctx.fillText($('wst-event-name'),40,panelY+88);
+    ctx.fillText(data.eventName,40,panelY+88);
 
-    const fields=[['Họ và tên',$('wst-name')],['Điện thoại',$('wst-phone')]];
-    if(document.getElementById('wst-email-row').style.display!=='none')fields.push(['Email',$('wst-email')]);
-    if(document.getElementById('wst-role-row').style.display!=='none')fields.push(['Chức vụ',$('wst-role')]);
-    fields.push(['Thời gian',$('wst-datetime')]);
-    fields.push(['Địa điểm',$('wst-location')]);
+    const fields=[['Họ và tên',data.name],['Điện thoại',data.phone]];
+    if(data.email)fields.push(['Email',data.email]);
+    if(data.role)fields.push(['Chức vụ',data.role]);
+    fields.push(['Thời gian',data.datetime]);
+    fields.push(['Địa điểm',data.location]);
     let y=panelY+128;
     fields.forEach(([label,val])=>{
       ctx.fillStyle='#999';
@@ -6019,7 +6023,7 @@ function _downloadWsTicket(){
     ctx.font='12px Arial';
     ctx.fillText('Vui lòng xuất trình vé này (bản in hoặc ảnh) khi tham dự sự kiện.',40,panelY+infoH-16);
 
-    _finishWsTicketImage(c,'ve-tham-du-'+$('wst-code').replace('#',''));
+    done(c);
   }
 
   if(bgSrc){
@@ -6036,7 +6040,7 @@ function _downloadWsTicket(){
     };
     img.src=bgSrc;
   }else{
-    // Không có ảnh thiệp mời — nền gradient tối + viền vàng mặc định
+    // Không có ảnh thiệp mời — nền gradient tối + viền xanh mặc định
     c.height=imgH+infoH;
     const grad=ctx.createLinearGradient(0,0,w,imgH);
     grad.addColorStop(0,'#1a1a1a');grad.addColorStop(1,'#0a0a0a');
@@ -6047,6 +6051,12 @@ function _downloadWsTicket(){
     ctx.textAlign='left';
     drawInfoPanel(imgH);
   }
+}
+function _downloadWsTicket(){
+  if(!_wsTicketData)return;
+  const filename='ve-tham-du-'+_wsTicketData.code.replace('#','');
+  if(_wsTicketCanvas){_finishWsTicketImage(_wsTicketCanvas,filename);}
+  else{_buildWsTicketCanvas(_wsTicketData,c=>{_wsTicketCanvas=c;_finishWsTicketImage(c,filename);});}
 }
 // Lưu/chia sẻ ảnh vé — nhiều lớp dự phòng vì thẻ <a download> không hoạt động trên
 // Safari iOS / trình duyệt trong app Zalo, Facebook (chỉ mở ảnh chứ không tải về).
@@ -6363,14 +6373,16 @@ function showActivateModal(){
   localStorage.setItem('ceo-code-'+_unlockCeoId,genCode);
   window._ceoCodeTimer=setTimeout(()=>{_showCeoCodePopup(genCode);},3000+Math.random()*2000);
 }
-function _showCeoCodePopup(code){
+let _codePopupFocusId='activate-code-inp';
+function _showCeoCodePopup(code,focusId){
+  _codePopupFocusId=focusId||'activate-code-inp';
   const disp=document.getElementById('ceo-code-display-val');
   if(disp)disp.textContent=code;
   document.getElementById('ceo-code-popup').classList.add('open');
 }
 function closeCeoCodePopup(){
   document.getElementById('ceo-code-popup').classList.remove('open');
-  document.getElementById('activate-code-inp')?.focus();
+  document.getElementById(_codePopupFocusId)?.focus();
 }
 function _copyCeoCode(el){
   navigator.clipboard?.writeText(el.textContent.trim()).then(()=>{
@@ -6766,14 +6778,13 @@ function buildCpoProductCard(pr,ceoId,ceo){
   const imgKey='cpo-prod-'+ceoId+'-'+pr.id;
   const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+imgKey)||'';
   const isApproved=!!pr.approved;
-  const viewUrl=_prodViewUrl({...pr,ceoWebsite:ceo?.website||'',ceoVideoUrl:ceo?.videoUrl||''});
   const approveBtn=window.adminMode?`
     <button onclick="event.stopPropagation();cpoToggleProductApproval('${ceoId}','${pr.id}')"
       style="width:100%;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid ${isApproved?'rgba(239,68,68,.35)':'rgba(16,185,129,.35)'};background:${isApproved?'rgba(239,68,68,.1)':'rgba(16,185,129,.1)'};color:${isApproved?'#f87171':'#10b981'}">
       ${isApproved?'🚫 Ẩn khỏi sàn':'✅ Duyệt lên sàn trưng bày'}
     </button>`:'';
   const approvedBadge=isApproved?`<div style="position:absolute;bottom:7px;right:7px;background:rgba(16,185,129,.9);color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:50px">✓ Đang hiển thị</div>`:'';
-  return `<div class="cpo-prod-card" onclick="${viewUrl?'window.open(\''+viewUrl+'\',\'_blank\')':''}" data-prod-id="${pr.id}">
+  return `<div class="cpo-prod-card" onclick="openCeoBooth('${ceoId}')" data-prod-id="${pr.id}">
     <div class="cpo-prod-thumb" data-img="${imgKey}" onclick="${window.adminMode?'event.stopPropagation();cpoProdUploadImg(\''+ceoId+'\',\''+pr.id+'\')':''}" style="position:relative">
       ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:`<span>🖼️</span>`}
       ${pr.badge?`<span class="cpo-prod-badge">${pr.badge}</span>`:''}
@@ -6787,7 +6798,7 @@ function buildCpoProductCard(pr,ceoId,ceo){
           ${pr.price?`<div class="cpo-prod-price">${pr.price}</div>`:''}
           ${pr.oldPrice?`<div class="cpo-prod-old">${pr.oldPrice}</div>`:''}
         </div>
-        ${viewUrl?`<a class="cpo-prod-btn" href="${viewUrl}" target="_blank" onclick="event.stopPropagation()">Xem ngay</a>`:''}
+        <button class="cpo-prod-btn" onclick="event.stopPropagation();openCeoBooth('${ceoId}')">Xem ngay</button>
         ${window.adminMode?`<button class="cpo-prod-btn" style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#f87171" onclick="event.stopPropagation();cpoDeleteProduct('${ceoId}','${pr.id}')">🗑</button>`:''}
       </div>
       ${window.adminMode?`<button class="ap-save" style="width:100%;margin-top:8px;padding:6px;font-size:.75rem" onclick="event.stopPropagation();cpoEditProduct('${ceoId}','${pr.id}')">✏️ Sửa</button>`:''}
@@ -6900,11 +6911,6 @@ function getApprovedCeoProducts(){
   });
   return result;
 }
-// Best external link to open for "Xem ngay": product's own link → CEO's website → CEO's YouTube video
-function _prodViewUrl(pr){
-  return pr.link || pr.ceoWebsite || pr.ceoVideoUrl || null;
-}
-
 // ===== PRODUCT DETAIL + ORDER INQUIRY MODAL =====
 let _pdCurrentProduct=null;
 let _pdPayMethod='qr';
@@ -7293,9 +7299,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c1" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c1')}">
             <span class="ceo-emoji">👨‍💼</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #001</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Nguyễn Văn Minh</div>
             <div class="ceo-card-role">CEO &amp; Founder — TechVision Vietnam</div>
@@ -7308,9 +7314,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c2" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c2')}">
             <span class="ceo-emoji">👩‍💼</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #002</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Trần Thị Lan Anh</div>
             <div class="ceo-card-role">CEO — GreenLife JSC</div>
@@ -7323,9 +7329,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c3" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c3')}">
             <span class="ceo-emoji">👨‍💼</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #003</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Lê Hùng Cường</div>
             <div class="ceo-card-role">Chủ tịch HĐQT — Alpha Real Estate</div>
@@ -7338,9 +7344,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c4" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c4')}">
             <span class="ceo-emoji">👩‍🏫</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #004</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Phạm Thu Hương</div>
             <div class="ceo-card-role">CEO — EduTech Vietnam Academy</div>
@@ -7353,9 +7359,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c5" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c5')}">
             <span class="ceo-emoji">👨‍💻</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #005</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Võ Quốc Bảo</div>
             <div class="ceo-card-role">CTO &amp; Co-Founder — NextAI Labs</div>
@@ -7368,9 +7374,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c6" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c6')}">
             <span class="ceo-emoji">👩‍⚕️</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #006</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Hoàng Thị Mai</div>
             <div class="ceo-card-role">CEO — VietWellness Group</div>
@@ -7383,9 +7389,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c7" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c7')}">
             <span class="ceo-emoji">👨‍💰</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #007</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Đặng Minh Tuấn</div>
             <div class="ceo-card-role">CEO — Pioneer Capital Fund</div>
@@ -7398,9 +7404,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c8" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c8')}">
             <span class="ceo-emoji">👩‍🛒</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #008</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Ngô Thị Bích Ngọc</div>
             <div class="ceo-card-role">CEO — ShopElite Vietnam</div>
@@ -7413,9 +7419,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c9" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c9')}">
             <span class="ceo-emoji">💼</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #009</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Hoàng Minh Tuấn</div>
             <div class="ceo-card-role">CEO &amp; Partner — Capital Ventures</div>
@@ -7428,9 +7434,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-card-img" data-img="ceo-c10" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c10')}">
             <span class="ceo-emoji">👩‍⚕️</span>
             <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
-          </div>
           <span class="ceo-code">CEO #010</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
+          </div>
           <div class="ceo-card-body">
             <div class="ceo-card-name">Nguyễn Thị Mai Ly</div>
             <div class="ceo-card-role">CEO — HealthFirst Vietnam</div>
