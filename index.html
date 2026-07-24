@@ -2031,6 +2031,10 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
             <input class="ws-inp" id="wse-seats-taken" placeholder="Số đã đăng ký (VD: 23)" type="number">
             <input class="ws-inp" id="wse-seats-total" placeholder="Tổng suất (VD: 50)" type="number">
           </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);cursor:pointer">
+            <input type="checkbox" id="wse-close-early" style="width:16px;height:16px">
+            Đóng đăng ký trước giờ diễn ra sự kiện 1 ngày (thay vì đóng đúng lúc bắt đầu)
+          </label>
           <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
             <div class="ws-img-wrap" data-img="workshop-ticket-bg" onclick="adminUpload('workshop-ticket-bg')" style="width:80px;height:56px;min-height:56px;aspect-ratio:unset;flex-shrink:0;cursor:pointer">
               <div class="img-ph" style="height:100%;min-height:56px"><p style="font-size:.5rem">Ảnh thiệp mời</p></div>
@@ -4784,6 +4788,7 @@ const _DB_SYNC_RE = [
   /^ceo-chapters-v1$/,
   /^ceo-chapter-section-v1$/,
   /^ceo-filter-cats-v1$/,
+  /^ws-event-v1$/,
 ];
 const _lsSet = localStorage.setItem.bind(localStorage);
 
@@ -5867,6 +5872,7 @@ function _wsRender(ev){
   if($('wse-highlights'))$('wse-highlights').value=Array.isArray(ev.highlights)?ev.highlights.join('\n'):'';
   if($('wse-seats-taken'))$('wse-seats-taken').value=ev.seatsTaken||0;
   if($('wse-seats-total'))$('wse-seats-total').value=ev.seatsTotal||50;
+  if($('wse-close-early'))$('wse-close-early').checked=!!ev.regCloseEarly;
   _wsUpdateCountdown(ev);
 }
 
@@ -5945,7 +5951,7 @@ function wsSaveEvent(){
     desc:g('wse-desc'),
     highlights:(document.getElementById('wse-highlights')?.value||'').split('\n').map(s=>s.trim()).filter(Boolean),
     seatsTaken:parseInt(g('wse-seats-taken'))||0,seatsTotal:parseInt(g('wse-seats-total'))||50,
-    regCloseEarly:true,
+    regCloseEarly:!!document.getElementById('wse-close-early')?.checked,
   };
   _saveWsEvent(ev);
   _wsRender(ev);
