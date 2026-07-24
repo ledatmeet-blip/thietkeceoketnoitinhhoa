@@ -2696,16 +2696,14 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 <script>
 // ===== DATA =====
 const DEFAULT_TESTIMONIALS = [
-  {id:"t1",name:"Nguyễn Minh Tuấn",role:"CEO Công ty TechVN",text:"Cuốn sách thay đổi hoàn toàn cách tôi nhìn nhận vai trò lãnh đạo. Sau 3 tháng áp dụng, doanh thu tăng 40%.",img:"images/testimonial-1.jpg"},
-  {id:"t2",name:"Trần Thị Lan",role:"Giám đốc Marketing",text:"Phần về kết nối đỉnh cao thực sự tuyệt vời. Tôi đã xây dựng được mạng lưới quan hệ vàng trong 6 tháng.",img:"images/testimonial-3.jpg"},
-  {id:"t3",name:"Phạm Đức Hải",role:"CEO StartupHub",text:"Đây không phải sách lý thuyết suông. Mỗi chương đều có case study thực tế và công cụ áp dụng ngay.",img:"images/testimonial-2.jpg"},
-  {id:"t4",name:"Lê Thanh Hương",role:"Co-Founder FoodChain",text:"Mindset sau khi đọc cuốn này hoàn toàn khác. Tôi tự tin hơn rất nhiều trong các quyết định quan trọng.",img:"images/testimonial-4.jpg"},
-  {id:"t5",name:"Võ Văn Khoa",role:"Giám đốc Đầu tư",text:"Chương về xây dựng đội ngũ tinh nhuệ cực kỳ thiết thực. Đã giúp tôi tuyển được 3 nhân tài xuất sắc.",img:"images/testimonial-7.jpg"},
-  {id:"t6",name:"Hoàng Thu Thảo",role:"CEO EduTech Vietnam",text:"Tôi đã đọc hàng chục sách về lãnh đạo nhưng cuốn này tổng hợp tinh hoa nhất. Worth every penny!",img:"images/testimonial-5.jpg"},
-  {id:"t7",name:"Đặng Quốc Bảo",role:"Chủ tịch Tập đoàn ABG",text:"Bài học về di sản và thương hiệu CEO rất sâu sắc. Đây là thứ tôi cần từ lâu rồi.",img:"images/testimonial-8.jpg"},
-  {id:"t8",name:"Nguyễn Thùy Linh",role:"CFO TechCorp",text:"Rất ấn tượng với cách tác giả tổng hợp triết lý từ hàng trăm CEO toàn cầu thành một hệ thống rõ ràng.",img:"images/testimonial-6.jpg"},
-  {id:"t9",name:"Trương Minh Hương",role:"CEO RetailPlus",text:"Đọc xong muốn đặt thêm cho cả đội ngũ lãnh đạo. Đây là 'bible' cho CEO thế hệ mới Việt Nam.",img:"images/testimonial-9.jpg"},
-  {id:"t10",name:"Bùi Khánh Linh",role:"Founder WomenLead",text:"Là phụ nữ trong vai trò CEO, cuốn sách cho tôi rất nhiều góc nhìn mới về kết nối và tạo ảnh hưởng.",img:"images/testimonial-10.jpg"},
+  {id:"t1",ceoId:"c1",name:"Trần Thị Luyến",role:"Chủ Tịch CLB — Hải An Hospitality",text:"Là người sáng lập CLB, tôi tự hào chứng kiến từng thành viên lớn mạnh từng ngày. Nhờ mạng lưới kết nối tại đây, Hải An Hospitality đã ký kết hợp tác với nhiều chuỗi khách sạn lớn chỉ trong vài tháng.",img:""},
+  {id:"t2",ceoId:"c2",name:"Nguyễn Thị Hương",role:"Phó Chủ Tịch CLB — HR Essence",text:"CLB CEO Kết Nối Tinh Hoa là nơi tôi tìm được những đối tác chiến lược thực sự hiểu ngành thực phẩm dinh dưỡng. Sản phẩm của HR Essence giờ đã có mặt tại nhiều hệ thống phân phối nhờ các mối quan hệ quý giá từ đây.",img:""},
+  {id:"t3",ceoId:"c3",name:"Nguyễn Thị Hoài Thanh",role:"Giám Đốc — CS Global, Mimiza, Dưỡng Sinh Hồ Tộc",text:"Tham gia CLB giúp tôi tiếp cận đúng những CEO cùng tầm nhìn về công nghệ chăm sóc sức khỏe chủ động. Chúng tôi đã cùng nhau lan tỏa giải pháp CSSK đến hàng nghìn khách hàng.",img:""},
+  {id:"t4",ceoId:"c4",name:"Mai Ái Hoa",role:"Giám Đốc — Trà Ô Long làng La Boong",text:"Từ một thương hiệu trà nhỏ, nhờ kết nối trong CLB tôi đã tìm được nhiều đối tác phân phối và mở rộng ra các tỉnh thành mới. Đây thực sự là bệ phóng cho những người làm F&B như tôi.",img:""},
+  {id:"t5",ceoId:"c5",name:"Nguyễn Thị Bích Lợi",role:"Chủ Tịch HĐQT — Global Beauty Group",text:"Ngành Spa, TMV cần rất nhiều sự tin tưởng và giới thiệu. CLB CEO Kết Nối Tinh Hoa đã giúp Global Beauty Group kết nối với hàng chục chủ spa để cùng chuẩn hoá và phát triển ngành làm đẹp Việt Nam.",img:""},
+  {id:"t6",ceoId:"c6",name:"Nguyễn Thị Tâm",role:"Giám Đốc — Madame Tam Nguyen",text:"Nhờ CLB, thương hiệu Madame Tam Nguyen được nhiều CEO nữ tin tưởng lựa chọn làm quà tặng đối tác. Đây là môi trường tuyệt vời để những người phụ nữ làm kinh doanh như tôi học hỏi và phát triển.",img:""},
+  {id:"t7",ceoId:"c7",name:"Nguyễn Thị Kim Dung",role:"Chủ Tịch — Công Ty TNHH TM & XNK ADT",text:"Kinh doanh rượu vang nhập khẩu cần rất nhiều mối quan hệ cấp cao. CLB CEO Kết Nối Tinh Hoa chính là nơi tôi tìm được những khách hàng và đối tác đồng hành cùng ADT trong nhiều năm qua.",img:""},
+  {id:"t8",ceoId:"c8",name:"Đinh Thị Ngân",role:"Phó Tổng Giám Đốc — Công Ty TNHH TM & XNK ADT",text:"Là người trực tiếp vận hành Hầm Rượu Vang tại 73 Tôn Đức Thắng, tôi thấy rõ giá trị của CLB khi nhiều buổi giao lưu doanh nhân được tổ chức ngay tại đây, giúp ADT đón tiếp hàng trăm CEO mỗi năm.",img:""},
 ];
 const TESTIMONIALS_KEY='ceo-testimonials-v1';
 function loadTestimonials(){
@@ -2916,7 +2914,9 @@ const FAQS_EN = [
 
 // ===== RENDER =====
 function makeTestiCard(t){
-  const imgKey='testi-'+t.id;
+  // Nếu đánh giá gắn với 1 hồ sơ CEO thật (t.ceoId), dùng chung đúng key ảnh với hồ sơ CEO đó
+  // (ceo-cN) — admin chỉ cần upload 1 lần ở hồ sơ CEO là ảnh tự hiện đúng ở cả 2 nơi.
+  const imgKey = t.ceoId ? ('ceo-'+t.ceoId) : ('testi-'+t.id);
   const imgSrc = t.img || localStorage.getItem(IMG_PREFIX+imgKey) || '';
   return `<div class="testi-card">
     <div class="testi-photo" data-img="${imgKey}" onclick="adminUpload('${imgKey}')">
