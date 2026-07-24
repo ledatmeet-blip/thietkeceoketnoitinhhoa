@@ -6293,11 +6293,14 @@ function buildCeoTicker(){
     const tags = Array.from(card.querySelectorAll('.ceo-tag')).slice(0,2).map(t=>t.textContent).join(' · ');
     const isUnlocked = _isCeoUnlockedForUser(id,currentUser?.email);
     const imgSrc = localStorage.getItem('ceo_img_ceo-'+id)||'';
+    // CSS ẩn <img> mặc định (display:none) và chỉ hiện khi có class "loaded" (gắn qua onload) —
+    // dùng đúng imgHtml đã có sẵn onload thay vì dựng lại 1 thẻ <img> khác thiếu onload,
+    // nếu không avatar sẽ luôn là vòng tròn xám trống dù đã có ảnh thật.
     const imgHtml = imgSrc
       ? `<img src="${imgSrc}" alt="" onload="this.classList.add('loaded')" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-      : '';
+      : emoji;
     items.push(`<div class="ceo-tick-item" onclick="document.querySelector('#ceo-page .ceo-card[data-ceo-id=\'${id}\']')?.scrollIntoView({block:'center',behavior:'smooth'})">
-      <div class="ceo-tick-av">${imgSrc?'<img src="'+imgSrc+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':emoji}</div>
+      <div class="ceo-tick-av">${imgHtml}</div>
       <div class="ceo-tick-info">
         <div class="ceo-tick-name">${name}</div>
         <div class="ceo-tick-role">${role}</div>
