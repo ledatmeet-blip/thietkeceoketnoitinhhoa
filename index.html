@@ -365,17 +365,22 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .market-cta-box p{color:var(--muted);margin-bottom:24px}
 
 /* LOGIN MODAL */
-/* ===== FLIPBOOK MODAL ===== */
-#flipbook-overlay{position:fixed;inset:0;background:#888880;z-index:1100;display:none}
-#flipbook-overlay.open{display:block}
-/* Iframe fills entire screen — NO top margin, NO clipping */
-#flipbook-frame{position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1}
-/* Only the home button sits on top — everything else passes through */
+/* ===== FLIPBOOK MODAL (sách tự chủ, không logo bên thứ 3) ===== */
+#flipbook-overlay{position:fixed;inset:0;background:#2f2f2b;background:radial-gradient(circle at 50% 40%,#3d3d37 0%,#262622 100%);z-index:1100;display:none}
+#flipbook-overlay.open{display:flex;flex-direction:column}
+#flipbook-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:60px 16px 82px;box-sizing:border-box}
+#flipbook-book{margin:0 auto}
+#flipbook-book .fb-page{background-color:#fff;background-size:cover;background-position:center;box-shadow:0 0 6px rgba(0,0,0,.15)}
 .fb-home-btn{position:fixed;top:16px;left:16px;z-index:1200;display:flex;align-items:center;gap:8px;padding:9px 20px;background:rgba(22,22,22,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border:none;border-radius:50px;font-size:.84rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.2s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .fb-home-btn:hover{background:rgba(22,22,22,1);transform:translateX(-2px)}
 .fb-home-btn svg{flex-shrink:0}
-/* Minimal watermark cover — only bottom-right corner badge, very small, matches bg */
-.fb-cover-br{position:fixed;bottom:0;right:0;width:160px;height:52px;background:#888880;pointer-events:none;z-index:1150}
+#fb-loading{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;font-size:.95rem;font-weight:600;z-index:1160;text-align:center;padding:24px}
+.fb-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.18);border-top-color:var(--gold,#f0c040);border-radius:50%;animation:fbspin .8s linear infinite}
+@keyframes fbspin{to{transform:rotate(360deg)}}
+.fb-nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:1200;display:flex;align-items:center;gap:14px;padding:7px 14px;background:rgba(22,22,22,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:50px;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.fb-nav button{width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:1.35rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;padding:0}
+.fb-nav button:hover{background:var(--gold,#f0c040);color:#161616}
+.fb-nav #fb-page-indicator{color:#fff;font-size:.85rem;font-weight:600;min-width:66px;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 
 #login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:none;align-items:center;justify-content:center;padding:20px}
 #login-overlay.open{display:flex}
@@ -4716,12 +4721,8 @@ function renderApSettingsTab(){
       <button class="ap-save" onclick="saveApAnn()">💾 Cập nhật thông báo</button>
     </div>
     <div class="ap-card">
-      <div class="ap-card-title">📖 Sách Lật (Flipbook — Heyzine)</div>
-      <div class="ap-field" style="margin-bottom:12px"><label class="ap-lbl">Link sách lật (Heyzine)</label>
-        <input class="ap-inp" id="ap-flipbook-url" value="${_getFlipbookUrl()}" placeholder="https://heyzine.com/flip-book/...">
-      </div>
-      <div style="font-size:.75rem;color:var(--muted);margin-bottom:12px">Áp dụng cho nút "📖 Xem Sách Giới Thiệu" trong trang Cộng Đồng và nút "Xem Điều Kiện Tham Gia" trên Sàn Sản Phẩm.</div>
-      <button class="ap-save" onclick="saveApFlipbook()">💾 Cập nhật link sách lật</button>
+      <div class="ap-card-title">📖 Sách Lật (Flipbook)</div>
+      <div style="font-size:.8rem;color:var(--muted)">Sách lật tự chủ từ file <code>cam-nang-thanh-vien.pdf</code> (không còn phụ thuộc Heyzine). Để đổi nội dung, thay file PDF trong thư mục dự án rồi deploy lại.</div>
     </div>
     <div class="ap-card">
       <div class="ap-card-title">Tài Khoản Quản Trị</div>
@@ -4758,13 +4759,6 @@ function saveApAnn(){
   const bar=document.getElementById('ann-bar');
   if(bar&&txt){bar.innerHTML=txt+' &nbsp;|&nbsp; <strong id="countdown-ann">--:--:--</strong>';}
   showToast('✅ Đã cập nhật thông báo banner','success');
-}
-function saveApFlipbook(){
-  const url=(document.getElementById('ap-flipbook-url').value||'').trim();
-  localStorage.setItem(FLIPBOOK_KEY, url||FLIPBOOK_DEFAULT);
-  const fr=document.getElementById('flipbook-frame');
-  if(fr) fr.src='about:blank'; // force reload with new URL on next open
-  showToast('✅ Đã cập nhật link sách lật','success');
 }
 function saveDeployHook(){
   const url=(document.getElementById('ap-deploy-hook').value||'').trim();
@@ -7583,33 +7577,130 @@ function confirmVideoUrl(){
 document.addEventListener('DOMContentLoaded', async () => { await _dbReady; initGallery(); });
 document.addEventListener('click',function(e){if(e.target.id==='gal-lightbox')document.getElementById('gal-lightbox').classList.remove('open');if(e.target.id==='video-url-modal')closeVideoModal();});
 
-// ===== FLIPBOOK =====
-const FLIPBOOK_KEY='ceo-flipbook-url';
-const FLIPBOOK_DEFAULT='https://heyzine.com/flip-book/1363f4df55.html';
-function _getFlipbookUrl(){ return localStorage.getItem(FLIPBOOK_KEY)||FLIPBOOK_DEFAULT; }
-function openFlipbook(){
-  const ov = document.getElementById('flipbook-overlay');
-  const fr = document.getElementById('flipbook-frame');
-  const url=_getFlipbookUrl();
-  if(fr.src !== url) fr.src = url;
-  ov.classList.add('open');
-  document.body.style.overflow = 'hidden';
+// ===== FLIPBOOK (self-hosted: PDF.js render trang, StPageFlip lật trang — không logo bên thứ 3) =====
+const FB_PDF_URL='cam-nang-thanh-vien.pdf';
+const FB_PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const FB_PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const FB_PAGEFLIP='https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js';
+let fbPageFlip=null, fbBuilt=false, fbBuilding=false, fbPageRatio=0.707;
+
+// Căn sách vừa vùng nhìn thấy trên mọi thiết bị (điện thoại / tablet / máy tính)
+function fbFit(){
+  const book=document.getElementById('flipbook-book');
+  if(!book) return;
+  const topGap=60, bottomGap=82, sideGap=16;               // phải khớp padding của #flipbook-stage
+  const availW=Math.max(220, window.innerWidth - 2*sideGap);
+  const availH=Math.max(220, window.innerHeight - topGap - bottomGap);
+  const twoPage=window.innerWidth>=820;                    // ≥820px: 2 trang; nhỏ hơn: 1 trang
+  let width;
+  if(twoPage){ width=Math.min(availW, 2*fbPageRatio*availH, 1040); }
+  else       { width=Math.min(availW, fbPageRatio*availH, 560); }
+  book.style.width=Math.round(width)+'px';
+  if(fbPageFlip && fbBuilt){ try{ fbPageFlip.update(); }catch(e){} }
 }
+let fbResizeT;
+window.addEventListener('resize',()=>{ clearTimeout(fbResizeT); fbResizeT=setTimeout(fbFit,150); });
+
+function fbLoadScript(src){
+  return new Promise((res,rej)=>{
+    if(document.querySelector('script[data-fb="'+src+'"]')){res();return;}
+    const s=document.createElement('script');s.src=src;s.setAttribute('data-fb',src);
+    s.onload=()=>res();s.onerror=()=>rej(new Error('Không tải được thư viện'));
+    document.head.appendChild(s);
+  });
+}
+
+async function openFlipbook(){
+  const ov=document.getElementById('flipbook-overlay');
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+  if(!fbBuilt && !fbBuilding){ try{ await fbBuildBook(); }catch(err){ fbShowError(err); } }
+  else { fbFit(); }
+}
+
+async function fbBuildBook(){
+  fbBuilding=true;
+  const loading=document.getElementById('fb-loading');
+  const loadingText=document.getElementById('fb-loading-text');
+  loading.style.display='flex';
+  await Promise.all([fbLoadScript(FB_PDFJS), fbLoadScript(FB_PAGEFLIP)]);
+  const pdfjsLib=window['pdfjsLib'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc=FB_PDFJS_WORKER;
+  const pdf=await pdfjsLib.getDocument(FB_PDF_URL).promise;
+  const n=pdf.numPages;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const images=[];
+  for(let i=1;i<=n;i++){
+    const page=await pdf.getPage(i);
+    const base=page.getViewport({scale:1});
+    if(i===1 && base.width>0){ fbPageRatio=base.width/base.height; }   // tỉ lệ trang thật (rộng/cao)
+    const viewport=page.getViewport({scale:1.6*dpr});
+    const canvas=document.createElement('canvas');
+    canvas.width=viewport.width; canvas.height=viewport.height;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    await page.render({canvasContext:ctx,viewport}).promise;
+    images.push(canvas.toDataURL('image/jpeg',0.82));
+    loadingText.textContent='Đang mở sách… '+i+'/'+n;
+  }
+  const baseH=800, baseW=Math.round(baseH*fbPageRatio);   // kích thước tham chiếu 1 trang (giữ đúng tỉ lệ)
+  fbFit();                                                // set chiều rộng khung trước khi tạo sách
+  const St=window.St;
+  fbPageFlip=new St.PageFlip(document.getElementById('flipbook-book'),{
+    width:baseW, height:baseH, size:'stretch',
+    minWidth:240, maxWidth:1100, minHeight:320, maxHeight:1500,
+    maxShadowOpacity:0.5, showCover:true, mobileScrollSupport:false,
+    usePortrait:true, drawShadow:true
+  });
+  fbPageFlip.loadFromImages(images);
+  fbPageFlip.on('flip', fbUpdateIndicator);
+  fbPageFlip.on('changeState', fbUpdateIndicator);
+  fbPageFlip.on('changeOrientation', fbUpdateIndicator);
+  fbBuilt=true; fbBuilding=false;
+  loading.style.display='none';
+  fbFit();                                                // căn lại lần cuối khi đã có trang thật
+  fbUpdateIndicator();
+}
+
+function fbUpdateIndicator(){
+  if(!fbPageFlip) return;
+  const el=document.getElementById('fb-page-indicator');
+  if(el) el.textContent=(fbPageFlip.getCurrentPageIndex()+1)+' / '+fbPageFlip.getPageCount();
+}
+function fbPrev(){ if(fbPageFlip) fbPageFlip.flipPrev(); }
+function fbNext(){ if(fbPageFlip) fbPageFlip.flipNext(); }
+function fbShowError(err){
+  fbBuilding=false;
+  const loading=document.getElementById('fb-loading');
+  loading.innerHTML='<span style="max-width:320px;line-height:1.55">Không mở được sách. Vui lòng kiểm tra kết nối và thử lại.<br><small style="opacity:.6">'+((err&&err.message)||'')+'</small></span>';
+}
+
 function closeFlipbook(){
   document.getElementById('flipbook-overlay').classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.style.overflow='';
 }
+// Phím mũi tên ←/→ để lật trang khi sách đang mở
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('flipbook-overlay').classList.contains('open')) return;
+  if(e.key==='ArrowLeft') fbPrev();
+  else if(e.key==='ArrowRight') fbNext();
+});
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
 </script>
 
-<!-- FLIPBOOK MODAL -->
+<!-- FLIPBOOK MODAL (sách tự chủ — không logo bên thứ 3) -->
 <div id="flipbook-overlay">
-  <iframe id="flipbook-frame" src="about:blank" allowfullscreen allow="fullscreen; autoplay"></iframe>
-  <div class="fb-cover-br"></div>
+  <div id="fb-loading"><div class="fb-spinner"></div><span id="fb-loading-text">Đang mở sách…</span></div>
+  <div id="flipbook-stage"><div id="flipbook-book"></div></div>
   <button class="fb-home-btn" onclick="closeFlipbook()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     ← TRANG CHỦ
   </button>
+  <div class="fb-nav">
+    <button onclick="fbPrev()" aria-label="Trang trước">‹</button>
+    <span id="fb-page-indicator">– / –</span>
+    <button onclick="fbNext()" aria-label="Trang sau">›</button>
+  </div>
 </div>
 <!-- CEO COMMUNITY PAGE -->
 <div id="ceo-page">
