@@ -6912,6 +6912,18 @@ function _renderBoothBody(p,id){
   <!-- Chợ gian hàng — sản phẩm chia thành các phân khu theo danh mục, giống sàn TMĐT -->
   ${prods.length?_renderBoothMarket(prods,id):''}
 
+  <!-- Quản lý sản phẩm (chỉ admin) — thêm/sửa/xoá/duyệt/đổi thứ tự hiển thị ngay tại gian hàng -->
+  ${am?`
+  <div class="booth-section" style="border-color:rgba(34,197,94,.2);background:rgba(34,197,94,.03)">
+    <div class="booth-section-title" style="color:var(--gold);display:flex;align-items:center;justify-content:space-between">
+      <span>📦 Quản lý sản phẩm gian hàng (${(p.products||[]).length})</span>
+      <button class="ap-save" style="padding:6px 14px;font-size:.75rem" onclick="cpoAddProduct()">+ Thêm sản phẩm</button>
+    </div>
+    <div class="cpo-prods" id="cpo-prods-grid">
+      ${(p.products||[]).length?(p.products||[]).map(pr=>buildCpoProductCard(pr,id,p)).join(''):'<div class="cpo-empty-prods">Chưa có sản phẩm nào — bấm "+ Thêm sản phẩm" để tạo.</div>'}
+    </div>
+  </div>`:''}
+
   <!-- Liên hệ + QR -->
   <div class="booth-section">
     <div class="booth-section-title">📬 Thông tin liên hệ</div>
@@ -7119,7 +7131,11 @@ function buildCpoProductCard(pr,ceoId,ceo){
         <button class="cpo-prod-btn" onclick="event.stopPropagation();openCeoBooth('${ceoId}')">Xem ngay</button>
         ${window.adminMode?`<button class="cpo-prod-btn" style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#f87171" onclick="event.stopPropagation();cpoDeleteProduct('${ceoId}','${pr.id}')">🗑</button>`:''}
       </div>
-      ${window.adminMode?`<button class="ap-save" style="width:100%;margin-top:8px;padding:6px;font-size:.75rem" onclick="event.stopPropagation();cpoEditProduct('${ceoId}','${pr.id}')">✏️ Sửa</button>`:''}
+      ${window.adminMode?`<div style="display:flex;gap:6px;margin-top:8px">
+        <button class="ap-save" style="flex:1;padding:6px;font-size:.75rem" onclick="event.stopPropagation();cpoEditProduct('${ceoId}','${pr.id}')">✏️ Sửa</button>
+        <button class="ap-cancel" style="padding:6px 10px;font-size:.75rem" title="Chuyển lên trước" onclick="event.stopPropagation();cpoMoveProduct('${ceoId}','${pr.id}',-1)">⬆️</button>
+        <button class="ap-cancel" style="padding:6px 10px;font-size:.75rem" title="Chuyển xuống sau" onclick="event.stopPropagation();cpoMoveProduct('${ceoId}','${pr.id}',1)">⬇️</button>
+      </div>`:''}
       ${approveBtn}
     </div>
   </div>`;
@@ -7150,6 +7166,12 @@ function cpoProdUploadImg(ceoId,prodId){
     }catch(err){_clearLoadingToasts();showToast('❌ Lỗi: '+err.message,'error');}
   };inp.click();
 }
+// Sau khi thêm/sửa/xoá/duyệt sản phẩm, render lại đúng màn hình admin đang mở — hồ sơ cá nhân
+// (openCeoProfile) hoặc gian hàng/chợ (openCeoBooth) — vì cả 2 nơi đều có thể quản lý sản phẩm.
+function _cpoRefreshView(ceoId){
+  if(document.getElementById('ceo-booth-overlay')?.classList.contains('open')) openCeoBooth(ceoId);
+  else openCeoProfile(ceoId);
+}
 // Vẽ hàng sao đánh giá (làm tròn tới 0.5 sao) — dùng chung cho card sản phẩm ở hồ sơ CEO,
 // gian hàng chợ và modal chi tiết, đảm bảo hiển thị đồng nhất.
 function _starsHtml(rating,reviewCount){
@@ -7162,15 +7184,17 @@ function _starsHtml(rating,reviewCount){
   }
   return `<div class="cpo-prod-rating-row"><span class="cpo-prod-stars">${stars}</span><span>${r.toFixed(1)}${reviewCount?' ('+reviewCount+' đánh giá)':''}</span></div>`;
 }
+// Sản phẩm có thể được thêm từ trang hồ sơ cá nhân (_cpoCurrentId) hoặc từ gian hàng/chợ (_boothCurrentId)
+function _cpoActiveId(){return _cpoCurrentId||_boothCurrentId;}
 function cpoAddProduct(){
-  const ceoId=_cpoCurrentId;if(!ceoId)return;
+  const ceoId=_cpoActiveId();if(!ceoId)return;
   const profiles=loadCeoProfiles();
   const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
-  const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',discount:'',badge:'',img:'',link:'',category:'',rating:0,reviewCount:0,soldCount:''};
+  const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',discount:'',badge:'',img:'',videoUrl:'',link:'',category:'',rating:0,reviewCount:0,soldCount:''};
   if(!profiles[pidx].products)profiles[pidx].products=[];
   profiles[pidx].products.push(newProd);
   saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
-  openCeoProfile(ceoId);
+  _cpoRefreshView(ceoId);
   setTimeout(()=>cpoEditProduct(ceoId,newProd.id),100);
 }
 function cpoDeleteProduct(ceoId,prodId){
@@ -7179,7 +7203,21 @@ function cpoDeleteProduct(ceoId,prodId){
   const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
   profiles[pidx].products=(profiles[pidx].products||[]).filter(r=>r.id!==prodId);
   saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
-  openCeoProfile(ceoId);
+  _cpoRefreshView(ceoId);
+}
+// Đổi vị trí hiển thị sản phẩm (lên/xuống) trong danh sách — quyết định thứ tự xuất hiện
+// trên hồ sơ CEO, gian hàng và sàn trưng bày chung.
+function cpoMoveProduct(ceoId,prodId,dir){
+  const profiles=loadCeoProfiles();
+  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+  const prs=profiles[pidx].products||[];
+  const i=prs.findIndex(r=>r.id===prodId);if(i<0)return;
+  const j=i+dir;
+  if(j<0||j>=prs.length)return;
+  [prs[i],prs[j]]=[prs[j],prs[i]];
+  profiles[pidx].products=prs;
+  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  _cpoRefreshView(ceoId);
 }
 function cpoEditProduct(ceoId,prodId){
   const profiles=loadCeoProfiles();
@@ -7204,6 +7242,7 @@ function cpoEditProduct(ceoId,prodId){
       <div><label class="ap-lbl">Số lượt đánh giá</label><input class="ap-inp" id="cpe-reviewcount" type="number" min="0" value="${pr.reviewCount||''}"></div>
       <div style="grid-column:1/-1"><label class="ap-lbl">Đã bán (VD: 120+ hoặc "Bán chạy")</label><input class="ap-inp" id="cpe-soldcount" value="${pr.soldCount||''}"></div>
       <div style="grid-column:1/-1"><label class="ap-lbl">Link (URL sản phẩm)</label><input class="ap-inp" id="cpe-link" value="${pr.link||''}" placeholder="https://..."></div>
+      <div style="grid-column:1/-1"><label class="ap-lbl">Video giới thiệu (YouTube URL)</label><input class="ap-inp" id="cpe-video" value="${pr.videoUrl||''}" placeholder="https://www.youtube.com/watch?v=..."></div>
       <div style="grid-column:1/-1"><label class="ap-lbl">Mô tả ngắn</label><textarea class="ap-inp" id="cpe-desc" rows="2" style="resize:vertical">${pr.desc||''}</textarea></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
@@ -7232,12 +7271,13 @@ function cpeSaveProd(ceoId,prodId){
     reviewCount:parseInt(document.getElementById('cpe-reviewcount').value)||0,
     soldCount:(document.getElementById('cpe-soldcount').value||'').trim(),
     link:(document.getElementById('cpe-link').value||'').trim(),
+    videoUrl:(document.getElementById('cpe-video').value||'').trim(),
     desc:(document.getElementById('cpe-desc').value||'').trim(),
   };
   profiles[pidx].products=prs;
   saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
   showToast('✅ Đã lưu sản phẩm','success');
-  openCeoProfile(ceoId);
+  _cpoRefreshView(ceoId);
 }
 
 // ===== CEO PRODUCT TICKER (linked to CEO profiles) =====
@@ -7284,6 +7324,7 @@ function _renderProductDetailForm(){
       ${p.discount?`<span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:50px">${p.discount}</span>`:''}
     </div>
     ${p.desc?`<p style="color:var(--muted);font-size:.85rem;line-height:1.65;margin-bottom:16px">${p.desc}</p>`:''}
+    ${_ytId(p.videoUrl||'')?`<div style="border-radius:12px;overflow:hidden;margin-bottom:16px;aspect-ratio:16/9"><iframe style="width:100%;height:100%" src="https://www.youtube.com/embed/${_ytId(p.videoUrl)}" allowfullscreen></iframe></div>`:''}
     <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px;margin-top:4px">
       <div style="font-weight:700;color:var(--gold);margin-bottom:10px">💳 Hình Thức Thanh Toán</div>
       <div class="pd-pay-options">
@@ -7440,7 +7481,7 @@ function cpoToggleProductApproval(ceoId,prodId){
   buildProdTicker();
   buildCeoApprovedGrid();
   renderShowcase();
-  openCeoProfile(ceoId);
+  _cpoRefreshView(ceoId);
   showToast(prs[ridx].approved?'✅ Sản phẩm đã duyệt — hiển thị trên sàn':'🚫 Đã ẩn khỏi sàn trưng bày','success');
   if(prs[ridx].approved){
     const ceo=profiles.find(x=>x.id===ceoId);
