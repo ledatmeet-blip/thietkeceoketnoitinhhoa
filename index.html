@@ -7382,13 +7382,13 @@ function buildProdTicker(){
 function buildProdTickerCard(pr){
   const imgKey=IMG_PREFIX+'cpo-prod-'+pr.ceoId+'-'+pr.id;
   const imgSrc=pr.img||localStorage.getItem(imgKey)||'';
-  return `<div class="cpo-prod-ticker-card" onclick="openProductDetail('${pr.id}')" title="${pr.name} — ${pr.ceoName}">
+  return `<div class="cpo-prod-ticker-card" onclick="openCeoBooth('${pr.ceoId}')" title="Xem gian hàng ${pr.ceoName} — ${pr.name}">
     <div class="cpo-prod-ticker-thumb">
       ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:'<span>🖼️</span>'}
       ${pr.badge?`<span class="cpo-prod-ticker-badge">${pr.badge}</span>`:''}
     </div>
     <div class="cpo-prod-ticker-body">
-      <div class="cpo-prod-ticker-ceo" onclick="event.stopPropagation();openCeoBooth('${pr.ceoId}')" style="cursor:pointer" title="Xem gian hàng"><span class="cpo-approved-dot"></span>${pr.ceoName} 🏢</div>
+      <div class="cpo-prod-ticker-ceo"><span class="cpo-approved-dot"></span>${pr.ceoName} 🏢</div>
       <div class="cpo-prod-ticker-name">${pr.name}</div>
       ${pr.price?`<div class="cpo-prod-ticker-price">${pr.price}</div>`:''}
     </div>
@@ -7406,20 +7406,21 @@ function buildCeoApprovedGrid(){
   grid.innerHTML=prods.map(pr=>{
     const imgKey=IMG_PREFIX+'cpo-prod-'+pr.ceoId+'-'+pr.id;
     const imgSrc=pr.img||localStorage.getItem(imgKey)||'';
-    return `<div class="ceo-ap-card" onclick="openProductDetail('${pr.id}')" title="${pr.name}">
+    return `<div class="ceo-ap-card" onclick="openCeoBooth('${pr.ceoId}')" title="Xem gian hàng ${pr.ceoName}">
       <div class="ceo-ap-thumb">
         ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:'<span>🖼️</span>'}
         ${pr.badge?`<span class="ceo-ap-badge">${pr.badge}</span>`:''}
       </div>
       <div class="ceo-ap-body">
-        <div class="ceo-ap-ceo" onclick="event.stopPropagation();openCeoBooth('${pr.ceoId}')" style="cursor:pointer" title="Xem gian hàng"><span class="cpo-approved-dot"></span>${pr.ceoName} 🏢</div>
+        <div class="ceo-ap-ceo"><span class="cpo-approved-dot"></span>${pr.ceoName} 🏢</div>
         <div class="ceo-ap-name">${pr.name}</div>
+        ${_starsHtml(pr.rating,pr.reviewCount)}
         <div class="ceo-ap-footer">
           <div>
             ${pr.price?`<span class="ceo-ap-price">${pr.price}</span>`:''}
             ${pr.oldPrice?`<span class="ceo-ap-old">${pr.oldPrice}</span>`:''}
           </div>
-          <span class="ceo-ap-link" style="cursor:pointer">Xem & Đặt hàng</span>
+          <span class="ceo-ap-link" style="cursor:pointer">Xem gian hàng →</span>
         </div>
       </div>
     </div>`;
