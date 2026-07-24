@@ -6024,10 +6024,10 @@ function closeWsTicketModal(){
 //   sự kiện, thời gian, địa điểm...) vẽ trên nền mặc định.
 // Dùng chung cho cả preview trong modal lẫn file tải về, đảm bảo 2 bên khớp nhau 100%.
 const WST_FIELD_POS={
-  code:{x:670,y:113,maxW:58,size:15},
-  name:{x:592,y:271,maxW:133,size:17},
-  phone:{x:592,y:317,maxW:136,size:17},
-  role:{x:592,y:364,maxW:133,size:17},
+  code:{x:665,y:113,maxW:63,size:15},
+  name:{x:592,y:271,maxW:137,size:17},
+  phone:{x:592,y:317,maxW:137,size:17},
+  role:{x:592,y:364,maxW:137,size:17},
 };
 function _buildWsTicketCanvas(data,done){
   const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
@@ -6042,13 +6042,17 @@ function _buildWsTicketCanvas(data,done){
     let size=pos.size;
     ctx.fillStyle=color;
     ctx.font='600 '+size+'px Arial';
-    while(size>10 && ctx.measureText(text).width>pos.maxW){
+    while(size>9 && ctx.measureText(text).width>pos.maxW){
       size--;
       ctx.font='600 '+size+'px Arial';
     }
     let t=text;
-    while(ctx.measureText(t+'…').width>pos.maxW && t.length>1){ t=t.slice(0,-1); }
-    if(t!==text) t=t+'…';
+    // Chỉ cắt bớt + thêm "…" nếu chữ gốc (chưa thêm dấu …) vẫn không vừa ở cỡ nhỏ nhất —
+    // tránh cắt oan khi bản thân "text" đã vừa khít nhưng "text…" (dài hơn) mới bị tràn.
+    if(ctx.measureText(t).width>pos.maxW){
+      while(ctx.measureText(t+'…').width>pos.maxW && t.length>1){ t=t.slice(0,-1); }
+      t=t+'…';
+    }
     ctx.fillText(t,pos.x,pos.y);
   }
 
