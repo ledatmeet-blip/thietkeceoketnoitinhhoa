@@ -29,6 +29,36 @@ function genCode(type) {
   return prefix + String(Math.floor(100000 + Math.random() * 900000));
 }
 
+// Levenshtein đơn giản — dùng để dung sai 1 ký tự gõ sai/thiếu/thừa khi khách
+// chuyển khoản chép tay nội dung (VD: "CEO4HF8G" thay vì "CEOE4HF8G" — thiếu chữ E).
+function editDistance(a, b) {
+  const m = a.length, n = b.length;
+  if (Math.abs(m - n) > 2) return 99; // chênh lệch độ dài quá lớn, chắc chắn không khớp — bỏ qua sớm cho nhanh
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+// Tìm payment "pending" khớp nhất với nội dung chuyển khoản thật (cho phép lệch tối đa 1 ký tự)
+function findBestMatch(content, pendingRows) {
+  const tokens = content.split(/[^A-Z0-9]+/).filter(t => t.length >= 6 && t.length <= 11);
+  let best = null; // { pay, dist }
+  for (const row of pendingRows) {
+    for (const token of tokens) {
+      const dist = editDistance(token, row.ref);
+      if (dist <= 1 && (!best || dist < best.dist)) best = { pay: row, dist };
+    }
+  }
+  return best;
+}
+
 // Cập nhật trạng thái 1 lead trong bảng site_data (key 'all-leads-v1') — server-side
 // tương đương _updateLeadStatus() phía client, để lead cũng phản ánh đúng khi xác nhận qua webhook.
 async function confirmLeadServerSide(sql, leadId) {
@@ -73,18 +103,14 @@ module.exports = async (req, res) => {
   const content = String(body.content || body.description || '').toUpperCase();
   const amount = parseFloat(body.transferAmount) || 0;
 
-  // Tìm mã tham chiếu dạng CEO/MEM/WSP + 6 ký tự chữ-số trong nội dung chuyển khoản
-  const m = content.match(/\b(CEO|MEM|WSP)[A-Z0-9]{6}\b/);
-  if (!m) {
-    return res.json({ success: true, skipped: 'no_ref_found' });
-  }
-  const ref = m[0];
-
   try {
-    const rows = await sql`SELECT * FROM payments WHERE ref = ${ref}`;
-    if (!rows.length) return res.json({ success: true, skipped: 'ref_not_found' });
-    const pay = rows[0];
-    if (pay.status !== 'pending') return res.json({ success: true, skipped: 'already_' + pay.status });
+    const pendingRows = await sql`SELECT * FROM payments WHERE status = 'pending' ORDER BY created_at DESC`;
+    if (!pendingRows.length) return res.json({ success: true, skipped: 'no_pending' });
+
+    const match = findBestMatch(content, pendingRows);
+    if (!match) return res.json({ success: true, skipped: 'no_ref_found' });
+    const pay = match.pay;
+    const ref = pay.ref;
 
     const amountOk = amount >= parseFloat(pay.amount);
     const code = genCode(pay.type);
@@ -96,16 +122,17 @@ module.exports = async (req, res) => {
     `;
     await confirmLeadServerSide(sql, pay.lead_id);
 
+    const fuzzyNote = match.dist > 0 ? `\nℹ️ Khớp gần đúng (lệch ${match.dist} ký tự so với nội dung CK thực nhận).` : '';
     const warn = amountOk ? '' : `\n⚠️ Số tiền chuyển (${amount.toLocaleString('vi-VN')}đ) khác số tiền yêu cầu (${parseFloat(pay.amount).toLocaleString('vi-VN')}đ) — vui lòng kiểm tra lại.`;
     await tgNotifyAll(
       `✅ *THANH TOÁN ĐÃ XÁC NHẬN (SePay)*\n` +
       `📦 ${pay.item_label || pay.type}\n` +
       `🔖 Mã: ${ref}\n` +
-      `💰 Số tiền nhận: ${amount.toLocaleString('vi-VN')}đ${warn}\n` +
+      `💰 Số tiền nhận: ${amount.toLocaleString('vi-VN')}đ${warn}${fuzzyNote}\n` +
       `🔑 Mã kích hoạt: ${code}`
     );
 
-    return res.json({ success: true, ref, matched: true });
+    return res.json({ success: true, ref, matched: true, editDistance: match.dist });
   } catch (err) {
     console.error('[payment-webhook]', err.message);
     return res.status(500).json({ success: false, error: err.message });
