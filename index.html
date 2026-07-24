@@ -5880,6 +5880,15 @@ function _wsParseTargetDate(ev){
   const d=new Date(parseInt(dm[3]),parseInt(dm[2])-1,parseInt(dm[1]),hh,min,0,0);
   return isNaN(d.getTime())?null:d;
 }
+// Mốc đóng đăng ký thực tế = trước giờ diễn ra sự kiện đúng 1 ngày (không phải đóng ngay lúc sự kiện bắt đầu).
+// Chỉ áp dụng cho sự kiện được tạo/lưu TỪ SAU khi có tính năng này (cờ regCloseEarly, gắn trong
+// wsSaveEvent) — sự kiện đang chạy trước đó vẫn giữ hành vi cũ (đóng đúng lúc bắt đầu) để không
+// đột ngột khoá đăng ký của khách đang chờ tham dự.
+function _wsRegCloseDate(ev){
+  const target=_wsParseTargetDate(ev);
+  if(!target)return null;
+  return ev.regCloseEarly ? new Date(target.getTime()-24*60*60*1000) : target;
+}
 function _wsSetRegOpen(isOpen){
   const btn=document.getElementById('ws-reg-btn');
   if(!btn)return;
@@ -5896,7 +5905,7 @@ function _wsSetRegOpen(isOpen){
 let _wsCountdownInterval=null;
 function _wsUpdateCountdown(ev){
   if(_wsCountdownInterval){clearInterval(_wsCountdownInterval);_wsCountdownInterval=null;}
-  const target=_wsParseTargetDate(ev);
+  const target=_wsRegCloseDate(ev);
   const hotFlag=document.getElementById('ws-hot-flag');
   const cdWrap=document.getElementById('ws-countdown-wrap');
   if(!target){
@@ -5935,7 +5944,8 @@ function wsSaveEvent(){
     price:g('wse-price')||'Miễn phí',priceOld:g('wse-price-old'),priceTag:g('wse-price-tag'),
     desc:g('wse-desc'),
     highlights:(document.getElementById('wse-highlights')?.value||'').split('\n').map(s=>s.trim()).filter(Boolean),
-    seatsTaken:parseInt(g('wse-seats-taken'))||0,seatsTotal:parseInt(g('wse-seats-total'))||50
+    seatsTaken:parseInt(g('wse-seats-taken'))||0,seatsTotal:parseInt(g('wse-seats-total'))||50,
+    regCloseEarly:true,
   };
   _saveWsEvent(ev);
   _wsRender(ev);
@@ -5945,9 +5955,9 @@ function wsSaveEvent(){
 // --- Registration Modal ---
 function openWsRegModal(){
   const ev=_loadWsEvent();
-  const target=_wsParseTargetDate(ev);
+  const target=_wsRegCloseDate(ev);
   if(target&&Date.now()>=target.getTime()){
-    showToast('⛔ Sự kiện đã bắt đầu, đăng ký đã đóng.','error');
+    showToast('⛔ Đã đóng đăng ký (trước giờ diễn ra sự kiện 1 ngày).','error');
     return;
   }
   const nm=document.getElementById('ws-reg-event-name');
