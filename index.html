@@ -1405,6 +1405,26 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .cpo-prod-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:var(--gold);font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s;text-decoration:none}
 .cpo-prod-btn:hover{background:rgba(34,197,94,.2)}
 .cpo-empty-prods{padding:32px;text-align:center;color:var(--muted);font-size:.85rem;border:1px dashed rgba(255,255,255,.1);border-radius:12px}
+/* Chợ gian hàng CEO — sao đánh giá / giảm giá / đã bán */
+.cpo-prod-stars{color:#fbbf24;font-size:.72rem;letter-spacing:1px}
+.cpo-prod-stars .cpo-star-empty{color:rgba(255,255,255,.15)}
+.cpo-prod-rating-row{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted)}
+.cpo-prod-sold{font-size:.7rem;color:var(--muted)}
+.cpo-prod-discount-badge{position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:50px;box-shadow:0 2px 8px rgba(239,68,68,.4)}
+.booth-market-section{margin-bottom:22px}
+.booth-market-cat-title{font-size:.8rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(34,197,94,.15)}
+.booth-market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.booth-market-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:.22s;display:flex;flex-direction:column}
+.booth-market-card:hover{border-color:rgba(34,197,94,.35);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.booth-market-thumb{width:100%;aspect-ratio:1/1;position:relative;overflow:hidden;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:2.3rem}
+.booth-market-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.booth-market-body{padding:12px 13px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
+.booth-market-name{font-size:.83rem;font-weight:700;color:#fff;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.booth-market-price-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:2px}
+.booth-market-price{font-size:.92rem;font-weight:800;color:var(--gold)}
+.booth-market-old{font-size:.7rem;color:var(--muted);text-decoration:line-through}
+.booth-market-cta{margin-top:8px;padding:7px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:var(--gold);font-size:.75rem;font-weight:700;text-align:center;transition:.2s}
+.booth-market-card:hover .booth-market-cta{background:rgba(34,197,94,.22)}
 /* Info table */
 .cpo-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
 .cpo-info-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px}
@@ -6826,6 +6846,46 @@ function _renderBoothHero(p,id){
   </div>`;
 }
 
+// Dựng khu trưng bày sản phẩm trong gian hàng CEO thành nhiều phân khu theo danh mục (category),
+// giống bố cục 1 sàn thương mại điện tử — mỗi phân khu là 1 nhóm sản phẩm cùng ngành/loại.
+// Sản phẩm không gán danh mục sẽ rơi vào nhóm "Sản phẩm nổi bật" mặc định.
+function _renderBoothMarket(prods,ceoId){
+  const groups={};
+  const order=[];
+  prods.forEach(pr=>{
+    const cat=(pr.category||'').trim()||'Sản phẩm nổi bật';
+    if(!groups[cat]){groups[cat]=[];order.push(cat);}
+    groups[cat].push(pr);
+  });
+  return order.map(cat=>`
+  <div class="booth-market-section">
+    <div class="booth-market-cat-title">🏷️ ${cat} <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(${groups[cat].length})</span></div>
+    <div class="booth-market-grid">
+      ${groups[cat].map(pr=>_buildBoothMarketCard(pr,ceoId)).join('')}
+    </div>
+  </div>`).join('');
+}
+function _buildBoothMarketCard(pr,ceoId){
+  const imgKey=IMG_PREFIX+'cpo-prod-'+ceoId+'-'+pr.id;
+  const imgSrc=pr.img||localStorage.getItem(imgKey)||'';
+  return `<div class="booth-market-card" onclick="openProductDetail('${pr.id}')">
+    <div class="booth-market-thumb">
+      ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:'<span>🖼️</span>'}
+      ${pr.badge?`<span class="ceo-ap-badge">${pr.badge}</span>`:''}
+      ${pr.discount?`<span class="cpo-prod-discount-badge">${pr.discount}</span>`:''}
+    </div>
+    <div class="booth-market-body">
+      <div class="booth-market-name">${pr.name}</div>
+      ${_starsHtml(pr.rating,pr.reviewCount)}
+      ${pr.soldCount?`<div class="cpo-prod-sold">🔥 Đã bán ${pr.soldCount}</div>`:''}
+      <div class="booth-market-price-row">
+        ${pr.price?`<span class="booth-market-price">${pr.price}</span>`:''}
+        ${pr.oldPrice?`<span class="booth-market-old">${pr.oldPrice}</span>`:''}
+      </div>
+      <div class="booth-market-cta">Xem chi tiết →</div>
+    </div>
+  </div>`;
+}
 function _renderBoothBody(p,id){
   const am=!!window.adminMode;
   const qrKey=IMG_PREFIX+'qr-'+id;
@@ -6849,25 +6909,8 @@ function _renderBoothBody(p,id){
     <div class="booth-intro">${p.boothIntro||p.bio||'<span style="color:rgba(255,255,255,.3)">Chưa có giới thiệu.</span>'}</div>
   </div>
 
-  <!-- Sản phẩm nổi bật -->
-  ${prods.length?`
-  <div class="booth-section">
-    <div class="booth-section-title">📦 Sản phẩm / Dịch vụ nổi bật</div>
-    <div class="booth-prod-grid">
-      ${prods.map(pr=>{
-        const imgKey=IMG_PREFIX+'cpo-prod-'+id+'-'+pr.id;
-        const imgSrc=pr.img||localStorage.getItem(imgKey)||'';
-        return `<div class="ceo-ap-card" onclick="${pr.link?`window.open('${pr.link}','_blank')`:''}" style="cursor:${pr.link?'pointer':'default'}">
-          <div class="ceo-ap-thumb">${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:'<span>🖼️</span>'}
-          ${pr.badge?`<span class="ceo-ap-badge">${pr.badge}</span>`:''}</div>
-          <div class="ceo-ap-body">
-            <div class="ceo-ap-name">${pr.name}</div>
-            <div class="ceo-ap-footer">${pr.price?`<span class="ceo-ap-price">${pr.price}</span>`:''}</div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`:''}
+  <!-- Chợ gian hàng — sản phẩm chia thành các phân khu theo danh mục, giống sàn TMĐT -->
+  ${prods.length?_renderBoothMarket(prods,id):''}
 
   <!-- Liên hệ + QR -->
   <div class="booth-section">
@@ -7060,11 +7103,14 @@ function buildCpoProductCard(pr,ceoId,ceo){
     <div class="cpo-prod-thumb" data-img="${imgKey}" onclick="${window.adminMode?'event.stopPropagation();cpoProdUploadImg(\''+ceoId+'\',\''+pr.id+'\')':''}" style="position:relative">
       ${imgSrc?`<img src="${imgSrc}" alt="${pr.name}">`:`<span>🖼️</span>`}
       ${pr.badge?`<span class="cpo-prod-badge">${pr.badge}</span>`:''}
+      ${pr.discount?`<span class="cpo-prod-discount-badge">${pr.discount}</span>`:''}
       ${approvedBadge}
     </div>
     <div class="cpo-prod-body">
       <div class="cpo-prod-name">${pr.name}</div>
       ${pr.desc?`<div class="cpo-prod-desc">${pr.desc}</div>`:''}
+      ${_starsHtml(pr.rating,pr.reviewCount)}
+      ${pr.soldCount?`<div class="cpo-prod-sold">🔥 Đã bán ${pr.soldCount}</div>`:''}
       <div class="cpo-prod-footer">
         <div>
           ${pr.price?`<div class="cpo-prod-price">${pr.price}</div>`:''}
@@ -7104,11 +7150,23 @@ function cpoProdUploadImg(ceoId,prodId){
     }catch(err){_clearLoadingToasts();showToast('❌ Lỗi: '+err.message,'error');}
   };inp.click();
 }
+// Vẽ hàng sao đánh giá (làm tròn tới 0.5 sao) — dùng chung cho card sản phẩm ở hồ sơ CEO,
+// gian hàng chợ và modal chi tiết, đảm bảo hiển thị đồng nhất.
+function _starsHtml(rating,reviewCount){
+  const r=Math.max(0,Math.min(5,parseFloat(rating)||0));
+  if(r<=0)return '';
+  const full=Math.round(r*2)/2;
+  let stars='';
+  for(let i=1;i<=5;i++){
+    stars+= i<=full ? '★' : (i-0.5===full ? '★' : '<span class="cpo-star-empty">★</span>');
+  }
+  return `<div class="cpo-prod-rating-row"><span class="cpo-prod-stars">${stars}</span><span>${r.toFixed(1)}${reviewCount?' ('+reviewCount+' đánh giá)':''}</span></div>`;
+}
 function cpoAddProduct(){
   const ceoId=_cpoCurrentId;if(!ceoId)return;
   const profiles=loadCeoProfiles();
   const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
-  const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',badge:'',img:'',link:''};
+  const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',discount:'',badge:'',img:'',link:'',category:'',rating:0,reviewCount:0,soldCount:''};
   if(!profiles[pidx].products)profiles[pidx].products=[];
   profiles[pidx].products.push(newProd);
   saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
@@ -7137,9 +7195,14 @@ function cpoEditProduct(ceoId,prodId){
   form.innerHTML=`<div style="font-weight:700;color:var(--gold);margin-bottom:4px">✏️ Sửa sản phẩm</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div><label class="ap-lbl">Tên sản phẩm</label><input class="ap-inp" id="cpe-name" value="${pr.name||''}"></div>
+      <div><label class="ap-lbl">Phân khu / danh mục (VD: Đồ uống)</label><input class="ap-inp" id="cpe-category" value="${pr.category||''}" placeholder="Để trống = Sản phẩm nổi bật"></div>
       <div><label class="ap-lbl">Badge (VD: Hot, Mới)</label><input class="ap-inp" id="cpe-badge" value="${pr.badge||''}"></div>
+      <div><label class="ap-lbl">Chiết khấu (VD: -20%)</label><input class="ap-inp" id="cpe-discount" value="${pr.discount||''}"></div>
       <div><label class="ap-lbl">Giá</label><input class="ap-inp" id="cpe-price" value="${pr.price||''}"></div>
       <div><label class="ap-lbl">Giá gốc (gạch ngang)</label><input class="ap-inp" id="cpe-oldprice" value="${pr.oldPrice||''}"></div>
+      <div><label class="ap-lbl">Đánh giá (0-5, VD: 4.8)</label><input class="ap-inp" id="cpe-rating" type="number" min="0" max="5" step="0.1" value="${pr.rating||''}"></div>
+      <div><label class="ap-lbl">Số lượt đánh giá</label><input class="ap-inp" id="cpe-reviewcount" type="number" min="0" value="${pr.reviewCount||''}"></div>
+      <div style="grid-column:1/-1"><label class="ap-lbl">Đã bán (VD: 120+ hoặc "Bán chạy")</label><input class="ap-inp" id="cpe-soldcount" value="${pr.soldCount||''}"></div>
       <div style="grid-column:1/-1"><label class="ap-lbl">Link (URL sản phẩm)</label><input class="ap-inp" id="cpe-link" value="${pr.link||''}" placeholder="https://..."></div>
       <div style="grid-column:1/-1"><label class="ap-lbl">Mô tả ngắn</label><textarea class="ap-inp" id="cpe-desc" rows="2" style="resize:vertical">${pr.desc||''}</textarea></div>
     </div>
@@ -7160,9 +7223,14 @@ function cpeSaveProd(ceoId,prodId){
   const ridx=prs.findIndex(r=>r.id===prodId);if(ridx<0)return;
   prs[ridx]={...prs[ridx],
     name:(document.getElementById('cpe-name').value||'').trim(),
+    category:(document.getElementById('cpe-category').value||'').trim(),
     badge:(document.getElementById('cpe-badge').value||'').trim(),
+    discount:(document.getElementById('cpe-discount').value||'').trim(),
     price:(document.getElementById('cpe-price').value||'').trim(),
     oldPrice:(document.getElementById('cpe-oldprice').value||'').trim(),
+    rating:parseFloat(document.getElementById('cpe-rating').value)||0,
+    reviewCount:parseInt(document.getElementById('cpe-reviewcount').value)||0,
+    soldCount:(document.getElementById('cpe-soldcount').value||'').trim(),
     link:(document.getElementById('cpe-link').value||'').trim(),
     desc:(document.getElementById('cpe-desc').value||'').trim(),
   };
@@ -7208,10 +7276,12 @@ function _renderProductDetailForm(){
   document.getElementById('pd-body').innerHTML=`
     <div class="ws-modal-title">${p.name}</div>
     <div class="ws-modal-sub">${seller?'🏢 '+seller:''}</div>
-    ${p.img?`<div style="border-radius:12px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/10;background:var(--dark4)"><img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover"></div>`:''}
+    ${p.img?`<div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/10;background:var(--dark4)"><img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">${p.discount?`<span class="cpo-prod-discount-badge">${p.discount}</span>`:''}</div>`:''}
+    ${(p.rating>0||p.soldCount)?`<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap">${_starsHtml(p.rating,p.reviewCount)}${p.soldCount?`<span class="cpo-prod-sold">🔥 Đã bán ${p.soldCount}</span>`:''}</div>`:''}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       ${p.price?`<span style="color:var(--gold);font-weight:800;font-size:1.2rem">${p.price}</span>`:''}
       ${p.oldPrice?`<span style="color:var(--muted);text-decoration:line-through;font-size:.85rem">${p.oldPrice}</span>`:''}
+      ${p.discount?`<span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:50px">${p.discount}</span>`:''}
     </div>
     ${p.desc?`<p style="color:var(--muted);font-size:.85rem;line-height:1.65;margin-bottom:16px">${p.desc}</p>`:''}
     <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px;margin-top:4px">
