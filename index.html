@@ -11,7 +11,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --dark:#0a0a0a;--dark2:#0f0f0f;--dark3:#141414;--dark4:#1a1a1a;
+  --dark:#070f0a;--dark2:#0b1810;--dark3:#0f2116;--dark4:#152c1e;
   --gold:#16a34a;--gold2:#066839;--gold-dim:rgba(22,163,74,0.12);
   --ceo-red:#7a0000;--ceo-red2:#5c0000;
   --text:#e8e8e8;--muted:#777;--green:#22c55e;
@@ -32,7 +32,12 @@
   --color-heading:#ffffff;
 }
 html{scroll-behavior:smooth}
-body{background:var(--dark);color:var(--color-body);font-family:var(--font-body);line-height:1.6;overflow-x:hidden;font-size:calc(1rem * var(--font-size-scale))}
+body{background:
+    radial-gradient(ellipse 1300px 900px at 15% -8%,rgba(22,163,74,.12),transparent 60%),
+    radial-gradient(ellipse 1100px 800px at 100% 15%,rgba(6,104,57,.14),transparent 55%),
+    radial-gradient(ellipse 1000px 900px at 0% 100%,rgba(6,104,57,.10),transparent 55%),
+    linear-gradient(160deg,var(--dark2) 0%,var(--dark) 45%,#050b07 100%);
+  background-attachment:fixed;background-color:var(--dark);color:var(--color-body);font-family:var(--font-body);line-height:1.6;overflow-x:hidden;font-size:calc(1rem * var(--font-size-scale))}
 a{color:var(--gold);text-decoration:none}
 img{max-width:100%;display:block}
 .container{max-width:1100px;margin:0 auto;padding:0 20px}
@@ -55,7 +60,7 @@ img{max-width:100%;display:block}
 #countdown-ann{font-weight:700;color:var(--gold);letter-spacing:1px}
 
 /* HEADER */
-header{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(22,163,74,.15);padding:12px 0}
+header{position:sticky;top:0;z-index:200;background:rgba(7,15,10,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(22,163,74,.15);padding:12px 0}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
 /* ===== BRAND IDENTITY ===== */
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;line-height:1}
@@ -1022,7 +1027,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 /* CEO PAGE FOOTER */
 .ceo-page-footer{position:relative;margin-top:0;overflow:hidden;min-height:200px}
 .ceo-pf-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a0800,#050300);background-size:cover;background-position:center top;filter:blur(24px);opacity:.2;transform:scale(1.12)}
-.ceo-pf-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,10,.4) 0%,rgba(5,5,5,.98) 100%)}
+.ceo-pf-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,15,10,.4) 0%,rgba(4,8,6,.98) 100%)}
 .ceo-pf-content{position:relative;z-index:1;padding:44px 0 28px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .ceo-pf-logo{font-family:var(--font-title);font-size:2rem;color:#fff;text-shadow:0 2px 24px rgba(22,163,74,.25);line-height:1}
 .ceo-pf-tagline{font-size:.72rem;color:rgba(22,163,74,.65);letter-spacing:2px;text-transform:uppercase;font-weight:600}
