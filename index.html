@@ -4753,6 +4753,7 @@ function enableAdmin(){
   window.adminMode=true;
   document.body.classList.add('admin-mode');
   document.getElementById('admin-bar').classList.add('visible');
+  if(typeof renderCeoFilterTabs==='function') renderCeoFilterTabs();
 }
 function disableAdmin(){
   window.adminMode=false;
@@ -6623,7 +6624,9 @@ function renderCeoFilterTabs(){
   if(!wrap)return;
   const cats=loadCeoFilterCats();
   wrap.innerHTML=`<button class="ceo-filter-btn active" onclick="filterCeos(this,'all')">Tất cả</button>`+
-    cats.map(c=>`<button class="ceo-filter-btn" onclick="filterCeos(this,'${c.name.replace(/'/g,"\\'")}')">${c.name}</button>`).join('');
+    cats.map(c=>`<button class="ceo-filter-btn" onclick="filterCeos(this,'${c.name.replace(/'/g,"\\'")}')">${c.name}</button>`).join('')+
+    // Admin đang đăng nhập: hiện luôn nút thêm/sửa danh mục ngay tại đây, không cần vào riêng Admin Panel
+    (window.adminMode?`<button class="ceo-filter-btn" style="border-style:dashed;color:var(--gold)" onclick="ceoCatOpenEditor()">+ Ngành nghề</button>`:'');
 }
 function filterCeos(btn,tag){
   document.querySelectorAll('.ceo-filter-btn').forEach(b=>b.classList.remove('active'));
