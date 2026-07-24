@@ -307,6 +307,8 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 /* Cat editor modal */
 #cateditor-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1600;display:none;align-items:center;justify-content:center}
 #cateditor-modal.open{display:flex}
+#ceo-cateditor-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1600;display:none;align-items:center;justify-content:center}
+#ceo-cateditor-modal.open{display:flex}
 .ce-box{background:var(--dark2);border:1px solid rgba(34,197,94,.15);border-radius:18px;width:min(440px,96vw);padding:26px;position:relative}
 .ce-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin:16px 0}
 .ce-row{display:flex;align-items:center;gap:10px;background:var(--dark3);border-radius:9px;padding:10px 12px}
@@ -2439,6 +2441,23 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
   </div>
 </div>
 
+<!-- CEO INDUSTRY FILTER CATEGORY EDITOR (Admin Panel → Hồ Sơ CEO → Danh mục ngành nghề) -->
+<div id="ceo-cateditor-modal" style="display:none" onclick="if(event.target===this)ceoCatCloseEditor()">
+  <div class="ce-box">
+    <button class="sm-close" onclick="ceoCatCloseEditor()">×</button>
+    <div class="sm-title">🏷️ Danh Mục Ngành Nghề (Hồ Sơ CEO)</div>
+    <div class="ce-list" id="ceo-ce-list"></div>
+    <div class="ce-add-row">
+      <input class="ce-name-inp" id="ceo-ce-new-name" placeholder="Tên ngành nghề mới..." onkeydown="if(event.key==='Enter')ceoCatAddRow()">
+      <button class="ap-btn ap-btn-e" onclick="ceoCatAddRow()">+ Thêm</button>
+    </div>
+    <div class="sm-actions">
+      <button class="sm-save" onclick="ceoCatSave()">💾 Lưu danh mục</button>
+      <button class="sm-cancel" onclick="ceoCatCloseEditor()">Hủy</button>
+    </div>
+  </div>
+</div>
+
 <!-- FINAL CTA -->
 <section id="final-cta">
   <div class="container">
@@ -3764,6 +3783,7 @@ function renderCeoGrid(){
   if(!grid) return;
   grid.innerHTML = profiles.map(p=>buildCeoCardHTML(p)).join('');
   _initCeoUnlocks();
+  renderCeoFilterTabs();
   const track = document.getElementById('ceo-ticker-track');
   if(track) delete track.dataset.built;
   buildCeoTicker();
@@ -3850,6 +3870,7 @@ function renderApCeoTab(){
     <h2>👤 Hồ Sơ CEO</h2>
     <div style="display:flex;gap:8px">
       <button class="ap-btn" style="font-size:.78rem;padding:7px 12px;border-color:rgba(34,197,94,.3);color:var(--gold)" onclick="resetCeoToRealData()" title="Tải lại 8 thành viên thật từ danh sách">🔄 Tải dữ liệu thật</button>
+      <button class="ap-add-btn" onclick="ceoCatOpenEditor()">🏷️ Danh mục ngành nghề</button>
       <button class="ap-add-btn" onclick="openCeoEditor(null)">+ Thêm CEO mới</button>
     </div>
   </div>
@@ -4761,6 +4782,7 @@ const _DB_SYNC_RE = [
   /^ceo-author-v1$/,
   /^ceo-chapters-v1$/,
   /^ceo-chapter-section-v1$/,
+  /^ceo-filter-cats-v1$/,
 ];
 const _lsSet = localStorage.setItem.bind(localStorage);
 
@@ -6585,6 +6607,24 @@ function closeSuccessModal(){
   document.getElementById('ceo-success-modal').classList.remove('open');
   _unlockCeoName='';_unlockCeoId=null;
 }
+// ===== DANH MỤC NGÀNH NGHỀ (bộ lọc Hồ Sơ CEO) — admin có thể chủ động thêm/sửa/xoá =====
+const CEO_FILTER_CATS_KEY='ceo-filter-cats-v1';
+const DEFAULT_CEO_FILTER_CATS=[
+  {id:'cfc1',name:'Công nghệ'},
+  {id:'cfc2',name:'F&B'},
+  {id:'cfc3',name:'Bất động sản'},
+  {id:'cfc4',name:'Giáo dục'},
+  {id:'cfc5',name:'Tài chính'},
+];
+function loadCeoFilterCats(){try{const d=JSON.parse(localStorage.getItem(CEO_FILTER_CATS_KEY));return Array.isArray(d)&&d.length?d:DEFAULT_CEO_FILTER_CATS;}catch(e){return DEFAULT_CEO_FILTER_CATS;}}
+function saveCeoFilterCats(arr){localStorage.setItem(CEO_FILTER_CATS_KEY,JSON.stringify(arr));_dbWrite(CEO_FILTER_CATS_KEY,arr);}
+function renderCeoFilterTabs(){
+  const wrap=document.getElementById('ceo-filter-tabs');
+  if(!wrap)return;
+  const cats=loadCeoFilterCats();
+  wrap.innerHTML=`<button class="ceo-filter-btn active" onclick="filterCeos(this,'all')">Tất cả</button>`+
+    cats.map(c=>`<button class="ceo-filter-btn" onclick="filterCeos(this,'${c.name.replace(/'/g,"\\'")}')">${c.name}</button>`).join('');
+}
 function filterCeos(btn,tag){
   document.querySelectorAll('.ceo-filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -6592,6 +6632,52 @@ function filterCeos(btn,tag){
     if(tag==='all'){card.style.display='';return;}
     card.style.display=(card.dataset.tags||'').toLowerCase().includes(tag.toLowerCase())?'':'none';
   });
+}
+// --- Editor modal (Admin Panel → Hồ Sơ CEO → Danh mục ngành nghề) ---
+function ceoCatOpenEditor(){
+  _ceoCatRenderList(loadCeoFilterCats());
+  const cm=document.getElementById('ceo-cateditor-modal');
+  cm.style.display='flex';
+  cm.classList.add('open');
+}
+function ceoCatCloseEditor(){
+  const cm=document.getElementById('ceo-cateditor-modal');
+  cm.classList.remove('open');
+  cm.style.display='none';
+}
+function _ceoCatRenderList(cats){
+  document.getElementById('ceo-ce-list').innerHTML=cats.map((c,i)=>`
+  <div class="ce-row" data-idx="${i}">
+    <input class="ce-name-inp" value="${c.name}" data-field="name" placeholder="Tên ngành nghề">
+    <button class="ce-del-row" onclick="ceoCatRemoveRow(${i})">✕</button>
+  </div>`).join('');
+}
+function ceoCatRemoveRow(idx){
+  const cats=loadCeoFilterCats();
+  cats.splice(idx,1);
+  saveCeoFilterCats(cats);
+  _ceoCatRenderList(cats);
+}
+function ceoCatAddRow(){
+  const name=(document.getElementById('ceo-ce-new-name').value||'').trim();
+  if(!name){document.getElementById('ceo-ce-new-name').focus();return;}
+  const cats=loadCeoFilterCats();
+  cats.push({id:'cfc'+Date.now(),name});
+  saveCeoFilterCats(cats);
+  _ceoCatRenderList(cats);
+  document.getElementById('ceo-ce-new-name').value='';
+  document.getElementById('ceo-ce-new-name').focus();
+}
+function ceoCatSave(){
+  const rows=document.querySelectorAll('#ceo-ce-list .ce-row');
+  const cats=loadCeoFilterCats();
+  rows.forEach((row,i)=>{
+    if(cats[i]) cats[i].name=row.querySelector('[data-field="name"]').value.trim()||cats[i].name;
+  });
+  saveCeoFilterCats(cats);
+  ceoCatCloseEditor();
+  renderCeoFilterTabs();
+  showToast('✅ Đã lưu danh mục ngành nghề','success');
 }
 function searchCeos(val){
   const q=val.toLowerCase().trim();
@@ -7447,13 +7533,8 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <p>Kết nối với hàng trăm CEO hàng đầu – Mở khóa để truy cập thông tin đầy đủ &amp; cơ hội hợp tác</p>
       </div>
       <div class="ceo-toolbar">
-        <div class="ceo-filters">
-          <button class="ceo-filter-btn active" onclick="filterCeos(this,'all')">Tất cả</button>
-          <button class="ceo-filter-btn" onclick="filterCeos(this,'công nghệ')">Công nghệ</button>
-          <button class="ceo-filter-btn" onclick="filterCeos(this,'f&b')">F&amp;B</button>
-          <button class="ceo-filter-btn" onclick="filterCeos(this,'bất động sản')">Bất động sản</button>
-          <button class="ceo-filter-btn" onclick="filterCeos(this,'giáo dục')">Giáo dục</button>
-          <button class="ceo-filter-btn" onclick="filterCeos(this,'tài chính')">Tài chính</button>
+        <div class="ceo-filters" id="ceo-filter-tabs">
+          <!-- Populated by renderCeoFilterTabs() -->
         </div>
         <div class="ceo-search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
