@@ -5424,50 +5424,37 @@ function _showMemStep(n){
   document.querySelectorAll('.mem-step').forEach(s=>s.classList.remove('active'));
   document.getElementById('mem-step-'+n).classList.add('active');
 }
+// "Tôi đã chuyển khoản" — đi qua đúng quy trình xác thực dùng chung (modal #ceo-activate-modal),
+// giống hệt Kết nối CEO/Workshop, thay vì màn hình nhập mã riêng của trang thành viên.
 function memGoStep2(){
-  document.getElementById('mem-code-inp-field').value='';
-  document.getElementById('mem-code-err-msg').textContent='';
-  _showMemStep(2);
-  setTimeout(()=>document.getElementById('mem-code-inp-field').focus(),120);
-  // Save lead + notify: user says they paid 497K membership
-  const userName=currentUser?.name||currentUser?.email||'Khách';
-  const userEmail=currentUser?.email||'';
-  window._membershipLeadId=_saveLead({
-    source:'membership',
-    name:userName,
-    phone:currentUser?.phone||'',
-    email:userEmail,
-    profession:'',
-    note:'Đăng ký thành viên CLB CEO Kết Nối Tinh Hoa — 497.000đ/năm',
+  closeMembershipModal();
+  document.getElementById('activate-code-inp').value='';
+  document.getElementById('activate-err-msg').textContent='';
+  document.getElementById('ceo-activate-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('activate-code-inp').focus(),120);
+  pfConfirmPaid({
+    type:'member',
+    itemLabel:'Thành viên CLB CEO Kết Nối Tinh Hoa',
     amount:497000,
-    status:'pending',
+    leadSource:'membership',
+    tgPaidEvent:'membership_paid',
+    tgSuccessEvent:'membership_activated',
+    codeInputId:'activate-code-inp',
+    onSuccess:()=>{
+      localStorage.setItem('ceo-member','active');
+      _showMemberBadge();
+      document.getElementById('membership-modal').classList.add('open');
+      _showMemStep(3);
+    }
   });
-  _tgNotify('membership_paid',{name:userName,email:userEmail,amount:497000,note:'Chờ xác nhận mã kích hoạt'});
-  // Tự sinh mã kích hoạt ngẫu nhiên "MEM"+6 số, báo popup cho khách sau 3-5 giây (mô phỏng nhận SMS/Zalo)
-  clearTimeout(window._memCodeTimer);
-  const genCode='MEM'+String(Math.floor(100000+Math.random()*900000));
-  localStorage.setItem('mem-code',genCode);
-  window._memCodeTimer=setTimeout(()=>{_showCeoCodePopup(genCode,'mem-code-inp-field');},3000+Math.random()*2000);
 }
 function memGoStep1(){ _showMemStep(1); }
 function skipMembership(){ closeMembershipModal(); }
-function submitMemberCode(){
-  const code=document.getElementById('mem-code-inp-field').value.trim().toUpperCase();
-  if(!code){document.getElementById('mem-code-err-msg').textContent='Vui lòng nhập mã kích hoạt.';return;}
-  const stored=(localStorage.getItem('mem-code')||'').toUpperCase();
-  const def='MEMBER2025';
-  if(code===stored||code===def||code==='TINHHOA2025'){
-    localStorage.setItem('ceo-member','active');
-    _showMemberBadge();
-    _showMemStep(3);
-    // Mark lead confirmed + notify
-    if(window._membershipLeadId){_updateLeadStatus(window._membershipLeadId,'confirmed');window._membershipLeadId=null;}
-    const userName=currentUser?.name||currentUser?.email||'Khách';
-    _tgNotify('membership_activated',{name:userName,email:currentUser?.email||'',amount:497000,message:'✅ Thành viên CLB đã kích hoạt thành công'});
-  } else {
-    document.getElementById('mem-code-err-msg').textContent='Mã không đúng. Vui lòng kiểm tra lại.';
-    document.getElementById('mem-code-inp-field').select();
-  }
+// Nút "← Quay lại" trong #ceo-activate-modal dùng chung cho cả 3 luồng — quay đúng màn hình nguồn
+function activateModalGoBack(){
+  closeActivateModal();
+  if(_pf?.type==='member'){ document.getElementById('membership-modal').classList.add('open'); _showMemStep(1); }
+  else{ document.getElementById('ceo-payment-modal').classList.add('open'); }
 }
 function _showMemberBadge(){
   const chip=document.getElementById('member-chip');
@@ -5934,7 +5921,27 @@ function submitWsReg(){
   _saveWsEvent(updEv);_wsRender(updEv);
   closeWsRegModal();
   _tgNotify('workshop_reg',{name:reg.name,phone:reg.phone,email:reg.email,role:reg.role,event:reg.event,amount:wsPrice});
-  openWsTicketModal(reg,updEv,wsPrice);
+  if(wsPrice>0){ openWsPaymentFlow(reg,updEv,wsPrice); }
+  else{ openWsTicketModal(reg,updEv,wsPrice); }
+}
+// Workshop có phí: đi qua đúng quy trình thanh toán+xác thực dùng chung (giống Kết nối CEO/Thành viên)
+// trước khi mở vé — thay vì phát vé ngay khi chưa xác nhận đã thanh toán.
+function openWsPaymentFlow(reg,ev,wsPrice){
+  const content=(reg.id.replace('reg','TIX')+' '+reg.name).toUpperCase().slice(0,40);
+  document.getElementById('pay-content').textContent=content;
+  document.getElementById('pay-amount').textContent=wsPrice.toLocaleString('vi-VN')+'đ';
+  document.getElementById('ceo-payment-modal').classList.add('open');
+  _pfPendingCtx={
+    type:'workshop',
+    itemLabel:reg.event||'Workshop',
+    amount:wsPrice,
+    phone:reg.phone,email:reg.email,
+    leadSource:'workshop',
+    tgPaidEvent:'workshop_paid',
+    tgSuccessEvent:'workshop_activated',
+    codeInputId:'activate-code-inp',
+    onSuccess:()=>{ openWsTicketModal(reg,ev,wsPrice); }
+  };
 }
 let _wsTicketData=null;
 let _wsTicketCanvas=null;
@@ -6314,6 +6321,64 @@ function _setCeoLockedUI(card){
 }
 // Tự động re-check mỗi 5 phút để đóng lại hồ sơ ngay khi hết hạn 24h mà không cần reload trang
 setInterval(_initCeoUnlocks,5*60*1000);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HỆ THỐNG THANH TOÁN + XÁC THỰC MÃ DÙNG CHUNG
+// Áp dụng thống nhất cho 3 luồng có phí: Kết nối CEO, Đăng ký thành viên CLB,
+// Đăng ký Workshop có phí. Quy trình chuẩn 3 bước giống nhau cho cả 3:
+//   (1) Xác nhận thông tin + quét QR chuyển khoản (modal #ceo-payment-modal,
+//       dùng chung — hoặc màn hình riêng của từng luồng nếu cần thêm thông tin)
+//   (2) Bấm "Tôi đã chuyển khoản" → hệ thống lưu lead trạng thái "pending",
+//       báo Telegram, tự sinh mã kích hoạt (PREFIX+6 số), hẹn giờ báo qua
+//       popup #ceo-code-popup sau 3-5 giây (mô phỏng nhận SMS/Zalo)
+//   (3) Khách nhập mã vào #ceo-activate-modal (dùng chung) → đúng mã →
+//       lead chuyển "confirmed", báo Telegram, chạy onSuccess() riêng của
+//       từng luồng (mở khóa hồ sơ CEO / kích hoạt thành viên / mở vé workshop)
+// ═══════════════════════════════════════════════════════════════════════════
+let _pf=null;          // context luồng thanh toán đang xác thực: {type,itemLabel,amount,code,leadId,onSuccess,...}
+let _pfPendingCtx=null; // context đã chuẩn bị, chờ khách bấm "Tôi đã chuyển khoản"
+const PF_PREFIX={ceo:'CEO',member:'MEM',workshop:'WSP'};
+const PF_MASTER_CODE='TINHHOA2025'; // mã tổng cho admin test nhanh, dùng được cho mọi luồng
+
+function pfConfirmPaid(ctx){
+  _pf={...ctx};
+  const userName=currentUser?.name||currentUser?.email||'Khách';
+  _pf.leadId=_saveLead({
+    source:_pf.leadSource||_pf.type,
+    name:userName,
+    phone:currentUser?.phone||_pf.phone||'',
+    email:currentUser?.email||_pf.email||'',
+    profession:'',
+    note:(_pf.itemLabel||'')+' — chờ xác thực chuyển khoản',
+    amount:_pf.amount||0,
+    status:'pending',
+  });
+  _tgNotify(_pf.tgPaidEvent||'payflow_paid',{name:userName,item:_pf.itemLabel,amount:_pf.amount});
+  clearTimeout(window._pfCodeTimer);
+  const code=(PF_PREFIX[_pf.type]||'PF')+String(Math.floor(100000+Math.random()*900000));
+  _pf.code=code;
+  window._pfCodeTimer=setTimeout(()=>_showCeoCodePopup(code,_pf.codeInputId||'activate-code-inp'),3000+Math.random()*2000);
+}
+function pfVerifyCode(inputId,errId){
+  if(!_pf){document.getElementById(errId).textContent='Phiên đã hết hạn, vui lòng thử lại từ đầu.';return false;}
+  const code=(document.getElementById(inputId).value||'').trim().toUpperCase();
+  const err=document.getElementById(errId);
+  if(!code){err.textContent='Vui lòng nhập mã kích hoạt.';return false;}
+  if(code!==_pf.code&&code!==PF_MASTER_CODE){
+    err.textContent='Mã không đúng. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.';
+    document.getElementById(inputId).select();
+    return false;
+  }
+  if(_pf.leadId)_updateLeadStatus(_pf.leadId,'confirmed');
+  const userName=currentUser?.name||currentUser?.email||'Khách';
+  _tgNotify(_pf.tgSuccessEvent||'payflow_activated',{name:userName,item:_pf.itemLabel,amount:_pf.amount});
+  const onSuccess=_pf.onSuccess;
+  _pf=null;
+  document.getElementById('ceo-activate-modal')?.classList.remove('open');
+  if(onSuccess)onSuccess();
+  return true;
+}
+
 // Opens the unlock/payment prompt for a given CEO profile object (works from any entry point,
 // not just a rendered card — booth links, marketplace fallbacks, etc. all route through this).
 function _promptCeoUnlock(p){
@@ -6337,21 +6402,30 @@ function confirmCeoUnlock(){
   if(!_unlockCeoId)return;
   closeUnlockModal();
   const num=_unlockCeoId.replace('c','').padStart(3,'0');
-  document.getElementById('pay-content').textContent='CEO'+num+' KET NOI';
+  const content='CEO'+num+' KET NOI';
+  document.getElementById('pay-content').textContent=content;
+  document.getElementById('pay-amount').textContent='99,000đ';
   document.getElementById('ceo-payment-modal').classList.add('open');
-  // Save lead + notify: user intends to pay 99K to connect with this CEO (kết nối có hiệu lực 24h)
-  const userName=currentUser?.name||currentUser?.email||'Khách';
-  window._ceoConnectLeadId=_saveLead({
-    source:'ceo_connect',
-    name:userName,
-    phone:currentUser?.phone||'',
-    email:currentUser?.email||'',
-    profession:'',
-    note:'Kết nối CEO: '+_unlockCeoName+' (Mã CEO'+num+')',
+  const ceoId=_unlockCeoId,ceoName=_unlockCeoName;
+  _pfPendingCtx={
+    type:'ceo',
+    itemLabel:'Kết nối với '+ceoName,
     amount:99000,
-    status:'new',
-  });
-  _tgNotify('ceo_connect_intent',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:99000});
+    leadSource:'ceo_connect',
+    tgPaidEvent:'ceo_connect_paid',
+    tgSuccessEvent:'ceo_unlock',
+    codeInputId:'activate-code-inp',
+    onSuccess:()=>{
+      const unlockKey=_ceoUnlockKey(ceoId,currentUser?.email);
+      if(unlockKey) localStorage.setItem(unlockKey,JSON.stringify({at:Date.now()}));
+      const card=document.querySelector('[data-ceo-id="'+ceoId+'"]');
+      if(card)_setCeoUnlockedUI(card);
+      document.getElementById('success-ceo-name-display').textContent=ceoName;
+      document.getElementById('ceo-success-modal').classList.add('open');
+      const track=document.getElementById('ceo-ticker-track');
+      if(track) delete track.dataset.built;
+    }
+  };
 }
 function closePaymentModal(){
   document.getElementById('ceo-payment-modal').classList.remove('open');
@@ -6362,16 +6436,7 @@ function showActivateModal(){
   document.getElementById('activate-err-msg').textContent='';
   document.getElementById('ceo-activate-modal').classList.add('open');
   setTimeout(()=>document.getElementById('activate-code-inp').focus(),120);
-  // Mark lead as pending + notify Telegram
-  if(window._ceoConnectLeadId) _updateLeadStatus(window._ceoConnectLeadId,'pending');
-  const num=(_unlockCeoId||'').replace('c','').padStart(3,'0');
-  const userName=currentUser?.name||currentUser?.email||'Khách';
-  _tgNotify('ceo_connect_paid',{userName,ceoName:_unlockCeoName,ceoCode:'CEO'+num,amount:99000,payContent:'CEO'+num+' KET NOI'});
-  // Tự sinh mã kích hoạt ngẫu nhiên "CEO"+6 số, báo popup cho khách sau 3-5 giây (mô phỏng nhận SMS/Zalo)
-  clearTimeout(window._ceoCodeTimer);
-  const genCode='CEO'+String(Math.floor(100000+Math.random()*900000));
-  localStorage.setItem('ceo-code-'+_unlockCeoId,genCode);
-  window._ceoCodeTimer=setTimeout(()=>{_showCeoCodePopup(genCode);},3000+Math.random()*2000);
+  if(_pfPendingCtx){pfConfirmPaid(_pfPendingCtx);_pfPendingCtx=null;}
 }
 let _codePopupFocusId='activate-code-inp';
 function _showCeoCodePopup(code,focusId){
@@ -6393,29 +6458,7 @@ function closeActivateModal(){
   document.getElementById('ceo-activate-modal').classList.remove('open');
 }
 function submitActivationCode(){
-  const code=document.getElementById('activate-code-inp').value.trim().toUpperCase();
-  if(!code){document.getElementById('activate-err-msg').textContent='Vui lòng nhập mã kích hoạt.';return;}
-  const stored=(localStorage.getItem('ceo-code-'+_unlockCeoId)||'').toUpperCase();
-  const def='CEO-'+_unlockCeoId.toUpperCase()+'-2025';
-  if(code===stored||code===def||code==='TINHHOA2025'){
-    const unlockKey=_ceoUnlockKey(_unlockCeoId,currentUser?.email);
-    if(unlockKey) localStorage.setItem(unlockKey,JSON.stringify({at:Date.now()}));
-    const card=document.querySelector('[data-ceo-id="'+_unlockCeoId+'"]');
-    if(card)_setCeoUnlockedUI(card);
-    closeActivateModal();
-    document.getElementById('success-ceo-name-display').textContent=_unlockCeoName;
-    document.getElementById('ceo-success-modal').classList.add('open');
-    // Rebuild ticker to reflect new unlock state
-    const track=document.getElementById('ceo-ticker-track');
-    if(track) delete track.dataset.built;
-    // Mark lead confirmed + notify
-    if(window._ceoConnectLeadId){_updateLeadStatus(window._ceoConnectLeadId,'confirmed');window._ceoConnectLeadId=null;}
-    const userName=currentUser?.name||currentUser?.email||'Khách';
-    _tgNotify('ceo_unlock',{name:userName,ceoName:_unlockCeoName,amount:99000,message:'✅ Kết nối CEO thành công, thanh toán 99K đã được xác nhận'});
-  } else {
-    document.getElementById('activate-err-msg').textContent='Mã không đúng. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.';
-    document.getElementById('activate-code-inp').select();
-  }
+  pfVerifyCode('activate-code-inp','activate-err-msg');
 }
 function closeSuccessModal(){
   document.getElementById('ceo-success-modal').classList.remove('open');
@@ -7679,18 +7722,6 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
       </div>
     </div>
 
-    <!-- STEP 2: ENTER CODE -->
-    <div class="mem-step" id="mem-step-2">
-      <div class="mem-code-body">
-        <div class="mem-key-icon">🔑</div>
-        <h3>Nhập mã kích hoạt thành viên</h3>
-        <p>Nhập mã bạn nhận được qua <strong>Zalo / SMS</strong> sau khi chuyển khoản thành công.</p>
-        <input type="text" class="mem-code-inp" id="mem-code-inp-field" placeholder="VD: MEMBER2025" oninput="document.getElementById('mem-code-err-msg').textContent=''" onkeydown="if(event.key==='Enter')submitMemberCode()">
-        <div class="mem-code-err" id="mem-code-err-msg"></div>
-        <button class="mem-activate-btn" onclick="submitMemberCode()">👑 Kích Hoạt Thành Viên</button>
-        <button class="mem-back-btn" onclick="memGoStep1()">← Quay lại</button>
-      </div>
-    </div>
 
     <!-- STEP 3: SUCCESS -->
     <div class="mem-step" id="mem-step-3">
@@ -7723,7 +7754,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
       <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val bank-editable" id="pay-bank-name" onclick="adminEditBank('bank_name')">MB Bank</span></div>
       <div class="bank-row"><span class="bank-lbl">Số tài khoản</span><span class="bank-val bank-editable" id="pay-account" onclick="adminEditBank('account')">0123 4567 890</span></div>
       <div class="bank-row"><span class="bank-lbl">Chủ tài khoản</span><span class="bank-val bank-editable" id="pay-owner" onclick="adminEditBank('owner')">NGUYEN VAN A</span></div>
-      <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold">99,000đ</span></div>
+      <div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold" id="pay-amount">99,000đ</span></div>
       <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="pay-content">CEO001 KET NOI</span></div>
     </div>
     <div class="bank-edit-hint">✏️ Admin: click vào tên ngân hàng / số TK / chủ TK để chỉnh sửa</div>
@@ -7739,10 +7770,10 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
     <div class="activate-icon">🔑</div>
     <h3>Nhập mã kích hoạt</h3>
     <p>Nhập mã kích hoạt bạn nhận được qua <strong>Zalo / SMS</strong> sau khi chuyển khoản thành công.</p>
-    <input type="text" class="activate-inp" id="activate-code-inp" placeholder="VD: CEO-C1-2025" oninput="document.getElementById('activate-err-msg').textContent=''" onkeydown="if(event.key==='Enter')submitActivationCode()">
+    <input type="text" class="activate-inp" id="activate-code-inp" placeholder="Nhập mã kích hoạt..." oninput="document.getElementById('activate-err-msg').textContent=''" onkeydown="if(event.key==='Enter')submitActivationCode()">
     <div class="activate-err" id="activate-err-msg"></div>
     <button class="activate-submit" onclick="submitActivationCode()">🔓 Kích Hoạt Ngay</button>
-    <button class="activate-back" onclick="closeActivateModal();document.getElementById('ceo-payment-modal').classList.add('open')">← Quay lại</button>
+    <button class="activate-back" onclick="activateModalGoBack()">← Quay lại</button>
   </div>
 </div>
 
