@@ -6015,15 +6015,50 @@ function closeWsTicketModal(){
   document.getElementById('ws-ticket-modal').classList.remove('open');
   document.body.style.overflow='';
 }
-// Vẽ vé thành canvas — ảnh thiệp mời admin upload hiển thị ĐẦY ĐỦ, nguyên vẹn ở trên,
-// thông tin khách được đặt thành 1 khối riêng bên dưới (không đè/che lên ảnh thiệp mời).
+// Vẽ vé thành canvas.
+// - Nếu admin đã upload mẫu vé thiết kế sẵn (workshop-ticket-bg): điền tên/SĐT/chức vụ/mã vé
+//   TRỰC TIẾP vào đúng các ô trống đã có sẵn trên mẫu (toạ độ đo thủ công khớp với file mẫu
+//   hiện tại 1000x700 — "Kết Nối Tinh Hoa CEO 2026". Nếu sau này đổi sang mẫu vé khác có bố cục
+//   khác, cần đo lại toạ độ trong WST_FIELD_POS bên dưới cho khớp).
+// - Nếu chưa có mẫu (hoặc ảnh lỗi không tải được): dùng khối thông tin dự phòng đầy đủ (có tên
+//   sự kiện, thời gian, địa điểm...) vẽ trên nền mặc định.
 // Dùng chung cho cả preview trong modal lẫn file tải về, đảm bảo 2 bên khớp nhau 100%.
+const WST_FIELD_POS={
+  code:{x:670,y:113,maxW:58,size:15},
+  name:{x:592,y:271,maxW:133,size:17},
+  phone:{x:592,y:317,maxW:136,size:17},
+  role:{x:592,y:364,maxW:133,size:17},
+};
 function _buildWsTicketCanvas(data,done){
   const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
   const w=1000,imgH=700,infoH=340;
   const c=document.createElement('canvas');
   c.width=w;
   const ctx=c.getContext('2d');
+
+  // Vẽ 1 dòng chữ vừa khít trong khung ngang cho trước — tự thu nhỏ cỡ chữ nếu quá dài,
+  // cắt bớt kèm "…" nếu vẫn không vừa (tên/chức vụ khách có thể dài ngắn khác nhau).
+  function fitText(text,pos,color){
+    let size=pos.size;
+    ctx.fillStyle=color;
+    ctx.font='600 '+size+'px Arial';
+    while(size>10 && ctx.measureText(text).width>pos.maxW){
+      size--;
+      ctx.font='600 '+size+'px Arial';
+    }
+    let t=text;
+    while(ctx.measureText(t+'…').width>pos.maxW && t.length>1){ t=t.slice(0,-1); }
+    if(t!==text) t=t+'…';
+    ctx.fillText(t,pos.x,pos.y);
+  }
+
+  function drawFieldsOnTemplate(){
+    fitText(String(data.code||'').replace('#',''),WST_FIELD_POS.code,'#f5d98b');
+    fitText(data.name||'',WST_FIELD_POS.name,'#ffffff');
+    fitText(data.phone||'',WST_FIELD_POS.phone,'#ffffff');
+    if(data.role) fitText(data.role,WST_FIELD_POS.role,'#ffffff');
+    done(c);
+  }
 
   function drawInfoPanel(panelY){
     ctx.fillStyle='#0f0f0f';
@@ -6069,19 +6104,23 @@ function _buildWsTicketCanvas(data,done){
 
   if(bgSrc){
     const img=new Image();
+    // Bắt buộc để đọc lại pixel (toDataURL/toBlob) từ ảnh tải về từ nguồn khác domain (Supabase
+    // Storage...) — thiếu dòng này canvas bị "tainted" và toDataURL sẽ ném SecurityError,
+    // khiến cả preview lẫn tải vé đều lỗi âm thầm dù ảnh mẫu đã lên đúng.
+    img.crossOrigin='anonymous';
     img.onload=()=>{
-      c.height=imgH+infoH;
+      c.height=imgH;
       ctx.drawImage(img,0,0,w,imgH); // ảnh thiệp mời admin upload — hiển thị trọn vẹn, không cắt/che
-      drawInfoPanel(imgH);
+      drawFieldsOnTemplate();
     };
     img.onerror=()=>{
-      c.height=infoH;
-      ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,w,infoH);
+      c.height=imgH+infoH;
+      ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,w,imgH+infoH);
       drawInfoPanel(0);
     };
     img.src=bgSrc;
   }else{
-    // Không có ảnh thiệp mời — nền gradient tối + viền xanh mặc định
+    // Không có ảnh thiệp mời — nền gradient tối + viền xanh mặc định, kèm đủ thông tin
     c.height=imgH+infoH;
     const grad=ctx.createLinearGradient(0,0,w,imgH);
     grad.addColorStop(0,'#1a1a1a');grad.addColorStop(1,'#0a0a0a');
