@@ -1156,6 +1156,9 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 /* MEMBER BADGE */
 .member-chip{background:rgba(34,197,94,.15);color:var(--gold);border:1px solid rgba(34,197,94,.3);border-radius:50px;font-size:.68rem;font-weight:700;padding:3px 10px;letter-spacing:.3px;white-space:nowrap;display:none}
 .member-chip.visible{display:inline-flex;align-items:center;gap:4px}
+/* GUEST BADGE — khách đã đăng nhập (Gmail/email) nhưng chưa là thành viên trả phí */
+.guest-chip{background:rgba(255,255,255,.08);color:var(--muted);border:1px solid rgba(255,255,255,.16);border-radius:50px;font-size:.68rem;font-weight:700;padding:3px 10px;letter-spacing:.3px;white-space:nowrap;display:none}
+.guest-chip.visible{display:inline-flex;align-items:center;gap:4px}
 /* MEMBERSHIP MODAL */
 #membership-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
 #membership-modal.open{display:flex}
@@ -1569,6 +1572,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
           <span data-i18n="btn_login">Đăng nhập</span>
         </button>
         <span class="member-chip" id="member-chip">👑 <span data-i18n="lbl_member">Thành Viên</span></span>
+        <span class="guest-chip" id="guest-chip">👤 Khách</span>
         <div class="user-avatar-btn" id="user-avatar-header" onclick="openUserMenu()" title="Tài khoản">
           <img id="user-avatar-img" src="" alt="">
         </div>
@@ -5370,12 +5374,28 @@ function loginWithEmail(){
   loginSuccess({name:email.split('@')[0],email,picture:''});
 }
 
+// Lưu phiên đăng nhập: thành viên trả phí (và admin) được nhớ đăng nhập lâu dài (localStorage);
+// khách (chỉ đăng nhập Gmail/email để xem, mua lẻ) chỉ được nhớ trong phiên trình duyệt hiện tại
+// (sessionStorage) — tự động đăng xuất khi đóng hết tab/trình duyệt, đúng yêu cầu phân biệt
+// rõ thành viên và khách ghé qua.
+function _persistUser(user, persistent){
+  const json = JSON.stringify(user);
+  if(persistent){
+    localStorage.setItem('ceo_user', json);
+    sessionStorage.removeItem('ceo_user');
+  } else {
+    sessionStorage.setItem('ceo_user', json);
+    localStorage.removeItem('ceo_user');
+  }
+}
+
 function loginSuccess(user){
   currentUser = user;
-  localStorage.setItem('ceo_user', JSON.stringify(user));
+  const isAdmin = _isAdminEmail(user.email);
+  const isMember = isAdmin || localStorage.getItem('ceo-member')==='active';
+  _persistUser(user, isMember);
   closeLogin();
   updateUserUI(user);
-  const isAdmin = _isAdminEmail(user.email);
   if(isAdmin){
     enableAdmin();
     // Auto mark as member so membership modal doesn't show for admin
@@ -5383,20 +5403,11 @@ function loginSuccess(user){
     _showMemberBadge();
     return;
   }
-  _checkJoinStatusAfterLogin(user);
-}
-function _checkJoinStatusAfterLogin(user){
-  let status=_getJoinStatus(user.email);
-  if(!status){
-    _createJoinRequest(user.name,user.email);
-    status='pending';
-  }
-  if(status==='pending'){ setTimeout(()=>openJoinStatusModal('pending'), 350); return; }
-  if(status==='rejected'){ setTimeout(()=>openJoinStatusModal('rejected'), 350); return; }
-  // Approved → continue existing membership flow for non-members
-  if(!localStorage.getItem('ceo-member')){
-    setTimeout(()=>openMembershipModal(), 350);
-  }
+  // Khách: KHÔNG ép qua bước duyệt cộng đồng / mời thành viên ngay khi đăng nhập — được tự do
+  // xem và mua lẻ sản phẩm trên chợ. Cổng duyệt cộng đồng + thanh toán thành viên chỉ hiện ra
+  // đúng lúc khách thực sự bấm vào tính năng cần quyền lợi (VD: mở hồ sơ Kết Nối CEO —
+  // xem gate trong openCeoProfile()).
+  if(isMember){ _showMemberBadge(); } else { _showGuestBadge(); }
 }
 
 function updateUserUI(user){
@@ -5406,8 +5417,8 @@ function updateUserUI(user){
   const img = document.getElementById('user-avatar-img');
   if(btn) btn.style.display='none';
   if(avatar){avatar.classList.add('visible'); if(user.picture) img.src=user.picture; else img.src='';}
-  // Show member badge if already a member
-  if(localStorage.getItem('ceo-member')) _showMemberBadge();
+  const isMember = _isAdminEmail(user.email) || localStorage.getItem('ceo-member')==='active';
+  if(isMember) _showMemberBadge(); else _showGuestBadge();
 }
 
 // ===== MEMBERSHIP =====
@@ -5427,6 +5438,8 @@ async function openMembershipModal(){
     codeInputId:'activate-code-inp',
     onSuccess:()=>{
       localStorage.setItem('ceo-member','active');
+      // Nâng cấp phiên: từ khách (sessionStorage) thành thành viên (nhớ đăng nhập lâu dài)
+      if(currentUser) _persistUser(currentUser, true);
       _showMemberBadge();
       document.getElementById('membership-modal').classList.add('open');
       _showMemStep(3);
@@ -5465,6 +5478,14 @@ function activateModalGoBack(){
 function _showMemberBadge(){
   const chip=document.getElementById('member-chip');
   if(chip) chip.classList.add('visible');
+  const gchip=document.getElementById('guest-chip');
+  if(gchip) gchip.classList.remove('visible');
+}
+function _showGuestBadge(){
+  const gchip=document.getElementById('guest-chip');
+  if(gchip) gchip.classList.add('visible');
+  const chip=document.getElementById('member-chip');
+  if(chip) chip.classList.remove('visible');
 }
 function memberExplore(){
   closeMembershipModal();
@@ -5474,12 +5495,15 @@ function memberExplore(){
 function _doLogout(){
   currentUser=null;
   localStorage.removeItem('ceo_user');
+  sessionStorage.removeItem('ceo_user');
   const btn=document.getElementById('btn-login-header');
   const avatar=document.getElementById('user-avatar-header');
   if(btn) btn.style.display='';
   if(avatar) avatar.classList.remove('visible');
   const chip=document.getElementById('member-chip');
   if(chip) chip.classList.remove('visible');
+  const gchip=document.getElementById('guest-chip');
+  if(gchip) gchip.classList.remove('visible');
 }
 function openUserMenu(){
   if(!currentUser) return openLogin();
@@ -5499,7 +5523,9 @@ function ceoSidebarLogout(){
 }
 
 function initAuth(){
-  const saved = localStorage.getItem('ceo_user');
+  // Thành viên (localStorage) được ưu tiên khôi phục trước — phiên nhớ lâu dài.
+  // Khách (sessionStorage) chỉ khôi phục nếu còn trong cùng phiên trình duyệt (tab/cửa sổ chưa đóng hết).
+  const saved = localStorage.getItem('ceo_user') || sessionStorage.getItem('ceo_user');
   if(saved){try{
     const u=JSON.parse(saved);
     currentUser=u;
@@ -6540,7 +6566,10 @@ function openCeoProfile(id){
   // (needed for editing profiles via the admin panel / product-approval re-renders).
   if(!window.adminMode && !_isCeoUnlockedForUser(id,currentUser?.email)){
     if(!currentUser){ openLogin(); return; }
-    const status=_getJoinStatus(currentUser.email);
+    let status=_getJoinStatus(currentUser.email);
+    // Khách bấm vào tính năng cần quyền lợi lần đầu → tạo yêu cầu tham gia cộng đồng ngay tại
+    // đây (thay vì tự động lúc đăng nhập) để admin thấy và duyệt được.
+    if(!status){ _createJoinRequest(currentUser.name,currentUser.email); status='pending'; }
     if(status!=='approved'){ openJoinStatusModal(status==='rejected'?'rejected':'pending'); return; }
     _promptCeoUnlock(p);
     return;
