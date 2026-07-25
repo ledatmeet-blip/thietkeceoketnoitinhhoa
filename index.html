@@ -563,6 +563,10 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
    để mỗi lần vuốt luôn dừng đúng giữa màn hình, giống các sàn TMĐT (Shopee/Tiki...). */
 @media(max-width:768px){
   .testi-marquee-wrap{margin:0 -16px}
+  /* Lớp phủ mờ 2 mép (rộng 120px, thiết kế cho marquee desktop nhiều thẻ) giờ che gần hết
+     bề rộng 1 thẻ trên mobile (thẻ chỉ ~320px) — làm ảnh/chữ như bị mờ/biến mất ở 2 bên.
+     Tắt hẳn trên mobile vì không cần fade-hint khi đã vuốt-dừng từng thẻ rõ ràng. */
+  .testi-marquee-wrap::before,.testi-marquee-wrap::after{display:none}
   .testi-row{animation:none!important;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:10px 16px;scrollbar-width:none}
   .testi-row::-webkit-scrollbar{display:none}
   .testi-card{width:82vw!important;max-width:320px;scroll-snap-align:center}
