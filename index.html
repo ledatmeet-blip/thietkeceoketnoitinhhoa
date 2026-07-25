@@ -5341,6 +5341,13 @@ const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 let currentUser = null;
 
 function openLogin(){document.getElementById('login-overlay').classList.add('open');}
+// Bấm "Kích Hoạt Thành Viên" khi CHƯA đăng nhập: mở form đăng nhập trước, nhớ lại ý định này,
+// đăng nhập xong tự động mở luôn màn hình QR thanh toán — không bắt bấm lại nút lần 2.
+let _pendingLoginAction=null;
+function openLoginForMembership(){
+  if(!currentUser){ _pendingLoginAction='membership'; openLogin(); }
+  else if(!localStorage.getItem('ceo-member')) openMembershipModal();
+}
 function closeLogin(){document.getElementById('login-overlay').classList.remove('open');}
 
 function signInWithGoogle(){
@@ -5475,8 +5482,13 @@ function loginSuccess(user){
   // Khách: KHÔNG ép qua bước duyệt cộng đồng / mời thành viên ngay khi đăng nhập — được tự do
   // xem và mua lẻ sản phẩm trên chợ. Cổng duyệt cộng đồng + thanh toán thành viên chỉ hiện ra
   // đúng lúc khách thực sự bấm vào tính năng cần quyền lợi (VD: mở hồ sơ Kết Nối CEO —
-  // xem gate trong openCeoProfile()).
+  // xem gate trong openCeoProfile()), hoặc khi họ đã chủ động bấm "Kích Hoạt Thành Viên"
+  // trước khi đăng nhập (xem openLoginForMembership()).
   if(isMember){ _showMemberBadge(); } else { _showGuestBadge(); }
+  if(_pendingLoginAction==='membership' && !isMember){
+    _pendingLoginAction=null;
+    setTimeout(()=>openMembershipModal(), 200);
+  } else { _pendingLoginAction=null; }
 }
 
 function updateUserUI(user){
@@ -7426,7 +7438,7 @@ function _renderProductDetailSuccess(){
       <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left">
         <div style="font-weight:700;color:var(--gold);margin-bottom:6px">👑 Trở Thành Thành Viên CLB</div>
         <p style="color:var(--muted);font-size:.8rem;line-height:1.6;margin-bottom:12px">Thành viên CLB được ưu tiên xét duyệt, truy cập kho sản phẩm độc quyền và kết nối trực tiếp với hàng trăm CEO khác — nhiều lựa chọn hơn hẳn.</p>
-        <button class="ws-modal-submit" style="margin-top:0" onclick="closeProductDetail();if(!currentUser)openLogin();else openMembershipModal()">🙌 Tham Gia Ngay</button>
+        <button class="ws-modal-submit" style="margin-top:0" onclick="closeProductDetail();openLoginForMembership()">🙌 Tham Gia Ngay</button>
       </div>
       <button class="btn btn-outline" style="width:100%" onclick="closeProductDetail()">Đóng</button>
     </div>`;
@@ -7808,7 +7820,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
       </button>
       <div class="ceo-sb-divider"></div>
       <div class="ceo-sb-label">TÀI KHOẢN</div>
-      <button class="ceo-sb-btn" onclick="if(!currentUser)openLogin();else openMembershipModal()">
+      <button class="ceo-sb-btn" onclick="openLoginForMembership()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Kích Hoạt Thành Viên
       </button>
@@ -8018,7 +8030,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
               <div class="ceo-fb-stat"><strong>50+</strong><span>Tỉnh thành</span></div>
               <div class="ceo-fb-stat"><strong>8</strong><span>Lĩnh vực</span></div>
             </div>
-            <button class="ceo-fb-btn" onclick="if(!currentUser)openLogin();else if(!localStorage.getItem('ceo-member'))openMembershipModal()">
+            <button class="ceo-fb-btn" onclick="openLoginForMembership()">
               👑 Kích Hoạt Thành Viên →
             </button>
             <button class="ceo-fb-btn-outline" onclick="openFlipbook()">
@@ -8045,7 +8057,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
             <a href="javascript:void(0)" onclick="closeCeoPage()">Trang Chủ</a>
             <a href="javascript:void(0)" onclick="closeCeoPage();document.querySelector('#community').scrollIntoView({behavior:'smooth'})">Cộng Đồng</a>
             <a href="javascript:void(0)" onclick="closeCeoPage();document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)">Sàn Sản Phẩm Thành Viên</a>
-            <a href="javascript:void(0)" onclick="if(!currentUser)openLogin();else openMembershipModal()">Kích Hoạt Thành Viên</a>
+            <a href="javascript:void(0)" onclick="openLoginForMembership()">Kích Hoạt Thành Viên</a>
           </div>
           <div class="ceo-pf-rule"></div>
           <div class="ceo-pf-copy">© 2025 CLB CEO Kết Nối Tinh Hoa. Bảo lưu mọi quyền.</div>
