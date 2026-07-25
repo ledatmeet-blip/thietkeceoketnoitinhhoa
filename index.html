@@ -2125,7 +2125,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
           <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx=".5"/><rect x="14" y="3" width="7" height="7" rx=".5"/><rect x="3" y="14" width="7" height="7" rx=".5"/><rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/><rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/><rect x="19" y="14" width="2" height="2" fill="currentColor" stroke="none"/><rect x="14" y="19" width="7" height="2" fill="currentColor" stroke="none"/></svg>
           <span>Admin: vào chế độ quản trị<br>rồi nhấn vào đây để upload QR</span>
         </div>
-        <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+        <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
       </div>
       <div class="payment-bank-info">
         <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val" id="wst-bank-name">—</span></div>
@@ -2520,7 +2520,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
         <div class="footer-logo-wrap" style="margin-bottom:18px">
           <div class="footer-logo-av" data-img="footer-avatar" onclick="window.adminMode&&adminUpload('footer-avatar')" title="Click để upload logo (Admin)">
             <span class="img-ph-ico">👑</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           </div>
           <div class="footer-logo-text">
             <div class="footer-brand-name" id="footer-brand-trigger">CEO Kết Nối Tinh Hoa</div>
@@ -3821,7 +3821,7 @@ function buildCeoCardHTML(p){
   const tagsArr = (p.tags||'').split(',').filter(t=>t.trim());
   const tagsHtml = tagsArr.map(t=>`<span class="ceo-tag">${t.trim()}</span>`).join('');
   const imgSrc = p.img || localStorage.getItem(IMG_PREFIX+'ceo-'+p.id)||'';
-  const imgHtml = imgSrc ? `<img src="${imgSrc}" alt="" style="display:block;width:100%;height:100%;object-fit:cover">` : `<img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">`;
+  const imgHtml = imgSrc ? `<img src="${imgSrc}" alt="" style="display:block;width:100%;height:100%;object-fit:cover">` : `<img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">`;
   return `<div class="ceo-card" data-ceo-id="${p.id}" data-tags="${(p.tags||'').toLowerCase()}" onclick="clickCeoCard(this)" style="position:relative">
     <div class="ceo-card-img" data-img="ceo-${p.id}" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-${p.id}')}">
       <span class="ceo-emoji" ${imgSrc?'style="display:none"':''}>${p.emoji||'👔'}</span>
@@ -7350,7 +7350,7 @@ function _renderProductDetailForm(){
             <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx=".5"/><rect x="14" y="3" width="7" height="7" rx=".5"/><rect x="3" y="14" width="7" height="7" rx=".5"/><rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/><rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/><rect x="19" y="14" width="2" height="2" fill="currentColor" stroke="none"/><rect x="14" y="19" width="7" height="2" fill="currentColor" stroke="none"/></svg>
             <span>Admin: vào chế độ quản trị<br>rồi nhấn vào đây để upload QR</span>
           </div>
-          <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+          <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
         </div>
         <div class="payment-bank-info">
           <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val">${b.bank_name}</span></div>
@@ -7827,7 +7827,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c1" data-tags="công nghệ,saas,ai" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c1" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c1')}">
             <span class="ceo-emoji">👨‍💼</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #001</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7842,7 +7842,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c2" data-tags="f&b,organic,thực phẩm" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c2" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c2')}">
             <span class="ceo-emoji">👩‍💼</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #002</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7857,7 +7857,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c3" data-tags="bất động sản,đầu tư" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c3" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c3')}">
             <span class="ceo-emoji">👨‍💼</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #003</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7872,7 +7872,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c4" data-tags="giáo dục,edtech,đào tạo" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c4" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c4')}">
             <span class="ceo-emoji">👩‍🏫</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #004</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7887,7 +7887,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c5" data-tags="công nghệ,ai,phần mềm" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c5" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c5')}">
             <span class="ceo-emoji">👨‍💻</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #005</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7902,7 +7902,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c6" data-tags="sức khỏe,y tế,wellness" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c6" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c6')}">
             <span class="ceo-emoji">👩‍⚕️</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #006</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7917,7 +7917,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c7" data-tags="tài chính,đầu tư,fintech" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c7" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c7')}">
             <span class="ceo-emoji">👨‍💰</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #007</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7932,7 +7932,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c8" data-tags="bán lẻ,e-commerce,thương mại điện tử" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c8" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c8')}">
             <span class="ceo-emoji">👩‍🛒</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #008</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7947,7 +7947,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c9" data-tags="tài chính,đầu tư,quỹ" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c9" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c9')}">
             <span class="ceo-emoji">💼</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #009</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -7962,7 +7962,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <div class="ceo-card" data-ceo-id="c10" data-tags="y tế,dược phẩm,sức khỏe" onclick="clickCeoCard(this)">
           <div class="ceo-card-img" data-img="ceo-c10" onclick="if(window.adminMode){event.stopPropagation();adminUpload('ceo-c10')}">
             <span class="ceo-emoji">👩‍⚕️</span>
-            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           <span class="ceo-code">CEO #010</span>
           <span class="ceo-card-status locked">🔒 Chưa kết nối</span>
           </div>
@@ -8015,7 +8015,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
           <div class="ceo-fb-right">
             <div class="ceo-fb-book-wrap" data-img="ceo-fb-book" onclick="window.adminMode?(event.stopPropagation(),adminUpload('ceo-fb-book')):openFlipbook()" title="Xem sách lật giới thiệu">
               📖
-              <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+              <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
             </div>
           </div>
         </div>
@@ -8192,7 +8192,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx=".5"/><rect x="14" y="3" width="7" height="7" rx=".5"/><rect x="3" y="14" width="7" height="7" rx=".5"/><rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/><rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/></svg>
               <span>Admin: upload QR ngân hàng</span>
             </div>
-            <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+            <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           </div>
           <div class="mem-bank-details">
             <div class="mem-bank-row"><span class="ml">Ngân hàng</span><span class="mv bank-editable" id="mem-bank-name" onclick="adminEditBank('bank_name')" title="Admin: click để sửa">MB Bank</span></div>
@@ -8234,7 +8234,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx=".5"/><rect x="14" y="3" width="7" height="7" rx=".5"/><rect x="3" y="14" width="7" height="7" rx=".5"/><rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/><rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none"/><rect x="19" y="14" width="2" height="2" fill="currentColor" stroke="none"/><rect x="14" y="19" width="7" height="2" fill="currentColor" stroke="none"/></svg>
         <span>Admin: vào chế độ quản trị<br>rồi nhấn vào đây để upload QR</span>
       </div>
-      <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'">
+      <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
     </div>
     <div class="payment-bank-info">
       <div class="bank-row"><span class="bank-lbl">Ngân hàng</span><span class="bank-val bank-editable" id="pay-bank-name" onclick="adminEditBank('bank_name')">MB Bank</span></div>
