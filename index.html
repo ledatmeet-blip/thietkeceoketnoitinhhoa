@@ -7628,19 +7628,23 @@ async function fbBuildBook(){
   pdfjsLib.GlobalWorkerOptions.workerSrc=FB_PDFJS_WORKER;
   const pdf=await pdfjsLib.getDocument(FB_PDF_URL).promise;
   const n=pdf.numPages;
-  const dpr=Math.min(window.devicePixelRatio||1,2);
+  // Render ở độ phân giải cố định CAO (không phụ thuộc devicePixelRatio của từng máy) để khi
+  // người dùng zoom tay (pinch) trên điện thoại hay phóng to trên máy tính, chữ vẫn nét —
+  // không bị nhoè do ảnh gốc quá nhỏ. ~2200px cạnh dài đủ nét cả khi zoom 2-3 lần.
+  const FB_TARGET_LONG_SIDE=2200;
   const images=[];
   for(let i=1;i<=n;i++){
     const page=await pdf.getPage(i);
     const base=page.getViewport({scale:1});
     if(i===1 && base.width>0){ fbPageRatio=base.width/base.height; }   // tỉ lệ trang thật (rộng/cao)
-    const viewport=page.getViewport({scale:1.6*dpr});
+    const scale=Math.min(5,Math.max(2.5,FB_TARGET_LONG_SIDE/Math.max(base.width,base.height)));
+    const viewport=page.getViewport({scale});
     const canvas=document.createElement('canvas');
     canvas.width=viewport.width; canvas.height=viewport.height;
     const ctx=canvas.getContext('2d');
     ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
     await page.render({canvasContext:ctx,viewport}).promise;
-    images.push(canvas.toDataURL('image/jpeg',0.82));
+    images.push(canvas.toDataURL('image/jpeg',0.93));
     loadingText.textContent='Đang mở sách… '+i+'/'+n;
   }
   const baseH=800, baseW=Math.round(baseH*fbPageRatio);   // kích thước tham chiếu 1 trang (giữ đúng tỉ lệ)
