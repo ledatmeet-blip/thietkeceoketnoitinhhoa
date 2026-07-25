@@ -369,8 +369,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 #flipbook-overlay{position:fixed;inset:0;background:#2f2f2b;background:radial-gradient(circle at 50% 40%,#3d3d37 0%,#262622 100%);z-index:1100;display:none}
 #flipbook-overlay.open{display:flex;flex-direction:column}
 #flipbook-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:60px 16px 82px;box-sizing:border-box}
-#flipbook-book-wrap{margin:0 auto;overflow:hidden;position:relative}
-#flipbook-book{transform-origin:top left}
+#flipbook-book{margin:0 auto}
 #flipbook-book .fb-page{background-color:#fff;background-size:cover;background-position:center;box-shadow:0 0 6px rgba(0,0,0,.15)}
 .fb-home-btn{position:fixed;top:16px;left:16px;z-index:1200;display:flex;align-items:center;gap:8px;padding:9px 20px;background:rgba(22,22,22,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border:none;border-radius:50px;font-size:.84rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.2s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .fb-home-btn:hover{background:rgba(22,22,22,1);transform:translateX(-2px)}
@@ -7586,15 +7585,9 @@ const FB_PAGEFLIP='https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-fli
 let fbPageFlip=null, fbBuilt=false, fbBuilding=false, fbPageRatio=0.707;
 
 // Căn sách vừa vùng nhìn thấy trên mọi thiết bị (điện thoại / tablet / máy tính)
-// StPageFlip tự vẽ canvas đúng bằng kích thước CSS hiển thị (không nhân devicePixelRatio) —
-// trên màn hình Retina/điện thoại (dpr>1) hoặc khi phóng to, canvas gốc quá nhỏ nên bị nhoè.
-// Khắc phục: dựng #flipbook-book LỚN HƠN (nhân dpr) rồi dùng CSS transform:scale thu nhỏ lại
-// đúng kích thước hiển thị — canvas nội bộ vẫn có độ phân giải cao, ảnh nét khi zoom.
-const fbDpr=Math.min(window.devicePixelRatio||1,3);
 function fbFit(){
   const book=document.getElementById('flipbook-book');
-  const wrap=document.getElementById('flipbook-book-wrap');
-  if(!book||!wrap) return;
+  if(!book) return;
   const topGap=60, bottomGap=82, sideGap=16;               // phải khớp padding của #flipbook-stage
   const availW=Math.max(220, window.innerWidth - 2*sideGap);
   const availH=Math.max(220, window.innerHeight - topGap - bottomGap);
@@ -7602,15 +7595,43 @@ function fbFit(){
   let width;
   if(twoPage){ width=Math.min(availW, 2*fbPageRatio*availH, 1040); }
   else       { width=Math.min(availW, fbPageRatio*availH, 560); }
-  width=Math.round(width);
-  const singlePageW=twoPage?width/2:width;
-  const height=Math.round(singlePageW/fbPageRatio);
-  wrap.style.width=width+'px';
-  wrap.style.height=height+'px';
-  book.style.width=Math.round(width*fbDpr)+'px';
-  book.style.height=Math.round(height*fbDpr)+'px';
-  book.style.transform='scale('+(1/fbDpr)+')';
+  book.style.width=Math.round(width)+'px';
   if(fbPageFlip && fbBuilt){ try{ fbPageFlip.update(); }catch(e){} }
+}
+// StPageFlip tự vẽ canvas ở độ phân giải ĐÚNG BẰNG kích thước CSS hiển thị (không nhân
+// devicePixelRatio) — trên màn hình Retina/điện thoại hoặc khi phóng to, ảnh luôn nhoè dù
+// ảnh nguồn có nét đến đâu. Khắc phục an toàn: theo dõi canvas nội bộ của thư viện, MỖI KHI
+// nó tự đổi kích thước (resize/update), ta tăng riêng độ phân giải bộ đệm (canvas.width/height,
+// backing-store) lên gấp dpr lần rồi ctx.scale(dpr,dpr) — không đụng tới CSS/kích thước hiển thị
+// hay hình học mà StPageFlip dùng để tính toán kéo lật trang, nên không ảnh hưởng thao tác kéo.
+const fbDpr=Math.min(window.devicePixelRatio||1,3);
+let fbCanvasObserving=null, fbLastPatchedW=null, fbLastPatchedH=null;
+function fbSetupRetinaCanvas(){
+  const bookEl=document.getElementById('flipbook-book');
+  if(!bookEl) return;
+  const mo=new MutationObserver(()=>{
+    const canvas=bookEl.querySelector('canvas');
+    if(canvas && canvas!==fbCanvasObserving){
+      fbCanvasObserving=canvas;
+      fbApplyRetinaScale(canvas);
+      new MutationObserver(()=>fbApplyRetinaScale(canvas))
+        .observe(canvas,{attributes:true,attributeFilter:['width','height']});
+    }
+  });
+  mo.observe(bookEl,{childList:true,subtree:true});
+}
+// So sánh theo GIÁ TRỊ (không dùng cờ thời điểm) để phân biệt "StPageFlip vừa đổi size mới"
+// với "đây chính là giá trị ta vừa nhân dpr xong" — tránh vòng lặp tự kích hoạt vô hạn mà
+// không phụ thuộc thứ tự microtask giữa các MutationObserver.
+function fbApplyRetinaScale(canvas){
+  if(fbDpr<=1) return;
+  const w=canvas.width, h=canvas.height;
+  if(!w||!h||(w===fbLastPatchedW&&h===fbLastPatchedH)) return;
+  const newW=Math.round(w*fbDpr), newH=Math.round(h*fbDpr);
+  canvas.width=newW; canvas.height=newH;
+  fbLastPatchedW=newW; fbLastPatchedH=newH;
+  const ctx=canvas.getContext('2d');
+  if(ctx) ctx.scale(fbDpr,fbDpr);
 }
 let fbResizeT;
 window.addEventListener('resize',()=>{ clearTimeout(fbResizeT); fbResizeT=setTimeout(fbFit,150); });
@@ -7663,6 +7684,7 @@ async function fbBuildBook(){
   }
   const baseH=800, baseW=Math.round(baseH*fbPageRatio);   // kích thước tham chiếu 1 trang (giữ đúng tỉ lệ)
   fbFit();                                                // set chiều rộng khung trước khi tạo sách
+  fbSetupRetinaCanvas();                                  // theo dõi canvas nội bộ để tăng độ phân giải
   const St=window.St;
   fbPageFlip=new St.PageFlip(document.getElementById('flipbook-book'),{
     width:baseW, height:baseH, size:'stretch',
@@ -7709,7 +7731,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
 <!-- FLIPBOOK MODAL (sách tự chủ — không logo bên thứ 3) -->
 <div id="flipbook-overlay">
   <div id="fb-loading"><div class="fb-spinner"></div><span id="fb-loading-text">Đang mở sách…</span></div>
-  <div id="flipbook-stage"><div id="flipbook-book-wrap"><div id="flipbook-book"></div></div></div>
+  <div id="flipbook-stage"><div id="flipbook-book"></div></div>
   <button class="fb-home-btn" onclick="closeFlipbook()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     ← TRANG CHỦ
