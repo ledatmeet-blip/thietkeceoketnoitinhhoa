@@ -558,6 +558,15 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .testi-row:hover{animation-play-state:paused}
 @keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
+/* Mobile: marquee tự chạy khiến thẻ luôn bị cắt cụt ở 2 mép màn hình (không lúc nào đứng yên
+   để đọc trọn 1 thẻ) — trông thiếu chuyên nghiệp. Đổi sang vuốt tay từng thẻ, có scroll-snap
+   để mỗi lần vuốt luôn dừng đúng giữa màn hình, giống các sàn TMĐT (Shopee/Tiki...). */
+@media(max-width:768px){
+  .testi-marquee-wrap{margin:0 -16px}
+  .testi-row{animation:none!important;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:10px 16px;scrollbar-width:none}
+  .testi-row::-webkit-scrollbar{display:none}
+  .testi-card{width:82vw!important;max-width:320px;scroll-snap-align:center}
+}
 /* Card */
 .testi-card{flex-shrink:0;width:300px;background:var(--dark3);border:1px solid rgba(34,197,94,.1);border-radius:16px;overflow:hidden;transition:.25s}
 .testi-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-4px) scale(1.01)}
