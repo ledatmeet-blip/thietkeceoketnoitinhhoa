@@ -4807,19 +4807,33 @@ const _DB_SYNC_RE = [
 const _lsSet = localStorage.setItem.bind(localStorage);
 
 // On page load: fetch all data from DB → populate localStorage before first render
+let _dbDataApplied = false;
+function _applyDbData(data){
+  if (!data) return;
+  Object.entries(data).forEach(([k, v]) => {
+    _lsSet(k, typeof v === 'string' ? v : JSON.stringify(v));
+  });
+  _dbDataApplied = true;
+}
+// Fetch riêng biệt với race — trước đây nếu fetch thua cuộc đua 6s (mạng yếu/server khởi động
+// nguội, payload dữ liệu ảnh admin ngày càng lớn khiến /api/read có lúc mất 10-15s+), toàn bộ
+// dữ liệu thật bị ÂM THẦM VỨT BỎ khi về tới nơi — trang mãi mãi hiển thị dữ liệu mặc định/rỗng
+// cho phiên đó dù server đã trả lời xong. Giờ dữ liệu về muộn vẫn được áp dụng + trang tự render
+// lại các phần dữ liệu-động, thay vì bỏ qua.
+const _dbFetchPromise = _IS_LIVE
+  ? fetch('/api/read').then(r => r.ok ? r.json() : null).catch(() => null)
+  : Promise.resolve(null);
 const _dbReady = _IS_LIVE
   ? Promise.race([
-      fetch('/api/read').then(r => r.ok ? r.json() : null),
-      new Promise(resolve => setTimeout(() => resolve(null), 6000))
-    ])
-    .then(data => {
-      if (!data) return;
-      Object.entries(data).forEach(([k, v]) => {
-        _lsSet(k, typeof v === 'string' ? v : JSON.stringify(v));
-      });
-    })
-    .catch(() => {})
+      _dbFetchPromise,
+      new Promise(resolve => setTimeout(() => resolve('TIMEOUT'), 6000))
+    ]).then(result => { if (result && result !== 'TIMEOUT') _applyDbData(result); })
   : Promise.resolve();
+_dbFetchPromise.then(data => {
+  if (!data || _dbDataApplied) return; // đã áp dụng kịp trong race ở trên rồi
+  _applyDbData(data);
+  if (typeof _reRenderAllDynamicSections === 'function') _reRenderAllDynamicSections();
+});
 
 // Write a key-value pair to Neon DB
 // ===== TOAST SYSTEM =====
@@ -6287,8 +6301,9 @@ function submitWsAppt(){
 }
 
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded', async () => {
-  await _dbReady; // wait for DB sync before rendering data-driven sections
+// Toàn bộ phần render phụ thuộc dữ liệu DB — tách riêng để có thể gọi lại khi dữ liệu về muộn
+// (sau khi race 6s đã hết hạn) mà không phải chờ tải lại trang.
+function _reRenderAllDynamicSections(){
   initCeoProfiles();
   renderCeoGrid();
   initWorkshopSection();
@@ -6307,6 +6322,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPricingInfo();
   applyDesign();
   initImages();
+}
+document.addEventListener('DOMContentLoaded', async () => {
+  await _dbReady; // wait for DB sync (tối đa 6s) before rendering data-driven sections
+  _reRenderAllDynamicSections();
   startCountdown();
   initTabs();
   initScrollAnim();
