@@ -29,7 +29,7 @@ async function ensureTable(sql) {
   _tableReady = true;
 }
 
-const PREFIX = { ceo: 'CEO', member: 'MEM', workshop: 'WSP' };
+const PREFIX = { ceo: 'CEO', member: 'MEM', workshop: 'WSP', diamond: 'DIA' };
 const ALNUM = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // bỏ ký tự dễ nhầm (0/O, 1/I)
 
 function genRef(type) {

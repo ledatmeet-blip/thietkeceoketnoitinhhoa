@@ -5487,7 +5487,10 @@ function loginSuccess(user){
   if(isMember){ _showMemberBadge(); } else { _showGuestBadge(); }
   if(_pendingLoginAction==='membership' && !isMember){
     _pendingLoginAction=null;
-    setTimeout(()=>openMembershipModal(), 200);
+    setTimeout(()=>openMembershipModal('standard'), 200);
+  } else if(_pendingLoginAction==='diamond'){
+    _pendingLoginAction=null;
+    setTimeout(()=>openMembershipModal('diamond'), 200);
   } else { _pendingLoginAction=null; }
 }
 
@@ -5503,26 +5506,50 @@ function updateUserUI(user){
 }
 
 // ===== MEMBERSHIP =====
-async function openMembershipModal(){
+// Cấu hình từng hạng thành viên — dự phòng sẵn hạng Kim Cương (2.997.000đ/năm) để sau này gắn
+// tính năng "thành viên tự đăng sản phẩm" (chỉ Kim Cương mới dùng được), chưa triển khai tính
+// năng đó ở bước này, chỉ dựng sẵn hạng + luồng kích hoạt.
+const MEMBERSHIP_TIERS={
+  standard:{
+    type:'member', icon:'👑', title:'Kích Hoạt Thành Viên CLB', amount:497000, amountText:'497,000đ',
+    itemLabel:'Thành viên CLB CEO Kết Nối Tinh Hoa',
+    benefits:['Truy cập hồ sơ CEO trong cộng đồng','Tham dự sự kiện networking độc quyền','Kết nối hợp tác trực tiếp với CEO','Nhận bản tin CEO Tinh Hoa hàng tuần','Đăng gian hàng trên Sàn Sản Phẩm Thành Viên','Ưu tiên xét duyệt đơn hàng & tư vấn'],
+  },
+  diamond:{
+    type:'diamond', icon:'💎', title:'Nâng Cấp Thành Viên Kim Cương', amount:2997000, amountText:'2,997,000đ',
+    itemLabel:'Thành viên Kim Cương CLB CEO Kết Nối Tinh Hoa',
+    benefits:['Toàn bộ quyền lợi Thành Viên thường','Ưu tiên hiển thị gian hàng lên đầu Sàn Sản Phẩm','Huy hiệu Kim Cương nổi bật trên hồ sơ','Hỗ trợ 1-1 từ Ban Điều Hành','🔒 Tự đăng sản phẩm không giới hạn (sắp ra mắt)','Ưu tiên tuyệt đối xét duyệt & tư vấn'],
+  },
+};
+async function openMembershipModal(tier){
+  tier=(tier==='diamond')?'diamond':'standard';
+  const cfg=MEMBERSHIP_TIERS[tier];
   const name = currentUser?.name || currentUser?.email || 'bạn';
   document.getElementById('mem-username').textContent = name;
   document.getElementById('mem-form-name').value = currentUser?.name && !currentUser.name.includes('@') ? currentUser.name : '';
   document.getElementById('mem-form-phone').value = currentUser?.phone || '';
   document.getElementById('mem-form-biz').value = '';
   document.getElementById('mem-form-industry').value = '';
+  document.getElementById('mem-tier-icon').textContent = cfg.icon;
+  document.getElementById('mem-tier-title').textContent = cfg.title;
+  document.getElementById('mem-tier-price').textContent = cfg.amountText;
+  document.getElementById('mem-tier-amount').textContent = cfg.amountText;
+  document.getElementById('mem-tier-benefits').innerHTML = cfg.benefits.map(b=>`<div class="mem-benefit">${b}</div>`).join('');
   _showMemStep(0);
   document.getElementById('membership-modal').classList.add('open');
   document.getElementById('mem-content').textContent='Đang tạo mã...';
   _pfPendingCtx={
-    type:'member',
-    itemLabel:'Thành viên CLB CEO Kết Nối Tinh Hoa',
-    amount:497000,
-    leadSource:'membership',
-    tgPaidEvent:'membership_paid',
-    tgSuccessEvent:'membership_activated',
+    type:cfg.type,
+    tier,
+    itemLabel:cfg.itemLabel,
+    amount:cfg.amount,
+    leadSource:tier==='diamond'?'membership_diamond':'membership',
+    tgPaidEvent:tier==='diamond'?'membership_diamond_paid':'membership_paid',
+    tgSuccessEvent:tier==='diamond'?'membership_diamond_activated':'membership_activated',
     codeInputId:'activate-code-inp',
     onSuccess:()=>{
       localStorage.setItem('ceo-member','active');
+      if(tier==='diamond') localStorage.setItem('ceo-member-tier','diamond');
       // Nâng cấp phiên: từ khách (sessionStorage) thành thành viên (nhớ đăng nhập lâu dài)
       if(currentUser) _persistUser(currentUser, true);
       _showMemberBadge();
@@ -5532,9 +5559,15 @@ async function openMembershipModal(){
   };
   // Tạo mã tham chiếu ngay trong lúc khách điền form (chạy nền), để khi bấm "Tiếp tục" ở bước
   // form thì QR đã sẵn sàng, không phải chờ thêm.
-  const ref=await pfCreateRef('member','Thành viên CLB CEO Kết Nối Tinh Hoa',497000);
+  const ref=await pfCreateRef(cfg.type,cfg.itemLabel,cfg.amount);
   document.getElementById('mem-content').textContent=ref||'Lỗi tạo mã — vui lòng đóng và mở lại';
   if(_pfPendingCtx)_pfPendingCtx.ref=ref;
+}
+// Nút "Nâng Cấp Kim Cương" riêng — dự phòng cho tính năng tự đăng sản phẩm sẽ triển khai sau,
+// chỉ hạng Kim Cương mới được dùng.
+function openDiamondUpgrade(){
+  if(!currentUser){ _pendingLoginAction='diamond'; openLogin(); }
+  else openMembershipModal('diamond');
 }
 // Bước 0 → Bước 1: xác nhận thông tin đăng ký (họ tên/SĐT bắt buộc, DN/ngành nghề tuỳ chọn cho
 // ai muốn đăng ký gian hàng), lưu vào _pfPendingCtx để đính kèm khi tạo lead, rồi mới sang QR.
@@ -5547,7 +5580,7 @@ function memSubmitForm(){
   if(currentUser){ currentUser.name=name; currentUser.phone=phone; _persistUser(currentUser, localStorage.getItem('ceo-member')==='active'); }
   if(_pfPendingCtx){
     _pfPendingCtx.phone=phone;
-    _pfPendingCtx.itemLabel='Thành viên CLB CEO Kết Nối Tinh Hoa'+(biz?(' — Gian hàng: '+biz+(industry?' ('+industry+')':'')):'');
+    _pfPendingCtx.itemLabel=(MEMBERSHIP_TIERS[_pfPendingCtx.tier||'standard'].itemLabel)+(biz?(' — Gian hàng: '+biz+(industry?' ('+industry+')':'')):'');
   }
   document.getElementById('mem-username').textContent=name;
   _showMemStep(1);
@@ -5575,12 +5608,17 @@ function skipMembership(){ closeMembershipModal(); }
 // Nút "← Quay lại" trong #ceo-activate-modal dùng chung cho cả 3 luồng — quay đúng màn hình nguồn
 function activateModalGoBack(){
   closeActivateModal();
-  if(_pf?.type==='member'){ document.getElementById('membership-modal').classList.add('open'); _showMemStep(1); }
+  if(_pf?.type==='member'||_pf?.type==='diamond'){ document.getElementById('membership-modal').classList.add('open'); _showMemStep(1); }
   else{ document.getElementById('ceo-payment-modal').classList.add('open'); }
 }
 function _showMemberBadge(){
   const chip=document.getElementById('member-chip');
-  if(chip) chip.classList.add('visible');
+  if(chip){
+    chip.classList.add('visible');
+    // Hạng Kim Cương hiện huy hiệu riêng — dự phòng cho tính năng tự đăng sản phẩm sau này.
+    const isDiamond=localStorage.getItem('ceo-member-tier')==='diamond';
+    chip.innerHTML=isDiamond?'💎 Kim Cương':'👑 <span data-i18n="lbl_member">Thành Viên</span>';
+  }
   const gchip=document.getElementById('guest-chip');
   if(gchip) gchip.classList.remove('visible');
 }
@@ -7846,6 +7884,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Kích Hoạt Thành Viên
       </button>
+      <button class="ceo-sb-btn" style="color:#7dd3fc" onclick="openDiamondUpgrade()" title="Dự phòng: sẽ mở khoá tính năng tự đăng sản phẩm">
+        💎 Nâng Cấp Kim Cương
+      </button>
       <button class="ceo-sb-btn" onclick="closeCeoPage()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Trang Chủ
@@ -8231,13 +8272,13 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
     <!-- STEP 1: QR PAYMENT -->
     <div class="mem-step active" id="mem-step-1">
       <div class="mem-hero">
-        <div class="mem-crown">👑</div>
-        <h3>Kích Hoạt Thành Viên CLB</h3>
+        <div class="mem-crown" id="mem-tier-icon">👑</div>
+        <h3 id="mem-tier-title">Kích Hoạt Thành Viên CLB</h3>
         <p>CEO Kết Nối Tinh Hoa</p>
         <p class="mem-user">Xin chào, <strong id="mem-username">bạn</strong>!</p>
       </div>
       <div class="mem-body">
-        <div class="mem-benefits-grid">
+        <div class="mem-benefits-grid" id="mem-tier-benefits">
           <div class="mem-benefit">Truy cập hồ sơ CEO trong cộng đồng</div>
           <div class="mem-benefit">Tham dự sự kiện networking độc quyền</div>
           <div class="mem-benefit">Kết nối hợp tác trực tiếp với CEO</div>
@@ -8247,7 +8288,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
         </div>
         <div class="mem-price-row">
           <div>
-            <div class="mem-price-amt">497,000đ</div>
+            <div class="mem-price-amt" id="mem-tier-price">497,000đ</div>
           </div>
           <div class="mem-price-period">/ năm<br><span style="font-size:.72rem;color:var(--muted)">Hơn 41,000đ/tháng</span></div>
         </div>
@@ -8263,7 +8304,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
             <div class="mem-bank-row"><span class="ml">Ngân hàng</span><span class="mv bank-editable" id="mem-bank-name" onclick="adminEditBank('bank_name')" title="Admin: click để sửa">MB Bank</span></div>
             <div class="mem-bank-row"><span class="ml">Số TK</span><span class="mv bank-editable" id="mem-account" onclick="adminEditBank('account')" title="Admin: click để sửa">0123 4567 890</span></div>
             <div class="mem-bank-row"><span class="ml">Chủ TK</span><span class="mv bank-editable" id="mem-owner" onclick="adminEditBank('owner')" title="Admin: click để sửa">NGUYEN VAN A</span></div>
-            <div class="mem-bank-row"><span class="ml">Số tiền</span><span class="mv gold">497,000đ</span></div>
+            <div class="mem-bank-row"><span class="ml">Số tiền</span><span class="mv gold" id="mem-tier-amount">497,000đ</span></div>
             <div class="mem-bank-row"><span class="ml">Nội dung</span><span class="mv gold" id="mem-content">Đang tạo mã...</span></div>
           </div>
         </div>
