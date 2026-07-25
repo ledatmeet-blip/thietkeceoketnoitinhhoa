@@ -2246,7 +2246,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
             <p>Được công nhận và vinh danh trong cộng đồng CEO Việt Nam</p>
           </div>
         </div>
-        <button class="btn btn-gold" onclick="openLogin()">Tham Gia Cộng Đồng Ngay →</button>
+        <button class="btn btn-gold" onclick="openLoginForMembership()">Tham Gia Cộng Đồng Ngay →</button>
       </div>
       <div class="community-events fade-up">
         <div class="events-hdr">
@@ -2392,9 +2392,9 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 
     <div class="market-cta-box fade-up">
       <h3>Bạn Là CEO Thành Viên?</h3>
-      <p>Đăng ký gian hàng miễn phí – tiếp cận 5,000+ CEO tiềm năng ngay hôm nay</p>
+      <p>Trở thành thành viên CLB – đăng ký gian hàng, tiếp cận 5,000+ CEO tiềm năng ngay hôm nay</p>
       <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-gold" onclick="openLogin()">🏪 Đăng Ký Gian Hàng</button>
+        <button class="btn btn-gold" onclick="openLoginForMembership()">🏪 Đăng Ký Gian Hàng</button>
         <button class="btn btn-outline" onclick="openFlipbook()">Xem Điều Kiện Tham Gia</button>
       </div>
     </div>
@@ -5506,7 +5506,11 @@ function updateUserUI(user){
 async function openMembershipModal(){
   const name = currentUser?.name || currentUser?.email || 'bạn';
   document.getElementById('mem-username').textContent = name;
-  _showMemStep(1);
+  document.getElementById('mem-form-name').value = currentUser?.name && !currentUser.name.includes('@') ? currentUser.name : '';
+  document.getElementById('mem-form-phone').value = currentUser?.phone || '';
+  document.getElementById('mem-form-biz').value = '';
+  document.getElementById('mem-form-industry').value = '';
+  _showMemStep(0);
   document.getElementById('membership-modal').classList.add('open');
   document.getElementById('mem-content').textContent='Đang tạo mã...';
   _pfPendingCtx={
@@ -5526,9 +5530,27 @@ async function openMembershipModal(){
       _showMemStep(3);
     }
   };
+  // Tạo mã tham chiếu ngay trong lúc khách điền form (chạy nền), để khi bấm "Tiếp tục" ở bước
+  // form thì QR đã sẵn sàng, không phải chờ thêm.
   const ref=await pfCreateRef('member','Thành viên CLB CEO Kết Nối Tinh Hoa',497000);
   document.getElementById('mem-content').textContent=ref||'Lỗi tạo mã — vui lòng đóng và mở lại';
   if(_pfPendingCtx)_pfPendingCtx.ref=ref;
+}
+// Bước 0 → Bước 1: xác nhận thông tin đăng ký (họ tên/SĐT bắt buộc, DN/ngành nghề tuỳ chọn cho
+// ai muốn đăng ký gian hàng), lưu vào _pfPendingCtx để đính kèm khi tạo lead, rồi mới sang QR.
+function memSubmitForm(){
+  const name=(document.getElementById('mem-form-name').value||'').trim();
+  const phone=(document.getElementById('mem-form-phone').value||'').trim();
+  const biz=(document.getElementById('mem-form-biz').value||'').trim();
+  const industry=(document.getElementById('mem-form-industry').value||'').trim();
+  if(!name||!phone){showToast('Vui lòng điền họ tên và số điện thoại','error');return;}
+  if(currentUser){ currentUser.name=name; currentUser.phone=phone; _persistUser(currentUser, localStorage.getItem('ceo-member')==='active'); }
+  if(_pfPendingCtx){
+    _pfPendingCtx.phone=phone;
+    _pfPendingCtx.itemLabel='Thành viên CLB CEO Kết Nối Tinh Hoa'+(biz?(' — Gian hàng: '+biz+(industry?' ('+industry+')':'')):'');
+  }
+  document.getElementById('mem-username').textContent=name;
+  _showMemStep(1);
 }
 function closeMembershipModal(){
   document.getElementById('membership-modal').classList.remove('open');
@@ -8187,6 +8209,24 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
 <!-- MEMBERSHIP MODAL -->
 <div id="membership-modal" onclick="if(event.target===this)closeMembershipModal()">
   <div class="mem-box">
+
+    <!-- STEP 0: FORM THÔNG TIN (dùng chung cho "Tham gia cộng đồng", "Đăng ký gian hàng", "Kích hoạt thành viên") -->
+    <div class="mem-step active" id="mem-step-0">
+      <div class="mem-hero">
+        <div class="mem-crown">📝</div>
+        <h3>Đăng Ký Tham Gia CLB</h3>
+        <p>Điền thông tin để chúng tôi thiết lập hồ sơ &amp; gian hàng cho bạn</p>
+      </div>
+      <div class="mem-body">
+        <div class="ws-form-row"><label class="ws-form-label">Họ và tên *</label><input class="ws-form-inp" id="mem-form-name" placeholder="Nguyễn Văn A"></div>
+        <div class="ws-form-row"><label class="ws-form-label">Số điện thoại *</label><input class="ws-form-inp" id="mem-form-phone" placeholder="0901 234 567"></div>
+        <div class="ws-form-row"><label class="ws-form-label">Tên doanh nghiệp / Gian hàng</label><input class="ws-form-inp" id="mem-form-biz" placeholder="Nếu muốn đăng ký gian hàng trưng bày sản phẩm"></div>
+        <div class="ws-form-row"><label class="ws-form-label">Ngành nghề / Lĩnh vực</label><input class="ws-form-inp" id="mem-form-industry" placeholder="VD: F&B, Bất động sản, Làm đẹp..."></div>
+        <div class="mem-warn">Sau khi thanh toán phí thành viên, hồ sơ &amp; gian hàng của bạn sẽ được Ban Điều Hành thiết lập trên Sàn Sản Phẩm.</div>
+        <button class="mem-done-btn" onclick="memSubmitForm()">Tiếp tục → Thanh toán</button>
+        <button class="mem-skip-btn" onclick="skipMembership()">Bỏ qua, chỉ xem với tư cách khách</button>
+      </div>
+    </div>
 
     <!-- STEP 1: QR PAYMENT -->
     <div class="mem-step active" id="mem-step-1">
