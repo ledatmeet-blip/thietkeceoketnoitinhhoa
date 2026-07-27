@@ -1,13 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// One-time admin endpoint: raises the ceo-site bucket's file size limit so video uploads
-// aren't rejected by Supabase Storage itself (separate from the Vercel function body-size
-// limit fixed by the signed-upload-URL flow). Delete this file after running it once.
+// One-time admin endpoint: inspects/raises the ceo-site bucket's file size limit so video
+// uploads aren't rejected by Supabase Storage itself (separate from the Vercel function
+// body-size limit fixed by the signed-upload-URL flow). Delete this file after running it once.
+// POST body: { adminEmail, adminPass, limitMB } — limitMB optional, omit to just inspect.
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { adminEmail, adminPass } = req.body || {};
+  const { adminEmail, adminPass, limitMB } = req.body || {};
   if (
     !adminEmail || !adminPass ||
     adminEmail !== process.env.ADMIN_EMAIL ||
@@ -25,9 +26,13 @@ module.exports = async (req, res) => {
     const { data: before, error: getErr } = await supabase.storage.getBucket('ceo-site');
     if (getErr) throw getErr;
 
+    if (!limitMB) {
+      return res.json({ inspectOnly: true, bucket: before });
+    }
+
     const { data, error } = await supabase.storage.updateBucket('ceo-site', {
       public: true,
-      fileSizeLimit: 500 * 1024 * 1024, // 500MB
+      fileSizeLimit: `${limitMB}MB`,
     });
     if (error) throw error;
 
