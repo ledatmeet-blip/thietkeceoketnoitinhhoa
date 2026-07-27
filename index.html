@@ -242,28 +242,30 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 @media(max-width:700px){.gal-album-card{width:170px}.gal-album-cover{width:170px;height:120px}}
 
 /* 3D community carousel — replaces the old flat 12-tile grid */
-.cc-stage{position:relative;height:440px;margin-bottom:8px;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse at 50% 28%,rgba(34,197,94,.14) 0%,rgba(0,0,0,0) 62%),linear-gradient(180deg,var(--dark3) 0%,var(--dark) 100%);border:1px solid rgba(34,197,94,.14);touch-action:pan-y;user-select:none}
-.cc-perspective{position:absolute;inset:0;perspective:1500px;display:flex;align-items:center;justify-content:center}
+.cc-stage{position:relative;height:560px;margin-bottom:8px;border-radius:24px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(34,197,94,.16) 0%,rgba(0,0,0,0) 62%),linear-gradient(180deg,var(--dark3) 0%,var(--dark) 100%);border:1px solid rgba(34,197,94,.14);touch-action:pan-y;user-select:none}
+.cc-perspective{position:absolute;inset:0;perspective:1800px;display:flex;align-items:center;justify-content:center}
 .cc-track{position:relative;width:100%;height:100%;transform-style:preserve-3d}
-.cc-card{position:absolute;top:50%;left:50%;width:240px;height:320px;margin:-160px 0 0 -120px;border-radius:18px;overflow:hidden;background:var(--dark4);box-shadow:0 30px 70px rgba(0,0,0,.6);cursor:pointer;transition:transform .55s cubic-bezier(.22,.9,.32,1),opacity .55s,filter .55s;filter:brightness(.48) saturate(.65);border:1px solid rgba(255,255,255,.07)}
-.cc-card.active{filter:brightness(1) saturate(1);box-shadow:0 40px 100px rgba(0,0,0,.75),0 0 0 2px rgba(34,197,94,.55)}
-.cc-card img,.cc-card video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-.cc-video-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:var(--dark4);pointer-events:none}
-.cc-play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#fff;background:rgba(0,0,0,.26);pointer-events:none}
-.cc-card-label{position:absolute;left:0;right:0;bottom:0;padding:20px 14px 12px;background:linear-gradient(to top,rgba(0,0,0,.72),transparent);color:#fff;font-size:.76rem;font-weight:700;opacity:0;transition:.3s;pointer-events:none}
+.cc-card{position:absolute;top:50%;left:50%;width:340px;height:440px;margin:-220px 0 0 -170px;border-radius:20px;overflow:hidden;background:var(--dark4);box-shadow:0 30px 70px rgba(0,0,0,.6);cursor:pointer;transition:transform .65s cubic-bezier(.19,.85,.28,1.05),opacity .65s ease,filter .65s ease;filter:brightness(.5) saturate(.7);border:1px solid rgba(255,255,255,.07);will-change:transform,opacity}
+.cc-card.active{filter:brightness(1) saturate(1);box-shadow:0 44px 110px rgba(0,0,0,.75),0 0 0 2px rgba(34,197,94,.55)}
+.cc-card img,.cc-card video{width:100%;height:100%;object-fit:cover;object-position:center;display:block;pointer-events:none}
+.cc-video-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.8rem;background:var(--dark4);pointer-events:none}
+.cc-play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.9rem;color:#fff;background:rgba(0,0,0,.24);pointer-events:none;transition:opacity .3s}
+.cc-card.active .cc-play-badge.is-playing{opacity:0}
+.cc-card-label{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 14px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);color:#fff;font-size:.82rem;font-weight:700;opacity:0;transition:.3s;pointer-events:none}
 .cc-card.active .cc-card-label{opacity:1}
-.cc-card-del{position:absolute;top:9px;right:9px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(122,0,0,.88);color:#fff;font-size:.82rem;cursor:pointer;z-index:5;display:none;align-items:center;justify-content:center}
+.cc-card-del{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(122,0,0,.88);color:#fff;font-size:.85rem;cursor:pointer;z-index:5;display:none;align-items:center;justify-content:center}
 .admin-mode .cc-card.active .cc-card-del{display:flex}
-.cc-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);color:#fff;font-size:1.5rem;cursor:pointer;z-index:60;transition:.2s;display:flex;align-items:center;justify-content:center}
+.cc-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:none;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);color:#fff;font-size:1.6rem;cursor:pointer;z-index:60;transition:.2s;display:flex;align-items:center;justify-content:center}
 .cc-nav:hover{background:rgba(34,197,94,.55)}
-.cc-nav-prev{left:18px}
-.cc-nav-next{right:18px}
-.cc-dots{position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:60;flex-wrap:wrap;padding:0 60px}
+.cc-nav-prev{left:20px}
+.cc-nav-next{right:20px}
+.cc-dots{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:60;flex-wrap:wrap;padding:0 64px}
 .cc-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);cursor:pointer;transition:.2s;flex-shrink:0}
 .cc-dot.active{background:var(--gold);width:22px;border-radius:4px}
 .cc-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:.88rem;text-align:center;padding:24px;z-index:2}
-@media(max-width:700px){.cc-stage{height:340px}.cc-card{width:180px;height:250px;margin:-125px 0 0 -90px}.cc-nav{width:38px;height:38px;font-size:1.25rem}}
-@media(max-width:440px){.cc-stage{height:300px}.cc-card{width:150px;height:210px;margin:-105px 0 0 -75px}}
+@media(max-width:900px){.cc-stage{height:440px}.cc-card{width:250px;height:330px;margin:-165px 0 0 -125px}}
+@media(max-width:700px){.cc-stage{height:380px}.cc-card{width:210px;height:280px;margin:-140px 0 0 -105px}.cc-nav{width:38px;height:38px;font-size:1.25rem}}
+@media(max-width:440px){.cc-stage{height:320px}.cc-card{width:168px;height:224px;margin:-112px 0 0 -84px}}
 /* Album viewer modal */
 #album-viewer-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:690;display:none;align-items:center;justify-content:center;padding:20px}
 #album-viewer-modal.open{display:flex}
@@ -7648,7 +7650,7 @@ let _carouselItems=[];
 let _carouselIndex=0;
 let _carouselFilter='all';
 let _carouselTimer=null;
-const CC_VISIBLE_SIDE=2;
+const CC_VISIBLE_SIDE=1;
 function initGallery(){
   _carouselFilter='all';
   _carouselItems=_getAllGalleryMediaItems();
@@ -7677,21 +7679,24 @@ function renderCommunityCarousel(){
     const abs=Math.abs(offset);
     const visible=abs<=CC_VISIBLE_SIDE;
     if(!visible)return'';
-    const tx=offset*230;
-    const tz=-abs*270;
-    const ty=abs*10;
-    const ry=offset*-36;
-    const scale=1-abs*0.15;
-    const op=Math.max(0,1-abs*0.3);
+    const tx=offset*300;
+    const tz=-abs*260;
+    const ty=abs*8;
+    const ry=offset*-30;
+    const scale=1-abs*0.18;
+    const op=Math.max(0,1-abs*0.35);
+    const isActive=abs===0;
     let inner;
     if(it.type==='photo'){inner=`<img src="${it.src}" alt="">`;}
     else{
       const info=_videoEmbedInfo(it.url);
-      inner=info.kind==='video'?`<video src="${info.src}" muted loop playsinline preload="metadata"></video>`:`<div class="cc-video-ph">🎥</div>`;
+      inner=info.kind==='video'
+        ?`<video src="${info.src}" ${isActive?'autoplay':''} muted loop playsinline preload="auto"></video>`
+        :`<div class="cc-video-ph">🎥</div>`;
     }
-    return`<div class="cc-card${abs===0?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_carouselCardClick(${i})">
+    return`<div class="cc-card${isActive?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_carouselCardClick(${i})">
       ${inner}
-      ${it.type==='video'?'<div class="cc-play-badge">▶</div>':''}
+      ${it.type==='video'?`<div class="cc-play-badge${isActive?' is-playing':''}">▶</div>`:''}
       <div class="cc-card-label">${it.label||(it.type==='video'?'Video cộng đồng':'')}</div>
       ${abs===0?`<button class="cc-card-del" onclick="event.stopPropagation();_carouselDeleteActive()">✕</button>`:''}
     </div>`;
