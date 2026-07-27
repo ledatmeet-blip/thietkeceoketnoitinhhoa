@@ -26,6 +26,12 @@ module.exports = async (req, res) => {
     const { data: before, error: getErr } = await supabase.storage.getBucket('ceo-site');
     if (getErr) throw getErr;
 
+    if (req.body.removeFiles) {
+      const { data: rm, error: rmErr } = await supabase.storage.from('ceo-site').remove(req.body.removeFiles);
+      if (rmErr) throw rmErr;
+      return res.json({ removed: rm });
+    }
+
     if (!limitMB) {
       return res.json({ inspectOnly: true, bucket: before });
     }
