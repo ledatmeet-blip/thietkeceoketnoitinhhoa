@@ -25,7 +25,7 @@ async function tgNotifyAll(text) {
 }
 
 function genCode(type) {
-  const prefix = { ceo: 'CEO', member: 'MEM', workshop: 'WSP', diamond: 'DIA' }[type] || 'PAY';
+  const prefix = { ceo: 'CEO', member: 'MEM', workshop: 'WSP', diamond: 'DIA', product: 'DH' }[type] || 'PAY';
   return prefix + String(Math.floor(100000 + Math.random() * 900000));
 }
 

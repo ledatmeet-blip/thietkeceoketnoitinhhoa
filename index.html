@@ -319,7 +319,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .sp-card{background:var(--dark3);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;transition:.3s cubic-bezier(.25,.8,.25,1);cursor:pointer;position:relative;display:flex;flex-direction:column}
 .sp-card:hover{border-color:rgba(34,197,94,.35);transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.55)}
 .sp-img{width:100%;aspect-ratio:1/1;background:var(--dark4);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.sp-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:.4s;display:none}
+.sp-img img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0;transition:.4s;display:none}
 .sp-card:hover .sp-img img{transform:scale(1.08)}
 .sp-img-ph{display:flex;flex-direction:column;align-items:center;gap:7px;color:rgba(255,255,255,.15);font-size:.72rem}
 .sp-badge{position:absolute;top:10px;left:10px;background:var(--ceo-red);color:#fff;font-size:.66rem;font-weight:800;padding:3px 10px;border-radius:50px;letter-spacing:.3px;z-index:1;box-shadow:0 4px 12px rgba(0,0,0,.3)}
@@ -460,7 +460,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .fb-nav button:hover{background:var(--gold,#f0c040);color:#161616}
 .fb-nav #fb-page-indicator{color:#fff;font-size:.85rem;font-weight:600;min-width:66px;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 
-#login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:none;align-items:center;justify-content:center;padding:20px}
+#login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #login-overlay.open{display:flex}
 .login-box{background:var(--dark3);border:1px solid rgba(34,197,94,.2);border-radius:20px;width:100%;max-width:420px;padding:40px 36px;text-align:center;position:relative}
 .login-logo{margin-bottom:20px}
@@ -727,7 +727,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .ws-edit-panel{display:none;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);flex-direction:column;gap:10px}
 .admin-mode .ws-edit-panel{display:flex}
 /* Workshop Registration Modal */
-#ws-reg-modal,#ws-appt-modal,#ws-ticket-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1500;display:none;align-items:center;justify-content:center;padding:16px}
+#ws-reg-modal,#ws-appt-modal,#ws-ticket-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9100;display:none;align-items:center;justify-content:center;padding:16px}
 #ws-reg-modal.open,#ws-appt-modal.open,#ws-ticket-modal.open{display:flex}
 .ws-modal-box{background:var(--dark2);border:1px solid rgba(34,197,94,.18);border-radius:18px;width:min(500px,98vw);max-height:92vh;overflow-y:auto;padding:28px;position:relative}
 .ws-modal-title{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:4px}
@@ -746,7 +746,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .ws-modal-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.07);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 /* Product Detail + Order Modal */
-#product-detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1500;display:none;align-items:center;justify-content:center;padding:16px}
+#product-detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9100;display:none;align-items:center;justify-content:center;padding:16px}
 #product-detail-modal.open{display:flex}
 
 /* URGENCY */
@@ -1004,7 +1004,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .cqe-cancel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--muted);border-radius:7px;padding:7px 10px;font-size:.78rem;cursor:pointer}
 .cqe-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;padding:7px 10px;font-size:.78rem;cursor:pointer}
 /* CEO UNLOCK MODAL */
-#ceo-unlock-modal{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-unlock-modal{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-unlock-modal.open{display:flex}
 .unlock-box{background:var(--dark3);border:1px solid rgba(34,197,94,.18);border-radius:20px;padding:28px;width:min(460px,100%);position:relative}
 .unlock-close-x{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -1024,7 +1024,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .unlock-cancel-x{width:100%;padding:10px;border-radius:50px;background:transparent;border:1.5px solid rgba(255,255,255,.1);color:var(--muted);font-size:.85rem;cursor:pointer;transition:.15s}
 .unlock-cancel-x:hover{color:var(--text)}
 /* CEO SUCCESS MODAL */
-#ceo-success-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1010;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-success-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9102;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-success-modal.open{display:flex}
 #join-status-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1010;display:none;align-items:center;justify-content:center;padding:20px}
 #join-status-modal.open{display:flex}
@@ -1037,7 +1037,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .success-ceo-btn:hover{transform:translateY(-2px)}
 .success-ceo-close{width:100%;padding:10px;background:transparent;border:1.5px solid rgba(255,255,255,.1);color:var(--muted);border-radius:50px;cursor:pointer;font-size:.85rem}
 /* CEO PAYMENT MODAL */
-#ceo-payment-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1005;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-payment-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-payment-modal.open{display:flex}
 .payment-box{background:var(--dark3);border:1px solid rgba(34,197,94,.18);border-radius:20px;padding:26px;width:min(460px,100%);position:relative}
 .payment-box h3{text-align:center;font-size:1.06rem;font-weight:800;color:#fff;margin-bottom:4px}
@@ -1066,7 +1066,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .payment-cancel-btn{width:100%;padding:10px;border-radius:50px;background:transparent;border:1.5px solid rgba(255,255,255,.1);color:var(--muted);font-size:.85rem;cursor:pointer}
 .payment-cancel-btn:hover{color:var(--text)}
 /* CEO ACTIVATE MODAL */
-#ceo-activate-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1008;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-activate-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-activate-modal.open{display:flex}
 .activate-box{background:var(--dark3);border:1px solid rgba(34,197,94,.2);border-radius:20px;padding:32px 28px;width:min(400px,100%);text-align:center}
 .activate-icon{font-size:2.6rem;margin-bottom:12px}
@@ -1080,7 +1080,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .activate-submit:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(34,197,94,.4)}
 .activate-back{width:100%;padding:10px;background:transparent;border:1.5px solid rgba(255,255,255,.1);color:var(--muted);border-radius:50px;cursor:pointer;font-size:.85rem}
 .activate-back:hover{color:var(--text)}
-#ceo-code-popup{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1009;display:none;align-items:center;justify-content:center;padding:20px}
+#ceo-code-popup{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9101;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-code-popup.open{display:flex}
 .ceo-code-display{background:var(--dark4);border:2px dashed rgba(34,197,94,.4);border-radius:12px;padding:16px;font-size:1.7rem;font-weight:900;letter-spacing:4px;color:var(--gold);cursor:pointer;margin-bottom:8px;user-select:all}
 .ceo-code-display:hover{background:rgba(34,197,94,.08)}
@@ -1260,7 +1260,7 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .guest-chip{background:rgba(255,255,255,.08);color:var(--muted);border:1px solid rgba(255,255,255,.16);border-radius:50px;font-size:.68rem;font-weight:700;padding:3px 10px;letter-spacing:.3px;white-space:nowrap;display:none}
 .guest-chip.visible{display:inline-flex;align-items:center;gap:4px}
 /* MEMBERSHIP MODAL */
-#membership-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+#membership-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #membership-modal.open{display:flex}
 .mem-box{background:var(--dark3);border:1px solid rgba(34,197,94,.2);border-radius:20px;width:min(540px,100%);max-height:92vh;overflow-y:auto;position:relative}
 .mem-step{display:none}
@@ -1515,7 +1515,7 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .booth-market-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:.22s;display:flex;flex-direction:column}
 .booth-market-card:hover{border-color:rgba(34,197,94,.35);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.5)}
 .booth-market-thumb{width:100%;aspect-ratio:1/1;position:relative;overflow:hidden;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:2.3rem}
-.booth-market-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.booth-market-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .booth-market-body{padding:12px 13px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
 .booth-market-name{font-size:.83rem;font-weight:700;color:#fff;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
 .booth-market-price-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:2px}
@@ -2695,7 +2695,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 <!-- FLOATING BUTTONS -->
 <div class="float-btns">
   <button class="float-btn" id="btn-music" title="Nhạc nền" onclick="toggleBgMusic()">🔊</button>
-  <button class="float-btn" id="btn-zalo" title="Chat Zalo" onclick="window.open('https://zalo.me','_blank')">💬</button>
+  <button class="float-btn" id="btn-zalo" title="Chat Zalo" onclick="window.open('https://zalo.me/0936678813','_blank')">💬</button>
   <button class="float-btn" id="btn-top" title="Lên đầu trang" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 </div>
 <audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
@@ -6384,7 +6384,7 @@ function _showImageLightbox(src,caption){
 
 // --- CEO Appointment Modal ---
 let _wsSelectedCeoId=null;
-function openWsApptModal(){
+function openWsApptModal(preselectId){
   _wsSelectedCeoId=null;
   // Build CEO selection grid
   const profiles=loadCeoProfiles();
@@ -6405,6 +6405,10 @@ function openWsApptModal(){
   if(dateInp){const d=new Date();d.setDate(d.getDate()+3);dateInp.value=d.toISOString().split('T')[0];}
   document.getElementById('ws-appt-modal').classList.add('open');
   document.body.style.overflow='hidden';
+  if(preselectId){
+    const item=grid&&grid.querySelector(`.ws-ceo-sel-item[data-id="${preselectId}"]`);
+    if(item)wsSelectCeo(preselectId,item);
+  }
 }
 function closeWsApptModal(){
   document.getElementById('ws-appt-modal').classList.remove('open');
@@ -6997,8 +7001,8 @@ function _renderBoothHero(p,id){
       <div class="booth-slogan">${p.slogan||'&nbsp;'}</div>
       <span class="booth-industry">🏭 ${p.industries||p.tags||p.role||'Đa ngành'}</span>
       <div class="booth-hero-actions">
-        <button class="booth-btn-contact" onclick="${p.hotline?`window.open('tel:${p.hotline}')`:'alert(\"Chưa có hotline\")'} ">📞 Liên hệ ngay</button>
-        <button class="booth-btn-schedule" onclick="${p.facebook||p.website?`window.open('${p.facebook||p.website}','_blank')`:'showToast(\"Chưa có lịch hẹn\",\"info\")'}">📅 Đặt lịch gặp CEO</button>
+        <button class="booth-btn-contact" onclick="window.open('tel:${(p.hotline||loadContact().phone).replace(/\D/g,'')}')">📞 Liên hệ ngay</button>
+        <button class="booth-btn-schedule" onclick="openWsApptModal('${id}')">📅 Đặt lịch gặp CEO</button>
         ${am?`<button class="booth-edit-btn" style="margin-left:0" onclick="boothToggleEdit('${id}')">✏️ Sửa thông tin</button>`:''}
       </div>
     </div>
@@ -7453,6 +7457,8 @@ function getApprovedCeoProducts(){
 // ===== PRODUCT DETAIL + ORDER INQUIRY MODAL =====
 let _pdCurrentProduct=null;
 let _pdPayMethod='qr';
+let _pdRef=null;
+let _pdPollTimer=null;
 function openProductDetail(id){
   // Cùng cơ chế chống mất thao tác khi /api/read chưa kịp về (xem _saveLead / openCeoBooth) —
   // đợi đồng bộ dữ liệu xong rồi mới tra cứu sản phẩm, tránh tra trên danh sách rỗng.
@@ -7463,6 +7469,8 @@ function openProductDetail(id){
     if(!p)return;
     _pdCurrentProduct=p;
     _pdPayMethod='qr';
+    _pdRef=null;
+    clearInterval(_pdPollTimer);
     _renderProductDetailForm();
     document.getElementById('product-detail-modal').classList.add('open');
   };
@@ -7472,7 +7480,9 @@ function openProductDetail(id){
 }
 function closeProductDetail(){
   document.getElementById('product-detail-modal').classList.remove('open');
+  clearInterval(_pdPollTimer);
   _pdCurrentProduct=null;
+  _pdRef=null;
 }
 function _renderProductDetailForm(){
   const p=_pdCurrentProduct;
@@ -7482,7 +7492,7 @@ function _renderProductDetailForm(){
   document.getElementById('pd-body').innerHTML=`
     <div class="ws-modal-title">${p.name}</div>
     <div class="ws-modal-sub">${seller?'🏢 '+seller:''}</div>
-    ${p.img?`<div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/10;background:var(--dark4)"><img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">${p.discount?`<span class="cpo-prod-discount-badge">${p.discount}</span>`:''}</div>`:''}
+    ${p.img?`<div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:14px;max-height:440px;background:var(--dark4);display:flex;align-items:center;justify-content:center"><img src="${p.img}" alt="${p.name}" style="max-width:100%;max-height:440px;width:auto;height:auto;object-fit:contain;display:block">${p.discount?`<span class="cpo-prod-discount-badge">${p.discount}</span>`:''}</div>`:''}
     ${(p.rating>0||p.soldCount)?`<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap">${_starsHtml(p.rating,p.reviewCount)}${p.soldCount?`<span class="cpo-prod-sold">🔥 Đã bán ${p.soldCount}</span>`:''}</div>`:''}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       ${p.price?`<span style="color:var(--gold);font-weight:800;font-size:1.2rem">${p.price}</span>`:''}
@@ -7510,8 +7520,9 @@ function _renderProductDetailForm(){
           <div class="bank-row"><span class="bank-lbl">Số tài khoản</span><span class="bank-val">${b.account}</span></div>
           <div class="bank-row"><span class="bank-lbl">Chủ tài khoản</span><span class="bank-val">${b.owner}</span></div>
           ${p.price?`<div class="bank-row"><span class="bank-lbl">Số tiền</span><span class="bank-val gold">${p.price}</span></div>`:''}
+          <div class="bank-row"><span class="bank-lbl">Nội dung CK</span><span class="bank-val gold" id="pd-ref-content">${_pdRef||'Đang tạo mã...'}</span></div>
         </div>
-        <div class="payment-warn">⚠️ Quét QR chuyển khoản, sau đó gửi yêu cầu bên dưới để admin xác nhận đơn.</div>
+        <div class="payment-warn">⚠️ Chuyển khoản ĐÚNG nội dung "${_pdRef||'mã ở trên'}" — hệ thống tự động xác nhận qua SePay, không cần chờ admin duyệt tay.</div>
       </div>
       <div id="pd-cod-block" style="display:none">
         <div class="payment-warn">💵 Bạn sẽ thanh toán trực tiếp cho người giao hàng khi nhận sản phẩm. Admin sẽ liên hệ xác nhận đơn trước khi giao.</div>
@@ -7522,14 +7533,29 @@ function _renderProductDetailForm(){
       <div class="ws-form-row"><label class="ws-form-label">Họ và tên *</label><input class="ws-form-inp" id="pd-name" placeholder="Nguyễn Văn A"></div>
       <div class="ws-form-row"><label class="ws-form-label">Số điện thoại *</label><input class="ws-form-inp" id="pd-phone" placeholder="0901 234 567"></div>
       <div class="ws-form-row"><label class="ws-form-label">Ghi chú (số lượng, yêu cầu thêm...)</label><textarea class="ws-form-inp" id="pd-note" rows="2" placeholder="VD: Cần đặt 2 phần, tư vấn thêm về..."></textarea></div>
-      <button class="ws-modal-submit" onclick="submitProductOrder()">📩 Gửi Yêu Cầu</button>
-      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:10px">🔒 Admin sẽ liên hệ xác nhận trong thời gian sớm nhất</p>
+      <button class="ws-modal-submit" id="pd-submit-btn" onclick="submitProductOrder()">📩 Gửi Yêu Cầu</button>
+      <p id="pd-submit-note" style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:10px">🔒 ${_pdPayMethod==='qr'?'Thanh toán QR được SePay tự động xác nhận':'Admin sẽ liên hệ xác nhận trong thời gian sớm nhất'}</p>
     </div>`;
   // Dynamically-injected [data-img] elements aren't covered by the one-time initImgs() pass — reapply stored image now
   document.querySelectorAll('#pd-body [data-img]').forEach(el=>{
     const s=localStorage.getItem(IMG_PREFIX+el.dataset.img);
     if(s)applyImg(el,s);
   });
+  if(_pdPayMethod==='qr')_pdEnsureRef();
+}
+// Tạo mã tham chiếu THẬT qua server (giống hệ thống dùng chung ở pfCreateRef) — hiển thị làm
+// "Nội dung CK" để SePay đối soát tự động, không cần admin xác nhận tay như trước.
+async function _pdEnsureRef(){
+  const p=_pdCurrentProduct;
+  if(!p||_pdRef)return;
+  const amount=parseFloat((p.price||'').replace(/[^\d]/g,''))||0;
+  const ref=await pfCreateRef('product',p.name,amount);
+  if(_pdCurrentProduct!==p)return; // đã đóng/đổi sản phẩm khác trong lúc đợi
+  _pdRef=ref;
+  const el=document.getElementById('pd-ref-content');
+  if(el)el.textContent=ref||'Lỗi tạo mã — vui lòng thử lại';
+  const warn=document.querySelector('#pd-qr-block .payment-warn');
+  if(warn&&ref)warn.textContent=`⚠️ Chuyển khoản ĐÚNG nội dung "${ref}" — hệ thống tự động xác nhận qua SePay, không cần chờ admin duyệt tay.`;
 }
 function _pdSelectPayMethod(method){
   _pdPayMethod=method;
@@ -7537,8 +7563,14 @@ function _pdSelectPayMethod(method){
   document.getElementById('pd-pay-cod-btn').classList.toggle('active',method==='cod');
   document.getElementById('pd-qr-block').style.display=method==='qr'?'':'none';
   document.getElementById('pd-cod-block').style.display=method==='cod'?'':'none';
+  const note=document.getElementById('pd-submit-note');
+  if(note)note.textContent=method==='qr'?'🔒 Thanh toán QR được SePay tự động xác nhận':'🔒 Admin sẽ liên hệ xác nhận trong thời gian sớm nhất';
+  if(method==='qr')_pdEnsureRef();
 }
 function submitProductOrder(){
+  return _pdPayMethod==='cod'?_submitProductOrderCod():_submitProductOrderQr();
+}
+function _submitProductOrderCod(){
   const p=_pdCurrentProduct;
   if(!p)return;
   const name=(document.getElementById('pd-name')?.value||'').trim();
@@ -7546,23 +7578,68 @@ function submitProductOrder(){
   const note=(document.getElementById('pd-note')?.value||'').trim();
   if(!name||!phone){showToast('Vui lòng điền họ tên và số điện thoại','error');return;}
   const seller=p.seller||p.ceoName||'';
-  const payLabel=_pdPayMethod==='cod'?'Thanh toán khi nhận hàng (COD)':'Chuyển khoản QR';
   const amount=parseFloat((p.price||'').replace(/[^\d]/g,''))||0;
   _saveLead({
     source:'product_order',
     name,phone,email:'',profession:'',
-    note:`Sản phẩm: ${p.name}${seller?' — Từ: '+seller:''} | Thanh toán: ${payLabel}${note?' | Ghi chú: '+note:''}`,
+    note:`Sản phẩm: ${p.name}${seller?' — Từ: '+seller:''} | Thanh toán khi nhận hàng (COD)${note?' | Ghi chú: '+note:''}`,
     amount,status:'new',
   });
-  _tgNotify('product_order',{name,phone,productName:p.name,sellerName:seller,payMethod:payLabel,note});
-  _renderProductDetailSuccess();
+  _tgNotify('product_order',{name,phone,productName:p.name,sellerName:seller,payMethod:'Thanh toán khi nhận hàng (COD)',note});
+  _renderProductDetailSuccess(false);
 }
-function _renderProductDetailSuccess(){
+function _submitProductOrderQr(){
+  const p=_pdCurrentProduct;
+  if(!p)return;
+  const name=(document.getElementById('pd-name')?.value||'').trim();
+  const phone=(document.getElementById('pd-phone')?.value||'').trim();
+  const note=(document.getElementById('pd-note')?.value||'').trim();
+  if(!name||!phone){showToast('Vui lòng điền họ tên và số điện thoại','error');return;}
+  if(!_pdRef){showToast('Đang tạo mã giao dịch, vui lòng đợi vài giây rồi bấm lại','error');return;}
+  const seller=p.seller||p.ceoName||'';
+  const amount=parseFloat((p.price||'').replace(/[^\d]/g,''))||0;
+  const ref=_pdRef;
+  const leadId=_saveLead({
+    source:'product_order',
+    name,phone,email:'',profession:'',
+    note:`Sản phẩm: ${p.name}${seller?' — Từ: '+seller:''} | Chuyển khoản QR (${ref})${note?' | Ghi chú: '+note:''}`,
+    amount,status:'pending',
+  });
+  _tgNotify('product_order',{name,phone,productName:p.name,sellerName:seller,payMethod:'Chuyển khoản QR ('+ref+')',note});
+  _renderProductDetailWaiting(ref);
+  _pdStartPaymentPolling(ref,leadId,{name,phone,productName:p.name});
+}
+function _renderProductDetailWaiting(ref){
+  document.getElementById('pd-body').innerHTML=`
+    <div style="text-align:center;padding:20px 0">
+      <div class="fb-spinner" style="margin:0 auto 16px"></div>
+      <div class="ws-modal-title" style="text-align:center">Đang chờ xác nhận chuyển khoản…</div>
+      <p style="color:var(--muted);font-size:.85rem;margin:10px 0 4px;line-height:1.6">Hệ thống tự động kiểm tra giao dịch qua SePay ngay khi ngân hàng báo có. Vui lòng giữ màn hình này sau khi chuyển khoản — thường chỉ vài giây tới 1-2 phút.</p>
+      <p style="color:var(--muted);font-size:.78rem">Mã giao dịch: <strong style="color:var(--gold)">${ref}</strong></p>
+      <button class="btn btn-outline" style="width:100%;margin-top:16px" onclick="closeProductDetail()">Đóng, xác nhận sau</button>
+    </div>`;
+}
+function _pdStartPaymentPolling(ref,leadId,info){
+  clearInterval(_pdPollTimer);
+  _pdPollTimer=setInterval(async()=>{
+    try{
+      const r=await fetch('/api/payment-status?ref='+encodeURIComponent(ref));
+      const d=await r.json();
+      if(d.status==='confirmed'){
+        clearInterval(_pdPollTimer);
+        if(leadId)_updateLeadStatus(leadId,'confirmed');
+        _tgNotify('lead_confirmed',{name:info.name,phone:info.phone,source:'Đặt hàng: '+info.productName,amount:0});
+        _renderProductDetailSuccess(true);
+      }
+    }catch(e){/* lỗi mạng tạm thời — bỏ qua, poll tiếp lần sau */}
+  },3000);
+}
+function _renderProductDetailSuccess(paid){
   document.getElementById('pd-body').innerHTML=`
     <div style="text-align:center;padding:6px 0 4px">
-      <div style="font-size:2.6rem;margin-bottom:10px">🎉</div>
-      <div class="ws-modal-title" style="text-align:center">Đã Gửi Yêu Cầu!</div>
-      <p style="color:var(--muted);font-size:.85rem;margin:10px 0 20px">Admin sẽ liên hệ với bạn qua số điện thoại đã cung cấp trong thời gian sớm nhất để tư vấn và xác nhận đơn hàng.</p>
+      <div style="font-size:2.6rem;margin-bottom:10px">${paid?'✅':'🎉'}</div>
+      <div class="ws-modal-title" style="text-align:center">${paid?'Đã Xác Nhận Thanh Toán!':'Đã Gửi Yêu Cầu!'}</div>
+      <p style="color:var(--muted);font-size:.85rem;margin:10px 0 20px">${paid?'Thanh toán của bạn đã được SePay xác nhận tự động. Admin sẽ liên hệ giao hàng trong thời gian sớm nhất.':'Admin sẽ liên hệ với bạn qua số điện thoại đã cung cấp trong thời gian sớm nhất để tư vấn và xác nhận đơn hàng.'}</p>
       <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left">
         <div style="font-weight:700;color:var(--gold);margin-bottom:6px">👑 Trở Thành Thành Viên CLB</div>
         <p style="color:var(--muted);font-size:.8rem;line-height:1.6;margin-bottom:12px">Thành viên CLB được ưu tiên xét duyệt, truy cập kho sản phẩm độc quyền và kết nối trực tiếp với hàng trăm CEO khác — nhiều lựa chọn hơn hẳn.</p>
