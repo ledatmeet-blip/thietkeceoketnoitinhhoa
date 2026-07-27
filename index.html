@@ -944,6 +944,27 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 #btn-music.muted{opacity:.5}
 #btn-top{background:var(--gold);color:#0a0a0a;opacity:0;pointer-events:none}
 #btn-top.visible{opacity:1;pointer-events:auto}
+#btn-ai-chat{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;position:relative}
+#btn-ai-chat::after{content:'';position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid var(--dark)}
+#btn-ai-chat.chat-open::after{display:none}
+
+/* AI CHAT WIDGET */
+#ai-chat-panel{position:fixed;bottom:24px;right:24px;width:min(360px,calc(100vw - 32px));height:min(520px,calc(100vh - 100px));background:var(--dark3);border:1px solid rgba(34,197,94,.22);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.55);z-index:9300;display:none;flex-direction:column;overflow:hidden}
+#ai-chat-panel.open{display:flex}
+.ai-chat-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(21,128,61,.1));border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.ai-chat-hdr-title{display:flex;align-items:center;gap:7px;font-weight:800;font-size:.88rem;color:#fff}
+.ai-chat-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
+.ai-chat-close{background:rgba(255,255,255,.08);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.85rem}
+.ai-chat-body{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px}
+.ai-chat-msg{max-width:84%;padding:9px 13px;border-radius:14px;font-size:.83rem;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.ai-chat-msg.bot{align-self:flex-start;background:var(--dark4);color:var(--text);border-bottom-left-radius:4px}
+.ai-chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:600;border-bottom-right-radius:4px}
+.ai-chat-msg.typing{color:var(--muted);font-style:italic}
+.ai-chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.ai-chat-input-row input{flex:1;background:var(--dark4);border:1.5px solid rgba(255,255,255,.08);color:var(--text);padding:9px 13px;border-radius:20px;font-size:.83rem;outline:none;font-family:inherit}
+.ai-chat-input-row input:focus{border-color:var(--gold)}
+#ai-chat-send-btn{width:38px;height:38px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-size:1rem;cursor:pointer;flex-shrink:0}
+@media(max-width:480px){#ai-chat-panel{right:16px;bottom:16px}}
 
 /* ===== CEO COMMUNITY PAGE ===== */
 #ceo-page{position:fixed;inset:0;background:var(--dark);z-index:860;display:none;flex-direction:column;overflow:hidden}
@@ -2694,11 +2715,27 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 
 <!-- FLOATING BUTTONS -->
 <div class="float-btns">
+  <button class="float-btn" id="btn-ai-chat" title="Hỏi Trợ Lý AI" onclick="toggleAiChat()">🤖</button>
   <button class="float-btn" id="btn-music" title="Nhạc nền" onclick="toggleBgMusic()">🔊</button>
   <button class="float-btn" id="btn-zalo" title="Chat Zalo" onclick="window.open('https://zalo.me/0936678813','_blank')">💬</button>
   <button class="float-btn" id="btn-top" title="Lên đầu trang" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 </div>
 <audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
+
+<!-- AI CHAT WIDGET -->
+<div id="ai-chat-panel">
+  <div class="ai-chat-hdr">
+    <div class="ai-chat-hdr-title"><span class="ai-chat-dot"></span>🤖 Trợ Lý AI — CLB CEO</div>
+    <button class="ai-chat-close" onclick="toggleAiChat()">✕</button>
+  </div>
+  <div class="ai-chat-body" id="ai-chat-body">
+    <div class="ai-chat-msg bot">Chào anh/chị! Em là trợ lý AI của CLB CEO Kết Nối Tinh Hoa 👋 Anh/chị cần tư vấn gì ạ — về thành viên, sản phẩm, sự kiện hay đặt lịch gặp CEO?</div>
+  </div>
+  <div class="ai-chat-input-row">
+    <input id="ai-chat-input" placeholder="Nhập câu hỏi của anh/chị…" onkeydown="if(event.key==='Enter')sendAiChat()">
+    <button id="ai-chat-send-btn" onclick="sendAiChat()">➤</button>
+  </div>
+</div>
 
 <!-- LOGIN MODAL -->
 <div id="login-overlay" onclick="if(event.target===this)closeLogin()">
@@ -5019,21 +5056,7 @@ async function _uploadBase64ToBlob(key, base64) {
   try {
     const blobRes = await fetch(base64);
     const fileBlob = await blobRes.blob();
-    const ext = (fileBlob.type || 'image/jpeg').split('/')[1]?.replace('jpeg','jpg') || 'jpg';
-    const filename = key.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 60) + '.' + ext;
-    const uploadRes = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': fileBlob.type || 'image/jpeg',
-        'x-admin-email': _AE,
-        'x-admin-pass': _AP,
-        'x-filename': filename,
-      },
-      body: fileBlob,
-    });
-    if (!uploadRes.ok) return null;
-    const { url } = await uploadRes.json();
-    return url || null;
+    return await _uploadDirect(key, fileBlob);
   } catch (e) { console.warn('[Blob] Upload failed:', e.message); return null; }
 }
 
@@ -5088,6 +5111,47 @@ function _findAdmin(email){
 function _isAdminEmail(email){ return !!_findAdmin(email); }
 const _AE = _ADMINS[0].email;
 const _AP = _ADMINS[0].pass;
+
+// ===== SUPABASE DIRECT UPLOAD (bypasses Vercel's ~4.5MB function body limit) =====
+// The anon key is meant to be public — safe to ship in client JS, same as any Supabase web app.
+const _SUPABASE_URL='https://urmpxjyobrreqiwysqxe.supabase.co';
+const _SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybXB4anlvYnJyZXFpd3lzcXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTA3NDcsImV4cCI6MjA5OTc4Njc0N30.hCV_tNQ3lGbedHGqfowWF3hKG-X4VfbP8QTrNtl-75s';
+const SUPABASE_JS_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+let _sbClient=null;
+function _loadScriptOnce(src){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector('script[data-src="'+src+'"]')){resolve();return;}
+    const s=document.createElement('script');s.src=src;s.setAttribute('data-src',src);
+    s.onload=()=>resolve();s.onerror=()=>reject(new Error('Không tải được thư viện upload'));
+    document.head.appendChild(s);
+  });
+}
+async function _getSbClient(){
+  if(_sbClient)return _sbClient;
+  await _loadScriptOnce(SUPABASE_JS_CDN);
+  _sbClient=window.supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON_KEY);
+  return _sbClient;
+}
+// Ask the server for a signed upload URL (tiny JSON request, no file bytes), then upload the
+// actual bytes straight from the browser to Supabase Storage — works for files of any size,
+// unlike routing them through /api/upload which is capped at a few MB by the platform.
+async function _uploadDirect(key,file){
+  if(!_IS_LIVE||!file)return null;
+  try{
+    const ext=(file.name&&file.name.includes('.')?file.name.split('.').pop():(file.type||'').split('/')[1])||'bin';
+    const filename=key.replace(/[^a-z0-9]/gi,'-').toLowerCase().slice(0,60)+'.'+ext.toLowerCase().replace('jpeg','jpg');
+    const res=await fetch('/api/upload-url',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({adminEmail:_AE,adminPass:_AP,filename})
+    });
+    if(!res.ok)return null;
+    const{path,token,publicUrl}=await res.json();
+    const sb=await _getSbClient();
+    const{error}=await sb.storage.from('ceo-site').uploadToSignedUrl(path,token,file,{contentType:file.type||undefined,upsert:true});
+    if(error)return null;
+    return publicUrl;
+  }catch(e){console.warn('[Upload] direct upload failed:',e.message);return null;}
+}
 function openAdminLogin(){
   document.getElementById('adm-email-inp').value='';
   document.getElementById('adm-pw-inp').value='';
@@ -8015,19 +8079,7 @@ function _applyVideoToTarget(url,label){
 }
 // Upload a raw File (e.g. a video) straight to Vercel Blob — no base64/localStorage detour
 async function _uploadFileToBlob(key,file){
-  if(!_IS_LIVE||!file)return null;
-  try{
-    const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
-    const filename=key.replace(/[^a-z0-9]/gi,'-').toLowerCase().slice(0,60)+'.'+ext;
-    const res=await fetch('/api/upload',{
-      method:'POST',
-      headers:{'Content-Type':file.type||'video/mp4','x-admin-email':_AE,'x-admin-pass':_AP,'x-filename':filename},
-      body:file,
-    });
-    if(!res.ok)return null;
-    const{url}=await res.json();
-    return url||null;
-  }catch(e){console.warn('[Blob] Video upload failed:',e.message);return null;}
+  return await _uploadDirect(key,file);
 }
 
 // ===== PHOTO ALBUMS (unlimited photos/videos, grouped separately from the 12-slot grid above) =====
@@ -8298,6 +8350,58 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight') fbNext();
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+
+// ===== AI CHAT WIDGET (Gemini brain dùng chung với bot Telegram, khác persona — xem api/website-chat.js) =====
+let _aiChatOpen=false;
+let _aiChatHistory=[]; // [{role:'user'|'model',parts:[{text}]}]
+let _aiChatFirstSent=false;
+let _aiChatSending=false;
+function toggleAiChat(){
+  _aiChatOpen=!_aiChatOpen;
+  document.getElementById('ai-chat-panel').classList.toggle('open',_aiChatOpen);
+  document.getElementById('btn-ai-chat').classList.toggle('chat-open',_aiChatOpen);
+  if(_aiChatOpen)setTimeout(()=>document.getElementById('ai-chat-input')?.focus(),150);
+}
+function _aiChatAppendMsg(text,who){
+  const body=document.getElementById('ai-chat-body');
+  if(!body)return null;
+  const div=document.createElement('div');
+  div.className='ai-chat-msg '+who;
+  div.textContent=text;
+  body.appendChild(div);
+  body.scrollTop=body.scrollHeight;
+  return div;
+}
+async function sendAiChat(){
+  if(_aiChatSending)return;
+  const inp=document.getElementById('ai-chat-input');
+  const msg=(inp.value||'').trim();
+  if(!msg)return;
+  inp.value='';
+  _aiChatAppendMsg(msg,'user');
+  _aiChatSending=true;
+  const typingEl=_aiChatAppendMsg('Đang trả lời…','bot typing');
+  try{
+    const r=await fetch('/api/website-chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg,history:_aiChatHistory,isFirstMessage:!_aiChatFirstSent}),
+    });
+    const d=await r.json();
+    _aiChatFirstSent=true;
+    typingEl?.remove();
+    const reply=d.reply||'Xin lỗi, em chưa trả lời được lúc này. Anh/chị thử lại giúp em nhé!';
+    _aiChatAppendMsg(reply,'bot');
+    _aiChatHistory.push({role:'user',parts:[{text:msg}]});
+    _aiChatHistory.push({role:'model',parts:[{text:reply}]});
+    if(_aiChatHistory.length>20)_aiChatHistory=_aiChatHistory.slice(-20);
+  }catch(e){
+    typingEl?.remove();
+    _aiChatAppendMsg('Kết nối lỗi, anh/chị thử lại giúp em nhé!','bot');
+  }finally{
+    _aiChatSending=false;
+  }
+}
 
 // ===== BACKGROUND MUSIC =====
 // Browsers block audio-with-sound autoplay until the user has interacted with the page, so we
