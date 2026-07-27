@@ -3824,7 +3824,7 @@ function galAdminAddPhoto(){
       const r=new FileReader();r.onload=ev=>{
         const gid=_nextGalleryGid();
         localStorage.setItem('comm-gallery-'+gid,JSON.stringify({type:'photo',src:ev.target.result,label:''}));
-        if(typeof initGallery==='function')initGallery();
+        if(typeof _refreshGalleryGrid==='function')_refreshGalleryGrid();
       };r.readAsDataURL(file);
     });
   };inp.click();
@@ -6537,7 +6537,11 @@ function _reRenderAllDynamicSections(){
   renderPricingInfo();
   applyDesign();
   initImages();
-  if (typeof initGallery === 'function') initGallery();
+  // _ccRefreshAll (không phải initGallery) — initGallery() gọi _ccRegister lại từ đầu, tạo instance
+  // MỚI và làm "mồ côi" các thẻ DOM cũ mà instance cũ đang theo dõi (không bao giờ bị dọn nữa,
+  // kể cả thẻ ứng với nội dung đã xoá) — đây chính là nguyên nhân "ảnh xoá rồi vẫn hiện lại khi
+  // chuyển ảnh". _ccRefreshAll cập nhật items trên CÙNG instance nên vẫn dọn đúng qua cardEls.
+  if (typeof _ccRefreshAll === 'function') _ccRefreshAll();
 }
 document.addEventListener('DOMContentLoaded', async () => {
   await _dbReady; // wait for DB sync (tối đa 6s) before rendering data-driven sections
@@ -7832,7 +7836,17 @@ function _getAllGalleryMediaItems(){
 // Both read from the exact same comm-gallery-* pool, so anything added anywhere shows up everywhere relevant.
 const CC_VISIBLE_SIDE=1;
 const _ccInstances={};
-function _ccRegister(key,ids,filterType){_ccInstances[key]={items:[],index:0,timer:null,ids,filterType};}
+function _ccRegister(key,ids,filterType){
+  // Lưới an toàn: nếu instance cũ đã tồn tại (vd initGallery() lỡ bị gọi lại lần 2), dọn sạch
+  // các thẻ DOM nó đang theo dõi trước khi thay bằng instance mới — nếu không các thẻ đó bị
+  // "mồ côi", không ai dọn nữa, kể cả khi nội dung tương ứng đã bị xoá khỏi dữ liệu.
+  const old=_ccInstances[key];
+  if(old){
+    if(old.timer)clearInterval(old.timer);
+    if(old.cardEls)Object.values(old.cardEls).forEach(el=>el.remove());
+  }
+  _ccInstances[key]={items:[],index:0,timer:null,ids,filterType};
+}
 function _ccLoad(key){
   const inst=_ccInstances[key];if(!inst)return;
   inst.items=_getAllGalleryMediaItems().filter(it=>inst.filterType==='all'?true:it.type===inst.filterType);
