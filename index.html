@@ -255,6 +255,10 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .cc-card.active .cc-card-label{opacity:1}
 .cc-card-del{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(122,0,0,.88);color:#fff;font-size:.85rem;cursor:pointer;z-index:5;display:none;align-items:center;justify-content:center}
 .admin-mode .cc-card.active .cc-card-del{display:flex}
+.cc-card-admin-row{position:absolute;top:10px;left:10px;display:none;gap:6px;z-index:5}
+.admin-mode .cc-card.active .cc-card-admin-row{display:flex}
+.cc-mini-btn{padding:5px 10px;border-radius:20px;border:none;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.cc-mini-btn:hover{background:rgba(34,197,94,.7)}
 .cc-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:none;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);color:#fff;font-size:1.6rem;cursor:pointer;z-index:60;transition:.2s;display:flex;align-items:center;justify-content:center}
 .cc-nav:hover{background:rgba(34,197,94,.55)}
 .cc-nav-prev{left:20px}
@@ -2353,12 +2357,35 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
       </div>
       <div class="cc-stage" id="cc-stage">
         <div class="cc-perspective"><div class="cc-track" id="cc-track"></div></div>
-        <button class="cc-nav cc-nav-prev" onclick="carouselPrev()" aria-label="Trước">‹</button>
-        <button class="cc-nav cc-nav-next" onclick="carouselNext()" aria-label="Sau">›</button>
+        <button class="cc-nav cc-nav-prev" onclick="_ccPrev('main')" aria-label="Trước">‹</button>
+        <button class="cc-nav cc-nav-next" onclick="_ccNext('main')" aria-label="Sau">›</button>
         <div class="cc-dots" id="cc-dots"></div>
         <div class="cc-empty" id="cc-empty">
           <span style="font-size:2.6rem;opacity:.35">🖼️</span>
           <span>Chưa có ảnh/video nào. Bấm "Thêm ảnh" hoặc "Thêm video" ở trên để bắt đầu.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEDICATED VIDEO SECTION — separate from the mixed carousel above, videos only -->
+    <div class="comm-gallery-section fade-up">
+      <div class="comm-gallery-header">
+        <div>
+          <h3>🎥 Video Cộng Đồng</h3>
+          <p>Video chia sẻ từ cộng đồng CEO Tinh Hoa</p>
+        </div>
+      </div>
+      <div class="gallery-admin-add-row">
+        <button class="gal-add-btn" onclick="openVideoModal({kind:'general'})">🎥 Thêm video</button>
+      </div>
+      <div class="cc-stage" id="ccv-stage">
+        <div class="cc-perspective"><div class="cc-track" id="ccv-track"></div></div>
+        <button class="cc-nav cc-nav-prev" onclick="_ccPrev('video')" aria-label="Trước">‹</button>
+        <button class="cc-nav cc-nav-next" onclick="_ccNext('video')" aria-label="Sau">›</button>
+        <div class="cc-dots" id="ccv-dots"></div>
+        <div class="cc-empty" id="ccv-empty">
+          <span style="font-size:2.6rem;opacity:.35">🎥</span>
+          <span>Chưa có video nào. Bấm "Thêm video" ở trên để bắt đầu.</span>
         </div>
       </div>
     </div>
@@ -4307,8 +4334,8 @@ function _nextGalleryGid(){
   let i=1;while(localStorage.getItem('comm-gallery-g'+i))i++;return'g'+i;
 }
 function _refreshGalleryGrid(){
-  // Trigger gallery re-render if initGallery exists
-  if(typeof initGallery==='function') initGallery();
+  if(typeof _ccRefreshAll==='function') _ccRefreshAll();
+  else if(typeof initGallery==='function') initGallery();
 }
 
 // --- EVENTS TAB ---
@@ -7646,39 +7673,38 @@ function _getAllGalleryMediaItems(){
   }
   return items.sort((a,b)=>(b.ts||0)-(a.ts||0));
 }
-let _carouselItems=[];
-let _carouselIndex=0;
-let _carouselFilter='all';
-let _carouselTimer=null;
+// Multi-instance carousel: 'main' (Tất cả/Ảnh/Video, filterable) + 'video' (Video Cộng Đồng only).
+// Both read from the exact same comm-gallery-* pool, so anything added anywhere shows up everywhere relevant.
 const CC_VISIBLE_SIDE=1;
-function initGallery(){
-  _carouselFilter='all';
-  _carouselItems=_getAllGalleryMediaItems();
-  _carouselIndex=0;
-  renderCommunityCarousel();
-  _startCarouselAutoplay();
-  renderAlbumsRow();
+const _ccInstances={};
+function _ccRegister(key,ids,filterType){_ccInstances[key]={items:[],index:0,timer:null,ids,filterType};}
+function _ccLoad(key){
+  const inst=_ccInstances[key];if(!inst)return;
+  inst.items=_getAllGalleryMediaItems().filter(it=>inst.filterType==='all'?true:it.type===inst.filterType);
+  inst.index=0;
+  _ccRender(key);
+  _ccStartAutoplay(key);
 }
-function renderCommunityCarousel(){
-  const track=document.getElementById('cc-track');
+function _ccRender(key){
+  const inst=_ccInstances[key];if(!inst)return;
+  const track=document.getElementById(inst.ids.track);
   if(!track)return;
-  const empty=document.getElementById('cc-empty');
-  const dots=document.getElementById('cc-dots');
-  if(!_carouselItems.length){
+  const empty=document.getElementById(inst.ids.empty);
+  const dots=document.getElementById(inst.ids.dots);
+  if(!inst.items.length){
     track.innerHTML='';
     if(empty)empty.style.display='flex';
     if(dots)dots.innerHTML='';
     return;
   }
   if(empty)empty.style.display='none';
-  const n=_carouselItems.length;
-  track.innerHTML=_carouselItems.map((it,i)=>{
-    let offset=i-_carouselIndex;
+  const n=inst.items.length;
+  track.innerHTML=inst.items.map((it,i)=>{
+    let offset=i-inst.index;
     if(offset>n/2)offset-=n;
     if(offset<-n/2)offset+=n;
     const abs=Math.abs(offset);
-    const visible=abs<=CC_VISIBLE_SIDE;
-    if(!visible)return'';
+    if(abs>CC_VISIBLE_SIDE)return'';
     const tx=offset*300;
     const tz=-abs*260;
     const ty=abs*8;
@@ -7694,40 +7720,53 @@ function renderCommunityCarousel(){
         ?`<video src="${info.src}" ${isActive?'autoplay':''} muted loop playsinline preload="auto"></video>`
         :`<div class="cc-video-ph">🎥</div>`;
     }
-    return`<div class="cc-card${isActive?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_carouselCardClick(${i})">
+    const adminRow=isActive?`
+      <button class="cc-card-del" onclick="event.stopPropagation();_ccDeleteActive('${key}')">✕</button>
+      <div class="cc-card-admin-row">
+        <button class="cc-mini-btn" onclick="event.stopPropagation();_ccEditActiveLabel('${key}')">✏️ Sửa</button>
+        <button class="cc-mini-btn" onclick="event.stopPropagation();_ccReplaceActive('${key}')">🔁 Thay thế</button>
+      </div>`:'';
+    return`<div class="cc-card${isActive?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_ccCardClick('${key}',${i})">
       ${inner}
       ${it.type==='video'?`<div class="cc-play-badge${isActive?' is-playing':''}">▶</div>`:''}
       <div class="cc-card-label">${it.label||(it.type==='video'?'Video cộng đồng':'')}</div>
-      ${abs===0?`<button class="cc-card-del" onclick="event.stopPropagation();_carouselDeleteActive()">✕</button>`:''}
+      ${adminRow}
     </div>`;
   }).join('');
-  if(dots)dots.innerHTML=_carouselItems.map((_,i)=>`<span class="cc-dot${i===_carouselIndex?' active':''}" onclick="_carouselGoTo(${i})"></span>`).join('');
+  if(dots)dots.innerHTML=inst.items.map((_,i)=>`<span class="cc-dot${i===inst.index?' active':''}" onclick="_ccGoTo('${key}',${i})"></span>`).join('');
 }
-function _carouselCardClick(i){
-  if(i===_carouselIndex){
-    const it=_carouselItems[i];
-    if(!it)return;
+function _ccCardClick(key,i){
+  const inst=_ccInstances[key];if(!inst)return;
+  if(i===inst.index){
+    const it=inst.items[i];if(!it)return;
     if(it.type==='photo')openGalleryLightbox(it.src);
     else _openCarouselVideoLightbox(it.url);
-  }else{
-    _carouselGoTo(i);
-  }
+  }else{_ccGoTo(key,i);}
 }
-function _carouselGoTo(i){
-  if(!_carouselItems.length)return;
-  _carouselIndex=((i%_carouselItems.length)+_carouselItems.length)%_carouselItems.length;
-  renderCommunityCarousel();
-  _restartCarouselAutoplay();
+function _ccGoTo(key,i){
+  const inst=_ccInstances[key];if(!inst||!inst.items.length)return;
+  inst.index=((i%inst.items.length)+inst.items.length)%inst.items.length;
+  _ccRender(key);
+  _ccRestartAutoplay(key);
 }
-function carouselPrev(){_carouselGoTo(_carouselIndex-1);}
-function carouselNext(){_carouselGoTo(_carouselIndex+1);}
-function _startCarouselAutoplay(){
-  if(_carouselTimer){clearInterval(_carouselTimer);_carouselTimer=null;}
-  if(_carouselItems.length<2)return;
-  _carouselTimer=setInterval(()=>{_carouselIndex=(_carouselIndex+1)%_carouselItems.length;renderCommunityCarousel();},4200);
+function _ccPrev(key){const inst=_ccInstances[key];if(inst)_ccGoTo(key,inst.index-1);}
+function _ccNext(key){const inst=_ccInstances[key];if(inst)_ccGoTo(key,inst.index+1);}
+function _ccStartAutoplay(key){
+  const inst=_ccInstances[key];if(!inst)return;
+  if(inst.timer){clearInterval(inst.timer);inst.timer=null;}
+  if(inst.items.length<2)return;
+  inst.timer=setInterval(()=>{inst.index=(inst.index+1)%inst.items.length;_ccRender(key);},4200);
 }
-function _pauseCarouselAutoplay(){if(_carouselTimer){clearInterval(_carouselTimer);_carouselTimer=null;}}
-function _restartCarouselAutoplay(){_startCarouselAutoplay();}
+function _ccPauseAutoplay(key){const inst=_ccInstances[key];if(inst&&inst.timer){clearInterval(inst.timer);inst.timer=null;}}
+function _ccRestartAutoplay(key){_ccStartAutoplay(key);}
+function _ccRefresh(key){
+  const inst=_ccInstances[key];if(!inst)return;
+  inst.items=_getAllGalleryMediaItems().filter(it=>inst.filterType==='all'?true:it.type===inst.filterType);
+  if(inst.index>=inst.items.length)inst.index=Math.max(0,inst.items.length-1);
+  _ccRender(key);
+  _ccRestartAutoplay(key);
+}
+function _ccRefreshAll(){Object.keys(_ccInstances).forEach(_ccRefresh);}
 function _openCarouselVideoLightbox(url){
   const info=_videoEmbedInfo(url);
   const box=document.getElementById('cc-video-lightbox-inner');
@@ -7738,50 +7777,88 @@ function closeCarouselVideoLightbox(){
   document.getElementById('cc-video-lightbox').classList.remove('open');
   document.getElementById('cc-video-lightbox-inner').innerHTML='';
 }
-function _carouselDeleteActive(){
+function _ccDeleteActive(key){
   if(!window.adminMode)return;
-  const it=_carouselItems[_carouselIndex];
-  if(!it)return;
+  const inst=_ccInstances[key];if(!inst)return;
+  const it=inst.items[inst.index];if(!it)return;
   if(!confirm('Xóa ảnh/video này?'))return;
   localStorage.removeItem(GAL_PREFIX+it.gid);
-  _carouselItems=_getAllGalleryMediaItems().filter(x=>_carouselFilter==='all'?true:x.type===_carouselFilter);
-  if(_carouselIndex>=_carouselItems.length)_carouselIndex=Math.max(0,_carouselItems.length-1);
-  renderCommunityCarousel();
+  _ccRefreshAll();
   renderAlbumsRow();
+}
+function _ccEditActiveLabel(key){
+  if(!window.adminMode)return;
+  const inst=_ccInstances[key];if(!inst)return;
+  const it=inst.items[inst.index];if(!it)return;
+  const name=window.prompt('Chú thích cho ảnh/video này:',it.label||'');
+  if(name===null)return;
+  const raw=localStorage.getItem(GAL_PREFIX+it.gid);
+  if(!raw)return;
+  try{const d=JSON.parse(raw);d.label=name.trim();localStorage.setItem(GAL_PREFIX+it.gid,JSON.stringify(d));}catch(e){}
+  _ccRefreshAll();
+}
+function _ccReplaceActive(key){
+  if(!window.adminMode)return;
+  const inst=_ccInstances[key];if(!inst)return;
+  const it=inst.items[inst.index];if(!it)return;
+  if(it.type==='photo'){
+    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+    inp.onchange=e=>{
+      const file=e.target.files[0];if(!file)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        const raw=localStorage.getItem(GAL_PREFIX+it.gid);
+        let d={};try{d=JSON.parse(raw)||{};}catch(err){}
+        d.type='photo';d.src=ev.target.result;
+        localStorage.setItem(GAL_PREFIX+it.gid,JSON.stringify(d));
+        _ccRefreshAll();renderAlbumsRow();
+      };r.readAsDataURL(file);
+    };inp.click();
+  }else{
+    openVideoModal({kind:'replace',gid:it.gid});
+  }
 }
 function switchGalleryTab(btn,type){
   document.querySelectorAll('.gtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  _carouselFilter=type;
-  _carouselItems=_getAllGalleryMediaItems().filter(it=>type==='all'?true:it.type===type);
-  _carouselIndex=0;
-  renderCommunityCarousel();
-  _restartCarouselAutoplay();
+  if(_ccInstances.main)_ccInstances.main.filterType=type;
+  _ccRefresh('main');
 }
 function openGalleryLightbox(src){
   document.getElementById('gal-lb-img').src=src;
   document.getElementById('gal-lightbox').classList.add('open');
 }
-// Drag/swipe support for the 3D stage (mouse + touch)
+// Drag/swipe support for each 3D stage (mouse + touch)
 (function(){
-  let startX=0,dragging=false;
-  document.addEventListener('DOMContentLoaded',()=>{
-    const stage=document.getElementById('cc-stage');
+  function attachSwipe(key,stageId){
+    let startX=0,dragging=false;
+    const stage=document.getElementById(stageId);
     if(!stage)return;
-    const down=e=>{dragging=true;const p=e.touches?e.touches[0]:e;startX=p.clientX;_pauseCarouselAutoplay();};
+    const down=e=>{dragging=true;const p=e.touches?e.touches[0]:e;startX=p.clientX;_ccPauseAutoplay(key);};
     const up=e=>{
       if(!dragging)return;dragging=false;
       const p=e.changedTouches?e.changedTouches[0]:e;
       const dx=p.clientX-startX;
-      if(Math.abs(dx)>50){dx<0?carouselNext():carouselPrev();}else{_restartCarouselAutoplay();}
+      if(Math.abs(dx)>50){dx<0?_ccNext(key):_ccPrev(key);}else{_ccRestartAutoplay(key);}
     };
     stage.addEventListener('mousedown',down);
     stage.addEventListener('touchstart',down,{passive:true});
     window.addEventListener('mouseup',up);
     stage.addEventListener('touchend',up);
-    stage.addEventListener('mouseenter',_pauseCarouselAutoplay);
-    stage.addEventListener('mouseleave',_restartCarouselAutoplay);
+    stage.addEventListener('mouseenter',()=>_ccPauseAutoplay(key));
+    stage.addEventListener('mouseleave',()=>_ccRestartAutoplay(key));
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    attachSwipe('main','cc-stage');
+    attachSwipe('video','ccv-stage');
   });
 })();
+function initGallery(){
+  _ccRegister('main',{track:'cc-track',dots:'cc-dots',empty:'cc-empty'},'all');
+  _ccRegister('video',{track:'ccv-track',dots:'ccv-dots',empty:'ccv-empty'},'video');
+  _ccLoad('main');
+  _ccLoad('video');
+  renderAlbumsRow();
+}
 
 // ===== VIDEO ADD MODAL (link OR upload from computer) =====
 let _videoModalTarget=null; // {kind:'album',albumId} | {kind:'general'}
@@ -7789,6 +7866,8 @@ let _videoModalMode='link';
 let _videoModalFile=null;
 function openVideoModal(target){
   _videoModalTarget=target;_videoModalFile=null;
+  const h4=document.querySelector('#video-url-modal h4');
+  if(h4)h4.textContent=target&&target.kind==='replace'?'🔁 Thay Thế Video':'🎥 Thêm Video';
   document.getElementById('video-url-input').value='';
   document.getElementById('video-label-input').value='';
   document.getElementById('video-file-name').textContent='Chưa chọn file (MP4, MOV…)';
@@ -7844,6 +7923,13 @@ function _applyVideoToTarget(url,label){
     localStorage.setItem(GAL_PREFIX+gid,JSON.stringify({type:'video',url,label}));
     _refreshGalleryGrid();
     if(typeof renderApMediaTab==='function'&&document.getElementById('ap-tab-media'))renderApMediaTab();
+  } else if(t.kind==='replace'){
+    const raw=localStorage.getItem(GAL_PREFIX+t.gid);
+    let d={};try{d=JSON.parse(raw)||{};}catch(e){}
+    d.type='video';d.url=url;d.label=label;
+    localStorage.setItem(GAL_PREFIX+t.gid,JSON.stringify(d));
+    _refreshGalleryGrid();
+    renderAlbumsRow();
   }
 }
 // Upload a raw File (e.g. a video) straight to Vercel Blob — no base64/localStorage detour
