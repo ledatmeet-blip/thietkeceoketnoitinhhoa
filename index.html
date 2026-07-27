@@ -6935,17 +6935,25 @@ let _boothCurrentId=null;
 
 function openCeoBooth(id){
   if(!id)return;
-  const profiles=loadCeoProfiles();
-  const p=profiles.find(x=>x.id===id);
-  if(!p)return;
-  _boothCurrentId=id;
-  document.getElementById('booth-topbar-name').textContent=p.businessName||p.company||p.name;
-  _renderBoothHero(p,id);
-  _renderBoothBody(p,id);
-  const ov=document.getElementById('ceo-booth-overlay');
-  ov.classList.add('open');
-  ov.scrollTop=0;
-  document.body.style.overflow='hidden';
+  // Cùng cơ chế chống mất thao tác khi /api/read chưa kịp về (xem _saveLead) — nếu bấm vào
+  // gian hàng quá sớm lúc dữ liệu CEO/sản phẩm chưa đồng bộ xong, đợi đồng bộ xong rồi mở,
+  // thay vì tra cứu trên danh sách rỗng và im lặng không làm gì.
+  const doOpen=()=>{
+    const profiles=loadCeoProfiles();
+    const p=profiles.find(x=>x.id===id);
+    if(!p)return;
+    _boothCurrentId=id;
+    document.getElementById('booth-topbar-name').textContent=p.businessName||p.company||p.name;
+    _renderBoothHero(p,id);
+    _renderBoothBody(p,id);
+    const ov=document.getElementById('ceo-booth-overlay');
+    ov.classList.add('open');
+    ov.scrollTop=0;
+    document.body.style.overflow='hidden';
+  };
+  if(_dbDataApplied) doOpen();
+  else if(_IS_LIVE) _dbFetchPromise.then(doOpen);
+  else doOpen();
 }
 function closeCeoBooth(){
   document.getElementById('ceo-booth-overlay').classList.remove('open');
@@ -7430,14 +7438,21 @@ function getApprovedCeoProducts(){
 let _pdCurrentProduct=null;
 let _pdPayMethod='qr';
 function openProductDetail(id){
-  const all=getApprovedCeoProducts();
-  let p=all.find(x=>x.id===id);
-  if(!p){ p=loadShowcaseProds().find(x=>x.id===id); }
-  if(!p)return;
-  _pdCurrentProduct=p;
-  _pdPayMethod='qr';
-  _renderProductDetailForm();
-  document.getElementById('product-detail-modal').classList.add('open');
+  // Cùng cơ chế chống mất thao tác khi /api/read chưa kịp về (xem _saveLead / openCeoBooth) —
+  // đợi đồng bộ dữ liệu xong rồi mới tra cứu sản phẩm, tránh tra trên danh sách rỗng.
+  const doOpen=()=>{
+    const all=getApprovedCeoProducts();
+    let p=all.find(x=>x.id===id);
+    if(!p){ p=loadShowcaseProds().find(x=>x.id===id); }
+    if(!p)return;
+    _pdCurrentProduct=p;
+    _pdPayMethod='qr';
+    _renderProductDetailForm();
+    document.getElementById('product-detail-modal').classList.add('open');
+  };
+  if(_dbDataApplied) doOpen();
+  else if(_IS_LIVE) _dbFetchPromise.then(doOpen);
+  else doOpen();
 }
 function closeProductDetail(){
   document.getElementById('product-detail-modal').classList.remove('open');
