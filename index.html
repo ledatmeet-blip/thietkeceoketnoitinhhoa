@@ -225,15 +225,45 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .gal-add-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.06);color:var(--gold);font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
 .gal-add-btn:hover{background:rgba(34,197,94,.14)}
 /* Photo albums */
-.gal-albums-row{display:none;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px}
+.gal-albums-row{display:none;gap:18px;overflow-x:auto;padding:8px 2px 16px;margin-bottom:8px}
 .gal-albums-row.has-content{display:flex}
-.gal-album-card{flex:0 0 auto;width:128px;cursor:pointer;text-align:center}
-.gal-album-cover{width:128px;height:96px;border-radius:10px;overflow:hidden;background:var(--dark3);border:1.5px dashed rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;position:relative;transition:.2s}
+.gal-album-card{flex:0 0 auto;width:220px;cursor:pointer;text-align:left;transition:transform .25s}
+.gal-album-card:hover{transform:translateY(-5px)}
+.gal-album-cover{width:220px;height:156px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--dark3),var(--dark4));border:1.5px solid rgba(34,197,94,.16);display:flex;align-items:center;justify-content:center;position:relative;transition:.25s;box-shadow:0 12px 28px rgba(0,0,0,.35)}
+.gal-album-cover.is-add{border-style:dashed}
 .gal-album-cover img{width:100%;height:100%;object-fit:cover}
-.gal-album-card:hover .gal-album-cover{border-color:rgba(34,197,94,.45)}
-.gal-album-count{position:absolute;bottom:4px;right:6px;background:rgba(0,0,0,.65);color:#fff;font-size:.64rem;font-weight:700;padding:2px 7px;border-radius:20px}
-.gal-album-name{margin-top:6px;font-size:.78rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gal-album-add-ico{font-size:1.8rem;color:var(--gold);opacity:.75}
+.gal-album-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%);opacity:0;transition:.25s}
+.gal-album-card:hover .gal-album-cover{border-color:rgba(34,197,94,.55);box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.gal-album-card:hover .gal-album-cover::after{opacity:1}
+.gal-album-folder-ico{font-size:2.8rem;opacity:.35}
+.gal-album-count{position:absolute;bottom:9px;right:11px;background:rgba(0,0,0,.62);color:#fff;font-size:.72rem;font-weight:700;padding:3px 11px;border-radius:20px;backdrop-filter:blur(4px);z-index:1}
+.gal-album-name{margin-top:10px;font-size:.92rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gal-album-add-ico{font-size:2.4rem;color:var(--gold);opacity:.85}
+@media(max-width:700px){.gal-album-card{width:170px}.gal-album-cover{width:170px;height:120px}}
+
+/* 3D community carousel — replaces the old flat 12-tile grid */
+.cc-stage{position:relative;height:440px;margin-bottom:8px;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse at 50% 28%,rgba(34,197,94,.14) 0%,rgba(0,0,0,0) 62%),linear-gradient(180deg,var(--dark3) 0%,var(--dark) 100%);border:1px solid rgba(34,197,94,.14);touch-action:pan-y;user-select:none}
+.cc-perspective{position:absolute;inset:0;perspective:1500px;display:flex;align-items:center;justify-content:center}
+.cc-track{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.cc-card{position:absolute;top:50%;left:50%;width:240px;height:320px;margin:-160px 0 0 -120px;border-radius:18px;overflow:hidden;background:var(--dark4);box-shadow:0 30px 70px rgba(0,0,0,.6);cursor:pointer;transition:transform .55s cubic-bezier(.22,.9,.32,1),opacity .55s,filter .55s;filter:brightness(.48) saturate(.65);border:1px solid rgba(255,255,255,.07)}
+.cc-card.active{filter:brightness(1) saturate(1);box-shadow:0 40px 100px rgba(0,0,0,.75),0 0 0 2px rgba(34,197,94,.55)}
+.cc-card img,.cc-card video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.cc-video-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:var(--dark4);pointer-events:none}
+.cc-play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#fff;background:rgba(0,0,0,.26);pointer-events:none}
+.cc-card-label{position:absolute;left:0;right:0;bottom:0;padding:20px 14px 12px;background:linear-gradient(to top,rgba(0,0,0,.72),transparent);color:#fff;font-size:.76rem;font-weight:700;opacity:0;transition:.3s;pointer-events:none}
+.cc-card.active .cc-card-label{opacity:1}
+.cc-card-del{position:absolute;top:9px;right:9px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(122,0,0,.88);color:#fff;font-size:.82rem;cursor:pointer;z-index:5;display:none;align-items:center;justify-content:center}
+.admin-mode .cc-card.active .cc-card-del{display:flex}
+.cc-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);color:#fff;font-size:1.5rem;cursor:pointer;z-index:60;transition:.2s;display:flex;align-items:center;justify-content:center}
+.cc-nav:hover{background:rgba(34,197,94,.55)}
+.cc-nav-prev{left:18px}
+.cc-nav-next{right:18px}
+.cc-dots{position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:60;flex-wrap:wrap;padding:0 60px}
+.cc-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);cursor:pointer;transition:.2s;flex-shrink:0}
+.cc-dot.active{background:var(--gold);width:22px;border-radius:4px}
+.cc-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:.88rem;text-align:center;padding:24px;z-index:2}
+@media(max-width:700px){.cc-stage{height:340px}.cc-card{width:180px;height:250px;margin:-125px 0 0 -90px}.cc-nav{width:38px;height:38px;font-size:1.25rem}}
+@media(max-width:440px){.cc-stage{height:300px}.cc-card{width:150px;height:210px;margin:-105px 0 0 -75px}}
 /* Album viewer modal */
 #album-viewer-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:690;display:none;align-items:center;justify-content:center;padding:20px}
 #album-viewer-modal.open{display:flex}
@@ -353,6 +383,12 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 #gal-lightbox img{max-width:min(92vw,1000px);max-height:90vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 60px rgba(0,0,0,.8)}
 #gal-lb-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:.2s}
 #gal-lb-close:hover{background:rgba(255,255,255,.24)}
+#cc-video-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:2100;display:none;align-items:center;justify-content:center;padding:20px}
+#cc-video-lightbox.open{display:flex}
+#cc-video-lightbox-inner{width:min(92vw,960px);aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;box-shadow:0 8px 60px rgba(0,0,0,.8)}
+#cc-video-lightbox-inner video,#cc-video-lightbox-inner iframe{width:100%;height:100%;border:0;display:block}
+#cc-video-lb-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:.2s}
+#cc-video-lb-close:hover{background:rgba(255,255,255,.24)}
 #video-url-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:700;display:none;align-items:center;justify-content:center}
 #video-url-modal.open{display:flex}
 .vmodal-box{background:var(--dark3);border:1px solid rgba(34,197,94,.25);border-radius:16px;padding:28px;width:min(440px,92vw)}
@@ -2313,69 +2349,16 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
         <button class="gal-add-btn" onclick="galAdminAddPhoto()">📷 Thêm ảnh</button>
         <button class="gal-add-btn" onclick="galAdminAddVideo()">🎥 Thêm video</button>
       </div>
-      <div class="comm-gallery-grid" id="gallery-grid">
-        <div class="gallery-tile featured photo-tile" data-gid="g1" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Ảnh nổi bật</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile photo-tile" data-gid="g2" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Thêm ảnh</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile photo-tile" data-gid="g3" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Thêm ảnh</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile photo-tile" data-gid="g4" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Thêm ảnh</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g5" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile photo-tile" data-gid="g6" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Thêm ảnh</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g7" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile photo-tile" data-gid="g8" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Thêm ảnh</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g9" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g10" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g11" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
-        </div>
-        <div class="gallery-tile video-tile" data-gid="g12" onclick="galleryTileClick(this)">
-          <div class="gal-ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Thêm video</span></div>
-          <div class="gal-overlay"></div><div class="gal-label"></div>
-          <button class="gal-del" onclick="galleryDelete(event,this.closest('.gallery-tile'))">✕</button>
+      <div class="cc-stage" id="cc-stage">
+        <div class="cc-perspective"><div class="cc-track" id="cc-track"></div></div>
+        <button class="cc-nav cc-nav-prev" onclick="carouselPrev()" aria-label="Trước">‹</button>
+        <button class="cc-nav cc-nav-next" onclick="carouselNext()" aria-label="Sau">›</button>
+        <div class="cc-dots" id="cc-dots"></div>
+        <div class="cc-empty" id="cc-empty">
+          <span style="font-size:2.6rem;opacity:.35">🖼️</span>
+          <span>Chưa có ảnh/video nào. Bấm "Thêm ảnh" hoặc "Thêm video" ở trên để bắt đầu.</span>
         </div>
       </div>
-      <p class="gallery-admin-note">👆 Nhấn vào ô trống để tải ảnh lên hoặc dán link video (chỉ quản trị viên)</p>
     </div>
   </div>
 </section>
@@ -7639,45 +7622,8 @@ function cpoToggleProductApproval(ceoId,prodId){
   }
 }
 
-// ===== COMMUNITY GALLERY =====
+// ===== COMMUNITY GALLERY — 3D depth carousel =====
 const GAL_PREFIX='comm-gallery-';
-function initGallery(){
-  document.querySelectorAll('.gallery-tile').forEach(function(tile){
-    const gid=tile.dataset.gid;
-    const saved=localStorage.getItem(GAL_PREFIX+gid);
-    if(saved){try{const d=JSON.parse(saved);if(d.type==='photo')_galSetPhoto(tile,d.src,d.label);else if(d.type==='video')_galSetVideo(tile,d.url,d.label);}catch(e){}}
-  });
-  renderAlbumsRow();
-}
-function galleryTileClick(tile){
-  const hasContent=tile.querySelector('img[src]:not([src=""]),iframe,video');
-  if(hasContent){
-    if(!window.adminMode){const img=tile.querySelector('img');if(img)openGalleryLightbox(img.src);}
-    return;
-  }
-  if(!window.adminMode)return;
-  if(tile.classList.contains('video-tile')){
-    openVideoModal({kind:'tile',tile});
-  } else {
-    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
-    inp.onchange=function(){
-      const file=inp.files[0];if(!file)return;
-      const r=new FileReader();
-      r.onload=function(ev){
-        const lbl=file.name.replace(/\.[^.]+$/,'');
-        _galSetPhoto(tile,ev.target.result,lbl);
-        localStorage.setItem(GAL_PREFIX+tile.dataset.gid,JSON.stringify({type:'photo',src:ev.target.result,label:lbl}));
-      };r.readAsDataURL(file);
-    };inp.click();
-  }
-}
-function _galSetPhoto(tile,src,label){
-  tile.querySelector('.gal-ph').style.display='none';
-  let img=tile.querySelector('img');
-  if(!img){img=document.createElement('img');tile.insertBefore(img,tile.querySelector('.gal-overlay'));}
-  img.src=src;
-  const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent=label||'';
-}
 // Detect YouTube/Vimeo links vs. a directly-hosted video file (e.g. uploaded to Blob storage)
 function _videoEmbedInfo(url){
   const yt=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -7686,52 +7632,154 @@ function _videoEmbedInfo(url){
   if(vm)return{kind:'iframe',src:'https://player.vimeo.com/video/'+vm[1]};
   return{kind:'video',src:url};
 }
-function _galSetVideo(tile,url,label){
-  tile.querySelector('.gal-ph').style.display='none';
-  const info=_videoEmbedInfo(url);
-  const wantTag=info.kind==='iframe'?'IFRAME':'VIDEO';
-  let media=tile.querySelector('iframe,video');
-  if(media&&media.tagName!==wantTag){media.remove();media=null;}
-  if(!media){
-    media=document.createElement(info.kind==='iframe'?'iframe':'video');
-    if(info.kind==='video'){media.controls=true;media.setAttribute('playsinline','');}
-    else{media.allow='autoplay;fullscreen';}
-    media.style.pointerEvents='none';
-    tile.insertBefore(media,tile.querySelector('.gal-overlay'));
+// Every comm-gallery-* entry counts — both the legacy flat pool AND every album's photos/videos —
+// so the carousel always reflects everything that's been uploaded, with no separate curation step.
+function _getAllGalleryMediaItems(){
+  const items=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.indexOf(GAL_PREFIX)===0){
+      try{const d=JSON.parse(localStorage.getItem(k));if(d&&(d.type==='photo'||d.type==='video'))items.push({gid:k.slice(GAL_PREFIX.length),...d});}catch(e){}
+    }
   }
-  media.src=info.src;
-  if(!tile.querySelector('.gal-play-btn')){
-    const pb=document.createElement('div');pb.className='gal-play-btn';
-    pb.innerHTML='<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="26" fill="rgba(0,0,0,.55)"/><polygon points="21,17 39,26 21,35" fill="rgba(255,255,255,.95)"/></svg>';
-    pb.onclick=function(e){e.stopPropagation();media.style.pointerEvents='auto';pb.style.display='none';if(info.kind==='video')media.play();else media.src=media.src;};
-    tile.insertBefore(pb,tile.querySelector('.gal-overlay'));
-  }
-  const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent=label||'Video cộng đồng';
+  return items.sort((a,b)=>(b.ts||0)-(a.ts||0));
 }
-function galleryDelete(e,tile){
-  e.stopPropagation();if(!window.adminMode)return;
-  const img=tile.querySelector('img');if(img)img.remove();
-  const media=tile.querySelector('iframe,video');if(media)media.remove();
-  const pb=tile.querySelector('.gal-play-btn');if(pb)pb.remove();
-  tile.querySelector('.gal-ph').style.display='';
-  const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent='';
-  localStorage.removeItem(GAL_PREFIX+tile.dataset.gid);
+let _carouselItems=[];
+let _carouselIndex=0;
+let _carouselFilter='all';
+let _carouselTimer=null;
+const CC_VISIBLE_SIDE=2;
+function initGallery(){
+  _carouselFilter='all';
+  _carouselItems=_getAllGalleryMediaItems();
+  _carouselIndex=0;
+  renderCommunityCarousel();
+  _startCarouselAutoplay();
+  renderAlbumsRow();
+}
+function renderCommunityCarousel(){
+  const track=document.getElementById('cc-track');
+  if(!track)return;
+  const empty=document.getElementById('cc-empty');
+  const dots=document.getElementById('cc-dots');
+  if(!_carouselItems.length){
+    track.innerHTML='';
+    if(empty)empty.style.display='flex';
+    if(dots)dots.innerHTML='';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  const n=_carouselItems.length;
+  track.innerHTML=_carouselItems.map((it,i)=>{
+    let offset=i-_carouselIndex;
+    if(offset>n/2)offset-=n;
+    if(offset<-n/2)offset+=n;
+    const abs=Math.abs(offset);
+    const visible=abs<=CC_VISIBLE_SIDE;
+    if(!visible)return'';
+    const tx=offset*230;
+    const tz=-abs*270;
+    const ty=abs*10;
+    const ry=offset*-36;
+    const scale=1-abs*0.15;
+    const op=Math.max(0,1-abs*0.3);
+    let inner;
+    if(it.type==='photo'){inner=`<img src="${it.src}" alt="">`;}
+    else{
+      const info=_videoEmbedInfo(it.url);
+      inner=info.kind==='video'?`<video src="${info.src}" muted loop playsinline preload="metadata"></video>`:`<div class="cc-video-ph">🎥</div>`;
+    }
+    return`<div class="cc-card${abs===0?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_carouselCardClick(${i})">
+      ${inner}
+      ${it.type==='video'?'<div class="cc-play-badge">▶</div>':''}
+      <div class="cc-card-label">${it.label||(it.type==='video'?'Video cộng đồng':'')}</div>
+      ${abs===0?`<button class="cc-card-del" onclick="event.stopPropagation();_carouselDeleteActive()">✕</button>`:''}
+    </div>`;
+  }).join('');
+  if(dots)dots.innerHTML=_carouselItems.map((_,i)=>`<span class="cc-dot${i===_carouselIndex?' active':''}" onclick="_carouselGoTo(${i})"></span>`).join('');
+}
+function _carouselCardClick(i){
+  if(i===_carouselIndex){
+    const it=_carouselItems[i];
+    if(!it)return;
+    if(it.type==='photo')openGalleryLightbox(it.src);
+    else _openCarouselVideoLightbox(it.url);
+  }else{
+    _carouselGoTo(i);
+  }
+}
+function _carouselGoTo(i){
+  if(!_carouselItems.length)return;
+  _carouselIndex=((i%_carouselItems.length)+_carouselItems.length)%_carouselItems.length;
+  renderCommunityCarousel();
+  _restartCarouselAutoplay();
+}
+function carouselPrev(){_carouselGoTo(_carouselIndex-1);}
+function carouselNext(){_carouselGoTo(_carouselIndex+1);}
+function _startCarouselAutoplay(){
+  if(_carouselTimer){clearInterval(_carouselTimer);_carouselTimer=null;}
+  if(_carouselItems.length<2)return;
+  _carouselTimer=setInterval(()=>{_carouselIndex=(_carouselIndex+1)%_carouselItems.length;renderCommunityCarousel();},4200);
+}
+function _pauseCarouselAutoplay(){if(_carouselTimer){clearInterval(_carouselTimer);_carouselTimer=null;}}
+function _restartCarouselAutoplay(){_startCarouselAutoplay();}
+function _openCarouselVideoLightbox(url){
+  const info=_videoEmbedInfo(url);
+  const box=document.getElementById('cc-video-lightbox-inner');
+  box.innerHTML=info.kind==='video'?`<video src="${info.src}" controls autoplay playsinline></video>`:`<iframe src="${info.src}" allow="autoplay;fullscreen"></iframe>`;
+  document.getElementById('cc-video-lightbox').classList.add('open');
+}
+function closeCarouselVideoLightbox(){
+  document.getElementById('cc-video-lightbox').classList.remove('open');
+  document.getElementById('cc-video-lightbox-inner').innerHTML='';
+}
+function _carouselDeleteActive(){
+  if(!window.adminMode)return;
+  const it=_carouselItems[_carouselIndex];
+  if(!it)return;
+  if(!confirm('Xóa ảnh/video này?'))return;
+  localStorage.removeItem(GAL_PREFIX+it.gid);
+  _carouselItems=_getAllGalleryMediaItems().filter(x=>_carouselFilter==='all'?true:x.type===_carouselFilter);
+  if(_carouselIndex>=_carouselItems.length)_carouselIndex=Math.max(0,_carouselItems.length-1);
+  renderCommunityCarousel();
+  renderAlbumsRow();
 }
 function switchGalleryTab(btn,type){
   document.querySelectorAll('.gtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  document.querySelectorAll('.gallery-tile').forEach(function(tile){
-    if(type==='all')tile.style.display='';
-    else if(type==='photo')tile.style.display=tile.classList.contains('photo-tile')?'':'none';
-    else if(type==='video')tile.style.display=tile.classList.contains('video-tile')?'':'none';
-  });
+  _carouselFilter=type;
+  _carouselItems=_getAllGalleryMediaItems().filter(it=>type==='all'?true:it.type===type);
+  _carouselIndex=0;
+  renderCommunityCarousel();
+  _restartCarouselAutoplay();
 }
 function openGalleryLightbox(src){
   document.getElementById('gal-lb-img').src=src;
   document.getElementById('gal-lightbox').classList.add('open');
 }
+// Drag/swipe support for the 3D stage (mouse + touch)
+(function(){
+  let startX=0,dragging=false;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const stage=document.getElementById('cc-stage');
+    if(!stage)return;
+    const down=e=>{dragging=true;const p=e.touches?e.touches[0]:e;startX=p.clientX;_pauseCarouselAutoplay();};
+    const up=e=>{
+      if(!dragging)return;dragging=false;
+      const p=e.changedTouches?e.changedTouches[0]:e;
+      const dx=p.clientX-startX;
+      if(Math.abs(dx)>50){dx<0?carouselNext():carouselPrev();}else{_restartCarouselAutoplay();}
+    };
+    stage.addEventListener('mousedown',down);
+    stage.addEventListener('touchstart',down,{passive:true});
+    window.addEventListener('mouseup',up);
+    stage.addEventListener('touchend',up);
+    stage.addEventListener('mouseenter',_pauseCarouselAutoplay);
+    stage.addEventListener('mouseleave',_restartCarouselAutoplay);
+  });
+})();
 
 // ===== VIDEO ADD MODAL (link OR upload from computer) =====
-let _videoModalTarget=null; // {kind:'tile',tile} | {kind:'album',albumId} | {kind:'general'}
+let _videoModalTarget=null; // {kind:'album',albumId} | {kind:'general'}
 let _videoModalMode='link';
 let _videoModalFile=null;
 function openVideoModal(target){
@@ -7782,10 +7830,7 @@ async function confirmVideoUrl(){
 }
 function _applyVideoToTarget(url,label){
   const t=_videoModalTarget;if(!t)return;
-  if(t.kind==='tile'){
-    _galSetVideo(t.tile,url,label);
-    localStorage.setItem(GAL_PREFIX+t.tile.dataset.gid,JSON.stringify({type:'video',url,label}));
-  } else if(t.kind==='album'){
+  if(t.kind==='album'){
     const gid=_nextAlbumItemGid(t.albumId);
     localStorage.setItem(GAL_PREFIX+gid,JSON.stringify({type:'video',url,label,ts:Date.now()}));
     renderAlbumViewer();renderAlbumsRow();
@@ -7840,11 +7885,11 @@ function renderAlbumsRow(){
     const coverPhoto=items.find(i=>i.type==='photo');
     const cover=coverPhoto?coverPhoto.src:'';
     return`<div class="gal-album-card" onclick="openAlbumViewer('${a.id}')">
-      <div class="gal-album-cover">${cover?`<img src="${cover}" alt="">`:'<span style="font-size:1.6rem;opacity:.35">📁</span>'}<span class="gal-album-count">${items.length}</span></div>
+      <div class="gal-album-cover">${cover?`<img src="${cover}" alt="">`:'<span class="gal-album-folder-ico">📁</span>'}<span class="gal-album-count">${items.length} mục</span></div>
       <div class="gal-album-name">${a.name}</div>
     </div>`;
   }).join('')+(window.adminMode?`<div class="gal-album-card" onclick="createNewAlbum()">
-      <div class="gal-album-cover" style="border-style:dashed"><span class="gal-album-add-ico">＋</span></div>
+      <div class="gal-album-cover is-add"><span class="gal-album-add-ico">＋</span></div>
       <div class="gal-album-name">Album mới</div>
     </div>`:'');
 }
@@ -7930,7 +7975,7 @@ function deleteAlbum(){
   renderAlbumsRow();
 }
 document.addEventListener('DOMContentLoaded', async () => { await _dbReady; initGallery(); });
-document.addEventListener('click',function(e){if(e.target.id==='gal-lightbox')document.getElementById('gal-lightbox').classList.remove('open');if(e.target.id==='video-url-modal')closeVideoModal();if(e.target.id==='album-viewer-modal')closeAlbumViewer();});
+document.addEventListener('click',function(e){if(e.target.id==='gal-lightbox')document.getElementById('gal-lightbox').classList.remove('open');if(e.target.id==='video-url-modal')closeVideoModal();if(e.target.id==='album-viewer-modal')closeAlbumViewer();if(e.target.id==='cc-video-lightbox')closeCarouselVideoLightbox();});
 
 // ===== FLIPBOOK (self-hosted: PDF.js render trang, StPageFlip lật trang — không logo bên thứ 3) =====
 const FB_PDF_URL='cam-nang-thanh-vien.pdf';
@@ -8080,7 +8125,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') fbPrev();
   else if(e.key==='ArrowRight') fbNext();
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
 </script>
 
 <!-- FLIPBOOK MODAL (sách tự chủ — không logo bên thứ 3) -->
@@ -8679,6 +8724,12 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
 <div id="gal-lightbox">
   <button id="gal-lb-close" onclick="document.getElementById('gal-lightbox').classList.remove('open')">✕</button>
   <img id="gal-lb-img" src="" alt="">
+</div>
+
+<!-- CAROUSEL VIDEO LIGHTBOX -->
+<div id="cc-video-lightbox">
+  <button id="cc-video-lb-close" onclick="closeCarouselVideoLightbox()">✕</button>
+  <div id="cc-video-lightbox-inner"></div>
 </div>
 
 <!-- VIDEO URL MODAL -->
