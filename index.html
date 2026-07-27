@@ -247,7 +247,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .cc-track{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .cc-card{position:absolute;top:50%;left:50%;width:340px;height:440px;margin:-220px 0 0 -170px;border-radius:20px;overflow:hidden;background:var(--dark4);box-shadow:0 30px 70px rgba(0,0,0,.6);cursor:pointer;transition:transform .65s cubic-bezier(.19,.85,.28,1.05),opacity .65s ease,filter .65s ease;filter:brightness(.5) saturate(.7);border:1px solid rgba(255,255,255,.07);will-change:transform,opacity}
 .cc-card.active{filter:brightness(1) saturate(1);box-shadow:0 44px 110px rgba(0,0,0,.75),0 0 0 2px rgba(34,197,94,.55)}
-.cc-card img,.cc-card video{width:100%;height:100%;object-fit:cover;object-position:center;display:block;pointer-events:none}
+.cc-card img,.cc-card video{width:100%;height:100%;object-fit:contain;object-position:center;display:block;pointer-events:none;background:var(--dark4)}
 .cc-video-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.8rem;background:var(--dark4);pointer-events:none}
 .cc-play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.9rem;color:#fff;background:rgba(0,0,0,.24);pointer-events:none;transition:opacity .3s}
 .cc-card.active .cc-play-badge.is-playing{opacity:0}
@@ -7830,60 +7830,94 @@ function _ccLoad(key){
   _ccRender(key);
   _ccStartAutoplay(key);
 }
+// Cards are kept alive across renders (keyed by gid) and only have their transform/opacity
+// updated — rebuilding innerHTML from scratch every tick (the old approach) meant every "frame"
+// was actually a brand-new element already sitting at its final position, so the CSS transition
+// never had anything to animate from → the whole carousel felt like it was snapping, not gliding.
 function _ccRender(key){
   const inst=_ccInstances[key];if(!inst)return;
   const track=document.getElementById(inst.ids.track);
   if(!track)return;
   const empty=document.getElementById(inst.ids.empty);
   const dots=document.getElementById(inst.ids.dots);
+  if(!inst.cardEls)inst.cardEls={};
   if(!inst.items.length){
     track.innerHTML='';
+    inst.cardEls={};
     if(empty)empty.style.display='flex';
     if(dots)dots.innerHTML='';
     return;
   }
   if(empty)empty.style.display='none';
   const n=inst.items.length;
-  track.innerHTML=inst.items.map((it,i)=>{
+  const activeGid=inst.items[inst.index].gid;
+  const visibleGids=new Set();
+  inst.items.forEach((it,i)=>{
     let offset=i-inst.index;
     if(offset>n/2)offset-=n;
     if(offset<-n/2)offset+=n;
     const abs=Math.abs(offset);
-    if(abs>CC_VISIBLE_SIDE)return'';
+    if(abs>CC_VISIBLE_SIDE)return;
+    visibleGids.add(it.gid);
     const tx=offset*300;
     const tz=-abs*260;
     const ty=abs*8;
     const ry=offset*-30;
     const scale=1-abs*0.18;
     const op=Math.max(0,1-abs*0.35);
-    const isActive=abs===0;
-    let inner;
-    if(it.type==='photo'){inner=`<img src="${it.src}" alt="">`;}
-    else{
-      const info=_videoEmbedInfo(it.url);
-      inner=info.kind==='video'
-        ?`<video src="${info.src}" ${isActive?'autoplay':''} muted loop playsinline preload="auto"></video>`
-        :`<div class="cc-video-ph">🎥</div>`;
+    const isActive=it.gid===activeGid;
+    const mediaKey=it.type+':'+(it.src||it.url);
+    let el=inst.cardEls[it.gid];
+    if(!el||el.dataset.mediaKey!==mediaKey){
+      if(el)el.remove();
+      el=document.createElement('div');
+      el.dataset.gid=it.gid;
+      el.dataset.mediaKey=mediaKey;
+      el.onclick=()=>_ccCardClickByGid(key,it.gid);
+      let inner;
+      if(it.type==='photo'){inner=`<img src="${it.src}" alt="">`;}
+      else{
+        const info=_videoEmbedInfo(it.url);
+        inner=info.kind==='video'
+          ?`<video src="${info.src}" muted loop playsinline preload="auto"></video>`
+          :`<div class="cc-video-ph">🎥</div>`;
+      }
+      el.innerHTML=`${inner}
+        ${it.type==='video'?`<div class="cc-play-badge">▶</div>`:''}
+        <div class="cc-card-label"></div>
+        <button class="cc-card-del" onclick="event.stopPropagation();_ccDeleteActive('${key}')">✕</button>
+        <div class="cc-card-admin-row">
+          <button class="cc-mini-btn" onclick="event.stopPropagation();_ccEditActiveLabel('${key}')">✏️ Sửa</button>
+          <button class="cc-mini-btn" onclick="event.stopPropagation();_ccReplaceActive('${key}')">🔁 Thay thế</button>
+        </div>`;
+      track.appendChild(el);
+      inst.cardEls[it.gid]=el;
     }
-    const adminRow=isActive?`
-      <button class="cc-card-del" onclick="event.stopPropagation();_ccDeleteActive('${key}')">✕</button>
-      <div class="cc-card-admin-row">
-        <button class="cc-mini-btn" onclick="event.stopPropagation();_ccEditActiveLabel('${key}')">✏️ Sửa</button>
-        <button class="cc-mini-btn" onclick="event.stopPropagation();_ccReplaceActive('${key}')">🔁 Thay thế</button>
-      </div>`:'';
-    return`<div class="cc-card${isActive?' active':''}" style="transform:translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale});opacity:${op};z-index:${100-abs}" onclick="_ccCardClick('${key}',${i})">
-      ${inner}
-      ${it.type==='video'?`<div class="cc-play-badge${isActive?' is-playing':''}">▶</div>`:''}
-      <div class="cc-card-label">${it.label||(it.type==='video'?'Video cộng đồng':'')}</div>
-      ${adminRow}
-    </div>`;
-  }).join('');
-  if(dots)dots.innerHTML=inst.items.map((_,i)=>`<span class="cc-dot${i===inst.index?' active':''}" onclick="_ccGoTo('${key}',${i})"></span>`).join('');
+    el.className='cc-card'+(isActive?' active':'');
+    el.style.transform=`translate(-50%,-50%) translate3d(${tx}px,${-ty}px,${tz}px) rotateY(${ry}deg) scale(${scale})`;
+    el.style.opacity=op;
+    el.style.zIndex=100-abs;
+    const labelEl=el.querySelector('.cc-card-label');
+    if(labelEl)labelEl.textContent=it.label||(it.type==='video'?'Video cộng đồng':'');
+    const vid=el.querySelector('video');
+    if(vid){
+      if(isActive){if(vid.paused)vid.play().catch(()=>{});}
+      else if(!vid.paused){vid.pause();}
+    }
+    const playBadge=el.querySelector('.cc-play-badge');
+    if(playBadge)playBadge.classList.toggle('is-playing',isActive&&!!vid&&!vid.paused);
+  });
+  Object.keys(inst.cardEls).forEach(gid=>{
+    if(!visibleGids.has(gid)){inst.cardEls[gid].remove();delete inst.cardEls[gid];}
+  });
+  if(dots)dots.innerHTML=inst.items.map((it,i)=>`<span class="cc-dot${it.gid===activeGid?' active':''}" onclick="_ccGoTo('${key}',${i})"></span>`).join('');
 }
-function _ccCardClick(key,i){
+function _ccCardClickByGid(key,gid){
   const inst=_ccInstances[key];if(!inst)return;
+  const i=inst.items.findIndex(it=>it.gid===gid);
+  if(i<0)return;
   if(i===inst.index){
-    const it=inst.items[i];if(!it)return;
+    const it=inst.items[i];
     if(it.type==='photo')openGalleryLightbox(it.src);
     else _openCarouselVideoLightbox(it.url);
   }else{_ccGoTo(key,i);}
