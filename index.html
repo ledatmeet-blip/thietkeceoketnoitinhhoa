@@ -4908,6 +4908,15 @@ function _applyDbData(data){
   Object.entries(data).forEach(([k, v]) => {
     _lsSet(k, typeof v === 'string' ? v : JSON.stringify(v));
   });
+  // Đồng bộ cả chiều XOÁ: nếu 1 key khớp mẫu đồng bộ (_DB_SYNC_RE) từng có sẵn trên máy này
+  // nhưng server KHÔNG còn trả về nữa (đã bị xoá — dù xoá từ thiết bị/trình duyệt khác), phải
+  // xoá luôn khỏi localStorage ở đây. Trước đây chỉ có chiều thêm/sửa — nội dung đã xoá trên
+  // server vẫn "sống lại" mãi trên mọi trình duyệt đã từng tải trang trước lúc xoá.
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k in data) continue;
+    if (_DB_SYNC_RE.some(re => re.test(k))) localStorage.removeItem(k);
+  }
   _dbDataApplied = true;
 }
 // Fetch riêng biệt với race — trước đây nếu fetch thua cuộc đua 6s (mạng yếu/server khởi động
@@ -6528,6 +6537,7 @@ function _reRenderAllDynamicSections(){
   renderPricingInfo();
   applyDesign();
   initImages();
+  if (typeof initGallery === 'function') initGallery();
 }
 document.addEventListener('DOMContentLoaded', async () => {
   await _dbReady; // wait for DB sync (tối đa 6s) before rendering data-driven sections
