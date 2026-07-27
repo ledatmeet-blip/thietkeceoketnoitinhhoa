@@ -940,6 +940,8 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .float-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);transition:.25s;border:none;font-size:1.3rem}
 .float-btn:hover{transform:scale(1.1)}
 #btn-zalo{background:#0068ff;color:#fff}
+#btn-music{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a}
+#btn-music.muted{opacity:.5}
 #btn-top{background:var(--gold);color:#0a0a0a;opacity:0;pointer-events:none}
 #btn-top.visible{opacity:1;pointer-events:auto}
 
@@ -2692,9 +2694,11 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 
 <!-- FLOATING BUTTONS -->
 <div class="float-btns">
+  <button class="float-btn" id="btn-music" title="Nhạc nền" onclick="toggleBgMusic()">🔊</button>
   <button class="float-btn" id="btn-zalo" title="Chat Zalo" onclick="window.open('https://zalo.me','_blank')">💬</button>
   <button class="float-btn" id="btn-top" title="Lên đầu trang" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 </div>
+<audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
 
 <!-- LOGIN MODAL -->
 <div id="login-overlay" onclick="if(event.target===this)closeLogin()">
@@ -7755,7 +7759,7 @@ function _ccStartAutoplay(key){
   const inst=_ccInstances[key];if(!inst)return;
   if(inst.timer){clearInterval(inst.timer);inst.timer=null;}
   if(inst.items.length<2)return;
-  inst.timer=setInterval(()=>{inst.index=(inst.index+1)%inst.items.length;_ccRender(key);},4200);
+  inst.timer=setInterval(()=>{inst.index=(inst.index+1)%inst.items.length;_ccRender(key);},7000);
 }
 function _ccPauseAutoplay(key){const inst=_ccInstances[key];if(inst&&inst.timer){clearInterval(inst.timer);inst.timer=null;}}
 function _ccRestartAutoplay(key){_ccStartAutoplay(key);}
@@ -8217,6 +8221,51 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight') fbNext();
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+
+// ===== BACKGROUND MUSIC =====
+// Browsers block audio-with-sound autoplay until the user has interacted with the page, so we
+// try to autoplay right away and, if that's blocked, start on the very first click/scroll/key —
+// giving a near-seamless "music plays as soon as you're on the site" experience either way.
+const BG_MUSIC_VOLUME=0.35;
+let _bgMusicMuted=localStorage.getItem('bg-music-muted')==='1';
+function _updateBgMusicBtn(){
+  const audio=document.getElementById('bg-music');
+  const btn=document.getElementById('btn-music');
+  if(!audio||!btn)return;
+  const playing=!audio.paused&&!audio.ended;
+  btn.textContent=playing?'🔊':'🔇';
+  btn.classList.toggle('muted',!playing);
+}
+function toggleBgMusic(){
+  const audio=document.getElementById('bg-music');
+  if(!audio)return;
+  if(audio.paused){
+    _bgMusicMuted=false;
+    audio.play().catch(()=>{});
+  }else{
+    _bgMusicMuted=true;
+    audio.pause();
+  }
+  localStorage.setItem('bg-music-muted',_bgMusicMuted?'1':'0');
+  _updateBgMusicBtn();
+}
+function _initBgMusic(){
+  const audio=document.getElementById('bg-music');
+  if(!audio)return;
+  audio.volume=BG_MUSIC_VOLUME;
+  audio.addEventListener('play',_updateBgMusicBtn);
+  audio.addEventListener('pause',_updateBgMusicBtn);
+  if(_bgMusicMuted){_updateBgMusicBtn();return;}
+  audio.play().catch(()=>{
+    const startOnInteract=()=>{
+      if(!_bgMusicMuted)audio.play().catch(()=>{});
+      ['click','touchstart','keydown','scroll'].forEach(ev=>document.removeEventListener(ev,startOnInteract));
+    };
+    ['click','touchstart','keydown','scroll'].forEach(ev=>document.addEventListener(ev,startOnInteract,{passive:true}));
+  });
+  _updateBgMusicBtn();
+}
+document.addEventListener('DOMContentLoaded',_initBgMusic);
 </script>
 
 <!-- FLIPBOOK MODAL (sách tự chủ — không logo bên thứ 3) -->
