@@ -224,6 +224,36 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .admin-mode .gallery-admin-add-row{display:flex}
 .gal-add-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.06);color:var(--gold);font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
 .gal-add-btn:hover{background:rgba(34,197,94,.14)}
+/* Photo albums */
+.gal-albums-row{display:none;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px}
+.gal-albums-row.has-content{display:flex}
+.gal-album-card{flex:0 0 auto;width:128px;cursor:pointer;text-align:center}
+.gal-album-cover{width:128px;height:96px;border-radius:10px;overflow:hidden;background:var(--dark3);border:1.5px dashed rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;position:relative;transition:.2s}
+.gal-album-cover img{width:100%;height:100%;object-fit:cover}
+.gal-album-card:hover .gal-album-cover{border-color:rgba(34,197,94,.45)}
+.gal-album-count{position:absolute;bottom:4px;right:6px;background:rgba(0,0,0,.65);color:#fff;font-size:.64rem;font-weight:700;padding:2px 7px;border-radius:20px}
+.gal-album-name{margin-top:6px;font-size:.78rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gal-album-add-ico{font-size:1.8rem;color:var(--gold);opacity:.75}
+/* Album viewer modal */
+#album-viewer-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:690;display:none;align-items:center;justify-content:center;padding:20px}
+#album-viewer-modal.open{display:flex}
+.alb-viewer-box{background:var(--dark3);border:1px solid rgba(34,197,94,.2);border-radius:18px;width:min(920px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.alb-viewer-hdr{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.alb-viewer-hdr h3{flex:1;font-size:1.05rem;color:#fff;font-weight:800;min-width:140px}
+.alb-viewer-actions{display:flex;gap:8px;flex-wrap:wrap}
+.alb-act-btn{padding:7px 13px;border-radius:8px;background:var(--dark4);border:1px solid rgba(34,197,94,.2);color:var(--gold);font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
+.alb-act-btn:hover{background:rgba(34,197,94,.08)}
+.alb-act-danger{color:#ff6b6b;border-color:rgba(255,107,107,.3)}
+.alb-act-danger:hover{background:rgba(255,107,107,.08)}
+.alb-viewer-close{width:34px;height:34px;border-radius:50%;border:none;background:var(--dark4);color:#fff;font-size:1rem;cursor:pointer;flex-shrink:0}
+.alb-viewer-grid{padding:20px 22px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.alb-item{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--dark4)}
+.alb-item img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
+.alb-item-video{width:100%;height:100%}
+.alb-item-video video,.alb-item-video iframe{width:100%;height:100%;border:0;background:#000}
+.alb-item-del{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(122,0,0,.85);color:#fff;font-size:.8rem;cursor:pointer;z-index:2}
+.alb-empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;font-size:.88rem}
+@media(max-width:600px){.alb-viewer-hdr h3{width:100%}}
 
 /* ===== SHOWCASE SẢN PHẨM ===== */
 .showcase-section{margin-top:0;padding:0}
@@ -330,6 +360,12 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .vmodal-input{width:100%;background:var(--dark4);border:1.5px solid rgba(34,197,94,.2);color:var(--text);padding:11px 14px;border-radius:8px;font-size:.88rem;outline:none;margin-bottom:16px;font-family:inherit}
 .vmodal-input:focus{border-color:var(--gold)}
 .vmodal-btns{display:flex;gap:10px;justify-content:flex-end}
+.vmodal-src-tabs{display:flex;gap:8px;margin-bottom:14px}
+.vmodal-src-tab{flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid rgba(34,197,94,.2);background:var(--dark4);color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
+.vmodal-src-tab.active{background:rgba(34,197,94,.12);color:var(--gold);border-color:var(--gold)}
+.vmodal-file-btn{display:block;text-align:center;padding:11px 14px;border-radius:8px;border:1.5px dashed rgba(34,197,94,.3);color:var(--gold);font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:8px;transition:.2s}
+.vmodal-file-btn:hover{background:rgba(34,197,94,.05)}
+.vmodal-file-name{font-size:.74rem;color:var(--muted);text-align:center;margin-bottom:16px}
 @media(max-width:700px){.comm-gallery-grid{grid-template-columns:repeat(2,1fr)}.gallery-tile.featured{grid-column:span 2}}
 @media(max-width:440px){.comm-gallery-grid{grid-template-columns:1fr}.gallery-tile.featured{grid-column:span 1;grid-row:span 1}}
 
@@ -2272,6 +2308,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
           <button class="gtab" onclick="switchGalleryTab(this,'video')">🎥 Video</button>
         </div>
       </div>
+      <div class="gal-albums-row" id="gal-albums-row"></div>
       <div class="gallery-admin-add-row">
         <button class="gal-add-btn" onclick="galAdminAddPhoto()">📷 Thêm ảnh</button>
         <button class="gal-add-btn" onclick="galAdminAddVideo()">🎥 Thêm video</button>
@@ -2578,17 +2615,17 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
         <div class="footer-contact-list">
 
           <!-- Phone → tel: -->
-          <a class="footer-contact-item is-link" id="fc-phone-item" href="tel:0909000000"
+          <a class="footer-contact-item is-link" id="fc-phone-item" href="tel:0936678813"
              onclick="if(window.adminMode){event.preventDefault();adminEditContact('phone')}">
             <div class="fci-icon-wrap">📞</div>
             <div class="fci-text">
               <div class="fci-label">Điện Thoại</div>
-              <div class="fci-val" id="fc-phone-val">0909 000 000</div>
+              <div class="fci-val" id="fc-phone-val">0936 678 813</div>
             </div>
           </a>
 
           <!-- Zalo → zalo.me -->
-          <a class="footer-contact-item is-link" id="fc-zalo-item" href="https://zalo.me/0909000000" target="_blank"
+          <a class="footer-contact-item is-link" id="fc-zalo-item" href="https://zalo.me/0936678813" target="_blank"
              onclick="if(window.adminMode){event.preventDefault();adminEditContact('zalo')}">
             <div class="fci-icon-wrap">💬</div>
             <div class="fci-text">
@@ -2598,12 +2635,12 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
           </a>
 
           <!-- Email → mailto: -->
-          <a class="footer-contact-item is-link" id="fc-email-item" href="mailto:info@ceoketnoitinhhoa.vn"
+          <a class="footer-contact-item is-link" id="fc-email-item" href="mailto:ceoketnoitinhhoa@gmail.com"
              onclick="if(window.adminMode){event.preventDefault();adminEditContact('email')}">
             <div class="fci-icon-wrap">✉️</div>
             <div class="fci-text">
               <div class="fci-label">Email</div>
-              <div class="fci-val" id="fc-email-val">info@ceoketnoitinhhoa.vn</div>
+              <div class="fci-val" id="fc-email-val">ceoketnoitinhhoa@gmail.com</div>
             </div>
           </a>
 
@@ -3741,12 +3778,7 @@ function galAdminAddPhoto(){
 }
 function galAdminAddVideo(){
   if(!window.adminMode)return;
-  const url=window.prompt('Nhập URL YouTube hoặc video (https://www.youtube.com/watch?v=...)');
-  if(!url)return;
-  const label=window.prompt('Tiêu đề video (tùy chọn):','')||'';
-  const gid=_nextGalleryGid();
-  localStorage.setItem('comm-gallery-'+gid,JSON.stringify({type:'video',url,label}));
-  if(typeof initGallery==='function')initGallery();
+  openVideoModal({kind:'general'});
 }
 
 // ===== ADMIN PANEL =====
@@ -4278,13 +4310,7 @@ function apUploadPhoto(){
   };inp.click();
 }
 function apAddVideo(){
-  const url=window.prompt('Nhập URL YouTube hoặc Vimeo:');
-  if(!url)return;
-  const label=window.prompt('Tiêu đề video (tùy chọn):','');
-  const gid=_nextGalleryGid();
-  localStorage.setItem('comm-gallery-'+gid,JSON.stringify({type:'video',url,label:label||''}));
-  _refreshGalleryGrid();
-  renderApMediaTab();
+  openVideoModal({kind:'general'});
 }
 function apDeleteMedia(gid){
   if(!confirm('Xóa media này?'))return;
@@ -4785,12 +4811,14 @@ function enableAdmin(){
   document.body.classList.add('admin-mode');
   document.getElementById('admin-bar').classList.add('visible');
   if(typeof renderCeoFilterTabs==='function') renderCeoFilterTabs();
+  if(typeof renderAlbumsRow==='function')renderAlbumsRow();
 }
 function disableAdmin(){
   window.adminMode=false;
   document.body.classList.remove('admin-mode');
   document.getElementById('admin-bar').classList.remove('visible');
   closeAdminPanel();
+  if(typeof renderAlbumsRow==='function')renderAlbumsRow();
 }
 
 // ===== DATABASE + BLOB SYNC LAYER =====
@@ -4816,6 +4844,7 @@ const _DB_SYNC_RE = [
   /^ceo-chapter-section-v1$/,
   /^ceo-filter-cats-v1$/,
   /^ws-event-v1$/,
+  /^ceo-albums-v1$/,
 ];
 const _lsSet = localStorage.setItem.bind(localStorage);
 
@@ -5065,7 +5094,7 @@ function submitAdminLogin(){
 
 // ===== BANK INFO =====
 const BANK_KEY='ceo-bank-v1';
-const BANK_DEF={bank_name:'MB Bank',account:'0123 4567 890',owner:'NGUYEN VAN A'};
+const BANK_DEF={bank_name:'VietinBank',account:'108643494131',owner:'TRAN THI LUYEN'};
 const BANK_LABELS={bank_name:'Tên ngân hàng (VD: MB Bank)',account:'Số tài khoản',owner:'Tên chủ tài khoản (IN HOA)'};
 function loadBank(){try{return{...BANK_DEF,...JSON.parse(localStorage.getItem(BANK_KEY)||'{}')};}catch(e){return{...BANK_DEF};}}
 function saveBank(b){localStorage.setItem(BANK_KEY,JSON.stringify(b));}
@@ -5088,13 +5117,13 @@ function adminEditBank(field){
 // ===== FOOTER CONTACT & SOCIALS =====
 const CONTACT_KEY='ceo-contact-v1';
 const CONTACT_DEF={
-  phone:'0909 000 000', phone_href:'tel:0909000000',
-  zalo:'Chat Zalo ngay', zalo_href:'https://zalo.me/0909000000',
-  email:'info@ceoketnoitinhhoa.vn',
+  phone:'0936 678 813', phone_href:'tel:0936678813',
+  zalo:'Chat Zalo ngay', zalo_href:'https://zalo.me/0936678813',
+  email:'ceoketnoitinhhoa@gmail.com',
   fb:'CEO Kết Nối Tinh Hoa', fb_href:'https://facebook.com',
   youtube:'https://youtube.com',
   tiktok:'https://tiktok.com',
-  zalo_url:'https://zalo.me/0909000000'
+  zalo_url:'https://zalo.me/0936678813'
 };
 function loadContact(){try{return{...CONTACT_DEF,...JSON.parse(localStorage.getItem(CONTACT_KEY)||'{}')};}catch(e){return{...CONTACT_DEF};}}
 function saveContact(c){localStorage.setItem(CONTACT_KEY,JSON.stringify(c));}
@@ -5697,12 +5726,20 @@ function _saveLead(data){
     status:data.status||'new',
     ts:new Date().toISOString(),
   };
-  const leads=_loadLeads();
-  // Avoid duplicate: same phone + source within 3 min
-  const dup=leads.find(l=>l.phone===lead.phone&&l.source===lead.source&&Date.now()-new Date(l.ts).getTime()<3*60*1000);
-  if(dup){Object.assign(dup,{...lead,id:dup.id,ts:dup.ts});_saveLeads(leads);return dup.id;}
-  leads.unshift(lead);
-  _saveLeads(leads);
+  // QUAN TRỌNG: đợi đồng bộ dữ liệu thật từ server xong rồi mới đọc-sửa-ghi mảng leads.
+  // Nếu đọc localStorage TRƯỚC khi đồng bộ xong (mạng chậm, /api/read có lúc mất 10-15s+),
+  // mảng cục bộ có thể đang rỗng/cũ — ghi đè lúc đó sẽ XOÁ MẤT toàn bộ lead thật đã có trên
+  // server (đã xảy ra thật khi test, không phải giả thuyết). Trả về id ngay để UI dùng luôn,
+  // việc đọc-ghi thật sự chỉ chạy sau khi chắc chắn đã có dữ liệu server.
+  const doSave=()=>{
+    const leads=_loadLeads();
+    const dup=leads.find(l=>l.phone===lead.phone&&l.source===lead.source&&Date.now()-new Date(l.ts).getTime()<3*60*1000);
+    if(dup){Object.assign(dup,{...lead,id:dup.id,ts:dup.ts});_saveLeads(leads);}
+    else{leads.unshift(lead);_saveLeads(leads);}
+  };
+  if(_dbDataApplied) doSave();
+  else if(_IS_LIVE) _dbFetchPromise.then(doSave);
+  else doSave();
   return lead.id;
 }
 function _updateLeadStatus(id,status){
@@ -7589,25 +7626,23 @@ function cpoToggleProductApproval(ceoId,prodId){
 
 // ===== COMMUNITY GALLERY =====
 const GAL_PREFIX='comm-gallery-';
-let _galPendingTile=null;
 function initGallery(){
   document.querySelectorAll('.gallery-tile').forEach(function(tile){
     const gid=tile.dataset.gid;
     const saved=localStorage.getItem(GAL_PREFIX+gid);
     if(saved){try{const d=JSON.parse(saved);if(d.type==='photo')_galSetPhoto(tile,d.src,d.label);else if(d.type==='video')_galSetVideo(tile,d.url,d.label);}catch(e){}}
   });
+  renderAlbumsRow();
 }
 function galleryTileClick(tile){
-  const hasContent=tile.querySelector('img[src]:not([src=""]),iframe');
+  const hasContent=tile.querySelector('img[src]:not([src=""]),iframe,video');
   if(hasContent){
     if(!window.adminMode){const img=tile.querySelector('img');if(img)openGalleryLightbox(img.src);}
     return;
   }
   if(!window.adminMode)return;
   if(tile.classList.contains('video-tile')){
-    _galPendingTile=tile;
-    document.getElementById('video-url-modal').classList.add('open');
-    setTimeout(()=>document.getElementById('video-url-input').focus(),120);
+    openVideoModal({kind:'tile',tile});
   } else {
     const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
     inp.onchange=function(){
@@ -7628,20 +7663,32 @@ function _galSetPhoto(tile,src,label){
   img.src=src;
   const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent=label||'';
 }
+// Detect YouTube/Vimeo links vs. a directly-hosted video file (e.g. uploaded to Blob storage)
+function _videoEmbedInfo(url){
+  const yt=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(yt)return{kind:'iframe',src:'https://www.youtube.com/embed/'+yt[1]+'?rel=0'};
+  const vm=url.match(/vimeo\.com\/(\d+)/);
+  if(vm)return{kind:'iframe',src:'https://player.vimeo.com/video/'+vm[1]};
+  return{kind:'video',src:url};
+}
 function _galSetVideo(tile,url,label){
   tile.querySelector('.gal-ph').style.display='none';
-  let embedUrl=url;
-  const yt=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if(yt)embedUrl='https://www.youtube.com/embed/'+yt[1]+'?rel=0';
-  const vm=url.match(/vimeo\.com\/(\d+)/);
-  if(vm)embedUrl='https://player.vimeo.com/video/'+vm[1];
-  let iframe=tile.querySelector('iframe');
-  if(!iframe){iframe=document.createElement('iframe');iframe.allow='autoplay;fullscreen';iframe.style.pointerEvents='none';tile.insertBefore(iframe,tile.querySelector('.gal-overlay'));}
-  iframe.src=embedUrl;
+  const info=_videoEmbedInfo(url);
+  const wantTag=info.kind==='iframe'?'IFRAME':'VIDEO';
+  let media=tile.querySelector('iframe,video');
+  if(media&&media.tagName!==wantTag){media.remove();media=null;}
+  if(!media){
+    media=document.createElement(info.kind==='iframe'?'iframe':'video');
+    if(info.kind==='video'){media.controls=true;media.setAttribute('playsinline','');}
+    else{media.allow='autoplay;fullscreen';}
+    media.style.pointerEvents='none';
+    tile.insertBefore(media,tile.querySelector('.gal-overlay'));
+  }
+  media.src=info.src;
   if(!tile.querySelector('.gal-play-btn')){
     const pb=document.createElement('div');pb.className='gal-play-btn';
     pb.innerHTML='<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="26" fill="rgba(0,0,0,.55)"/><polygon points="21,17 39,26 21,35" fill="rgba(255,255,255,.95)"/></svg>';
-    pb.onclick=function(e){e.stopPropagation();iframe.style.pointerEvents='auto';pb.style.display='none';iframe.src=iframe.src;};
+    pb.onclick=function(e){e.stopPropagation();media.style.pointerEvents='auto';pb.style.display='none';if(info.kind==='video')media.play();else media.src=media.src;};
     tile.insertBefore(pb,tile.querySelector('.gal-overlay'));
   }
   const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent=label||'Video cộng đồng';
@@ -7649,7 +7696,7 @@ function _galSetVideo(tile,url,label){
 function galleryDelete(e,tile){
   e.stopPropagation();if(!window.adminMode)return;
   const img=tile.querySelector('img');if(img)img.remove();
-  const iframe=tile.querySelector('iframe');if(iframe)iframe.remove();
+  const media=tile.querySelector('iframe,video');if(media)media.remove();
   const pb=tile.querySelector('.gal-play-btn');if(pb)pb.remove();
   tile.querySelector('.gal-ph').style.display='';
   const lbl=tile.querySelector('.gal-label');if(lbl)lbl.textContent='';
@@ -7667,19 +7714,208 @@ function openGalleryLightbox(src){
   document.getElementById('gal-lb-img').src=src;
   document.getElementById('gal-lightbox').classList.add('open');
 }
+
+// ===== VIDEO ADD MODAL (link OR upload from computer) =====
+let _videoModalTarget=null; // {kind:'tile',tile} | {kind:'album',albumId} | {kind:'general'}
+let _videoModalMode='link';
+let _videoModalFile=null;
+function openVideoModal(target){
+  _videoModalTarget=target;_videoModalFile=null;
+  document.getElementById('video-url-input').value='';
+  document.getElementById('video-label-input').value='';
+  document.getElementById('video-file-name').textContent='Chưa chọn file (MP4, MOV…)';
+  document.getElementById('video-file-input').value='';
+  switchVideoSrcTab('link');
+  document.getElementById('video-url-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('video-url-input').focus(),120);
+}
+function switchVideoSrcTab(mode){
+  _videoModalMode=mode;
+  document.getElementById('vmodal-tab-link').classList.toggle('active',mode==='link');
+  document.getElementById('vmodal-tab-file').classList.toggle('active',mode==='file');
+  document.getElementById('video-url-input').style.display=mode==='link'?'':'none';
+  document.getElementById('vmodal-file-wrap').style.display=mode==='file'?'':'none';
+}
+function onVideoFileChosen(e){
+  const f=e.target.files[0];
+  _videoModalFile=f||null;
+  document.getElementById('video-file-name').textContent=f?('✓ '+f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)'):'Chưa chọn file (MP4, MOV…)';
+}
 function closeVideoModal(){
   const m=document.getElementById('video-url-modal');if(m)m.classList.remove('open');
-  _galPendingTile=null;
+  _videoModalTarget=null;_videoModalFile=null;
 }
-function confirmVideoUrl(){
-  const url=document.getElementById('video-url-input').value.trim();
-  if(!url||!_galPendingTile){closeVideoModal();return;}
-  _galSetVideo(_galPendingTile,url,'Video cộng đồng');
-  localStorage.setItem(GAL_PREFIX+_galPendingTile.dataset.gid,JSON.stringify({type:'video',url:url,label:'Video cộng đồng'}));
-  closeVideoModal();
+async function confirmVideoUrl(){
+  if(!_videoModalTarget){closeVideoModal();return;}
+  const label=(document.getElementById('video-label-input').value||'').trim()||'Video cộng đồng';
+  if(_videoModalMode==='file'){
+    if(!_videoModalFile){alert('Vui lòng chọn file video từ máy tính.');return;}
+    if(!_IS_LIVE){alert('Tải video từ máy chỉ hoạt động trên site đã deploy (cần Vercel Blob storage). Trên localhost, hãy dùng link YouTube/Vimeo.');return;}
+    const btn=document.getElementById('vmodal-confirm-btn');
+    const orig=btn.textContent;btn.textContent='⏳ Đang tải lên…';btn.disabled=true;
+    const url=await _uploadFileToBlob('gal-video-'+Date.now(),_videoModalFile);
+    btn.textContent=orig;btn.disabled=false;
+    if(!url){alert('Tải video thất bại. Vui lòng thử lại.');return;}
+    _applyVideoToTarget(url,label);
+    closeVideoModal();
+  } else {
+    const url=(document.getElementById('video-url-input').value||'').trim();
+    if(!url){closeVideoModal();return;}
+    _applyVideoToTarget(url,label);
+    closeVideoModal();
+  }
+}
+function _applyVideoToTarget(url,label){
+  const t=_videoModalTarget;if(!t)return;
+  if(t.kind==='tile'){
+    _galSetVideo(t.tile,url,label);
+    localStorage.setItem(GAL_PREFIX+t.tile.dataset.gid,JSON.stringify({type:'video',url,label}));
+  } else if(t.kind==='album'){
+    const gid=_nextAlbumItemGid(t.albumId);
+    localStorage.setItem(GAL_PREFIX+gid,JSON.stringify({type:'video',url,label,ts:Date.now()}));
+    renderAlbumViewer();renderAlbumsRow();
+  } else if(t.kind==='general'){
+    const gid=_nextGalleryGid();
+    localStorage.setItem(GAL_PREFIX+gid,JSON.stringify({type:'video',url,label}));
+    _refreshGalleryGrid();
+    if(typeof renderApMediaTab==='function'&&document.getElementById('ap-tab-media'))renderApMediaTab();
+  }
+}
+// Upload a raw File (e.g. a video) straight to Vercel Blob — no base64/localStorage detour
+async function _uploadFileToBlob(key,file){
+  if(!_IS_LIVE||!file)return null;
+  try{
+    const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+    const filename=key.replace(/[^a-z0-9]/gi,'-').toLowerCase().slice(0,60)+'.'+ext;
+    const res=await fetch('/api/upload',{
+      method:'POST',
+      headers:{'Content-Type':file.type||'video/mp4','x-admin-email':_AE,'x-admin-pass':_AP,'x-filename':filename},
+      body:file,
+    });
+    if(!res.ok)return null;
+    const{url}=await res.json();
+    return url||null;
+  }catch(e){console.warn('[Blob] Video upload failed:',e.message);return null;}
+}
+
+// ===== PHOTO ALBUMS (unlimited photos/videos, grouped separately from the 12-slot grid above) =====
+const ALBUM_KEY='ceo-albums-v1';
+let _albViewerId=null;
+function loadAlbums(){try{return JSON.parse(localStorage.getItem(ALBUM_KEY)||'[]');}catch(e){return[];}}
+function saveAlbums(a){localStorage.setItem(ALBUM_KEY,JSON.stringify(a));}
+function _albumItemPrefix(albumId){return GAL_PREFIX+'alb'+albumId+'-';}
+function loadAlbumItems(albumId){
+  const prefix=_albumItemPrefix(albumId);
+  const items=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.indexOf(prefix)===0){
+      try{items.push({gid:k.slice(GAL_PREFIX.length),...JSON.parse(localStorage.getItem(k))});}catch(e){}
+    }
+  }
+  return items.sort((a,b)=>(a.ts||0)-(b.ts||0));
+}
+function _nextAlbumItemGid(albumId){return'alb'+albumId+'-'+Date.now()+'-'+Math.floor(Math.random()*100000);}
+function renderAlbumsRow(){
+  const row=document.getElementById('gal-albums-row');if(!row)return;
+  const albums=loadAlbums();
+  row.classList.toggle('has-content',albums.length>0||!!window.adminMode);
+  row.innerHTML=albums.map(a=>{
+    const items=loadAlbumItems(a.id);
+    const coverPhoto=items.find(i=>i.type==='photo');
+    const cover=coverPhoto?coverPhoto.src:'';
+    return`<div class="gal-album-card" onclick="openAlbumViewer('${a.id}')">
+      <div class="gal-album-cover">${cover?`<img src="${cover}" alt="">`:'<span style="font-size:1.6rem;opacity:.35">📁</span>'}<span class="gal-album-count">${items.length}</span></div>
+      <div class="gal-album-name">${a.name}</div>
+    </div>`;
+  }).join('')+(window.adminMode?`<div class="gal-album-card" onclick="createNewAlbum()">
+      <div class="gal-album-cover" style="border-style:dashed"><span class="gal-album-add-ico">＋</span></div>
+      <div class="gal-album-name">Album mới</div>
+    </div>`:'');
+}
+function createNewAlbum(){
+  if(!window.adminMode)return;
+  const name=(window.prompt('Tên album mới (VD: Chuyến đi Đà Lạt 2026):')||'').trim();
+  if(!name)return;
+  const albums=loadAlbums();
+  const id='a'+Date.now();
+  albums.push({id,name,createdAt:Date.now()});
+  saveAlbums(albums);
+  renderAlbumsRow();
+  openAlbumViewer(id);
+}
+function openAlbumViewer(albumId){
+  _albViewerId=albumId;
+  renderAlbumViewer();
+  document.getElementById('album-viewer-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeAlbumViewer(){
+  document.getElementById('album-viewer-modal').classList.remove('open');
+  document.body.style.overflow='';
+  _albViewerId=null;
+}
+function renderAlbumViewer(){
+  const albums=loadAlbums();
+  const album=albums.find(a=>a.id===_albViewerId);
+  if(!album){closeAlbumViewer();return;}
+  document.getElementById('alb-viewer-title').textContent='📁 '+album.name;
+  document.getElementById('alb-viewer-admin-actions').innerHTML=window.adminMode?`
+    <button class="alb-act-btn" onclick="albAddPhotos()">📷 Thêm ảnh</button>
+    <button class="alb-act-btn" onclick="albAddVideo()">🎥 Thêm video</button>
+    <button class="alb-act-btn" onclick="renameAlbum()">✏️ Đổi tên</button>
+    <button class="alb-act-btn alb-act-danger" onclick="deleteAlbum()">🗑 Xóa album</button>`:'';
+  const items=loadAlbumItems(album.id);
+  const grid=document.getElementById('alb-viewer-grid');
+  grid.innerHTML=items.length?items.map(it=>{
+    let inner;
+    if(it.type==='photo'){inner=`<img src="${it.src}" alt="" onclick="openGalleryLightbox('${it.src}')">`;}
+    else{const info=_videoEmbedInfo(it.url);inner=info.kind==='video'?`<div class="alb-item-video"><video src="${info.src}" controls playsinline></video></div>`:`<div class="alb-item-video"><iframe src="${info.src}" allow="autoplay;fullscreen"></iframe></div>`;}
+    return`<div class="alb-item">${inner}${window.adminMode?`<button class="alb-item-del" onclick="albDeleteItem('${it.gid}')">✕</button>`:''}</div>`;
+  }).join(''):`<div class="alb-empty">${window.adminMode?'Album trống. Bấm "Thêm ảnh" hoặc "Thêm video" để bắt đầu.':'Album này chưa có nội dung.'}</div>`;
+}
+function albAddPhotos(){
+  if(!window.adminMode||!_albViewerId)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+  inp.onchange=e=>{
+    Array.from(e.target.files).forEach(file=>{
+      const r=new FileReader();
+      r.onload=ev=>{
+        const gid=_nextAlbumItemGid(_albViewerId);
+        localStorage.setItem(GAL_PREFIX+gid,JSON.stringify({type:'photo',src:ev.target.result,label:'',ts:Date.now()}));
+        renderAlbumViewer();renderAlbumsRow();
+      };
+      r.readAsDataURL(file);
+    });
+  };inp.click();
+}
+function albAddVideo(){
+  if(!window.adminMode||!_albViewerId)return;
+  openVideoModal({kind:'album',albumId:_albViewerId});
+}
+function albDeleteItem(gid){
+  if(!confirm('Xóa mục này khỏi album?'))return;
+  localStorage.removeItem(GAL_PREFIX+gid);
+  renderAlbumViewer();renderAlbumsRow();
+}
+function renameAlbum(){
+  if(!_albViewerId)return;
+  const albums=loadAlbums();
+  const a=albums.find(x=>x.id===_albViewerId);if(!a)return;
+  const name=(window.prompt('Đổi tên album:',a.name)||'').trim();
+  if(!name)return;
+  a.name=name;saveAlbums(albums);renderAlbumViewer();renderAlbumsRow();
+}
+function deleteAlbum(){
+  if(!_albViewerId)return;
+  if(!confirm('Xóa toàn bộ album này và các ảnh/video bên trong? Không thể hoàn tác.'))return;
+  loadAlbumItems(_albViewerId).forEach(it=>localStorage.removeItem(GAL_PREFIX+it.gid));
+  saveAlbums(loadAlbums().filter(a=>a.id!==_albViewerId));
+  closeAlbumViewer();
+  renderAlbumsRow();
 }
 document.addEventListener('DOMContentLoaded', async () => { await _dbReady; initGallery(); });
-document.addEventListener('click',function(e){if(e.target.id==='gal-lightbox')document.getElementById('gal-lightbox').classList.remove('open');if(e.target.id==='video-url-modal')closeVideoModal();});
+document.addEventListener('click',function(e){if(e.target.id==='gal-lightbox')document.getElementById('gal-lightbox').classList.remove('open');if(e.target.id==='video-url-modal')closeVideoModal();if(e.target.id==='album-viewer-modal')closeAlbumViewer();});
 
 // ===== FLIPBOOK (self-hosted: PDF.js render trang, StPageFlip lật trang — không logo bên thứ 3) =====
 const FB_PDF_URL='cam-nang-thanh-vien.pdf';
@@ -7829,7 +8065,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') fbPrev();
   else if(e.key==='ArrowRight') fbNext();
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
 </script>
 
 <!-- FLIPBOOK MODAL (sách tự chủ — không logo bên thứ 3) -->
@@ -8301,9 +8537,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
             <img src="" alt="QR thanh toán" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
           </div>
           <div class="mem-bank-details">
-            <div class="mem-bank-row"><span class="ml">Ngân hàng</span><span class="mv bank-editable" id="mem-bank-name" onclick="adminEditBank('bank_name')" title="Admin: click để sửa">MB Bank</span></div>
-            <div class="mem-bank-row"><span class="ml">Số TK</span><span class="mv bank-editable" id="mem-account" onclick="adminEditBank('account')" title="Admin: click để sửa">0123 4567 890</span></div>
-            <div class="mem-bank-row"><span class="ml">Chủ TK</span><span class="mv bank-editable" id="mem-owner" onclick="adminEditBank('owner')" title="Admin: click để sửa">NGUYEN VAN A</span></div>
+            <div class="mem-bank-row"><span class="ml">Ngân hàng</span><span class="mv bank-editable" id="mem-bank-name" onclick="adminEditBank('bank_name')" title="Admin: click để sửa">VietinBank</span></div>
+            <div class="mem-bank-row"><span class="ml">Số TK</span><span class="mv bank-editable" id="mem-account" onclick="adminEditBank('account')" title="Admin: click để sửa">108643494131</span></div>
+            <div class="mem-bank-row"><span class="ml">Chủ TK</span><span class="mv bank-editable" id="mem-owner" onclick="adminEditBank('owner')" title="Admin: click để sửa">TRAN THI LUYEN</span></div>
             <div class="mem-bank-row"><span class="ml">Số tiền</span><span class="mv gold" id="mem-tier-amount">497,000đ</span></div>
             <div class="mem-bank-row"><span class="ml">Nội dung</span><span class="mv gold" id="mem-content">Đang tạo mã...</span></div>
           </div>
@@ -8433,12 +8669,34 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook();
 <!-- VIDEO URL MODAL -->
 <div id="video-url-modal">
   <div class="vmodal-box">
-    <h4>🎥 Dán link video YouTube / Vimeo</h4>
+    <h4>🎥 Thêm Video</h4>
+    <div class="vmodal-src-tabs">
+      <button type="button" class="vmodal-src-tab active" id="vmodal-tab-link" onclick="switchVideoSrcTab('link')">🔗 Dán link</button>
+      <button type="button" class="vmodal-src-tab" id="vmodal-tab-file" onclick="switchVideoSrcTab('file')">📁 Tải từ máy tính</button>
+    </div>
     <input type="text" class="vmodal-input" id="video-url-input" placeholder="https://www.youtube.com/watch?v=..." onkeydown="if(event.key==='Enter')confirmVideoUrl()">
+    <div id="vmodal-file-wrap" style="display:none">
+      <label class="vmodal-file-btn" for="video-file-input">📁 Chọn video từ máy tính…</label>
+      <input type="file" id="video-file-input" accept="video/*" style="display:none" onchange="onVideoFileChosen(event)">
+      <div id="video-file-name" class="vmodal-file-name">Chưa chọn file (MP4, MOV…)</div>
+    </div>
+    <input type="text" class="vmodal-input" id="video-label-input" placeholder="Tiêu đề video (tùy chọn)" onkeydown="if(event.key==='Enter')confirmVideoUrl()">
     <div class="vmodal-btns">
       <button class="btn btn-outline" style="padding:8px 20px;font-size:.85rem" onclick="closeVideoModal()">Hủy</button>
-      <button class="btn btn-gold" style="padding:8px 20px;font-size:.85rem" onclick="confirmVideoUrl()">Xác nhận</button>
+      <button class="btn btn-gold" style="padding:8px 20px;font-size:.85rem" id="vmodal-confirm-btn" onclick="confirmVideoUrl()">Xác nhận</button>
     </div>
+  </div>
+</div>
+
+<!-- ALBUM VIEWER MODAL -->
+<div id="album-viewer-modal">
+  <div class="alb-viewer-box">
+    <div class="alb-viewer-hdr">
+      <h3 id="alb-viewer-title">Album</h3>
+      <div class="alb-viewer-actions" id="alb-viewer-admin-actions"></div>
+      <button class="alb-viewer-close" onclick="closeAlbumViewer()">✕</button>
+    </div>
+    <div class="alb-viewer-grid" id="alb-viewer-grid"></div>
   </div>
 </div>
 </body>
