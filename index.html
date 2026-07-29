@@ -667,18 +667,17 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .testi-row:hover{animation-play-state:paused}
 @keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
-/* Mobile: marquee tự chạy khiến thẻ luôn bị cắt cụt ở 2 mép màn hình (không lúc nào đứng yên
-   để đọc trọn 1 thẻ) — trông thiếu chuyên nghiệp. Đổi sang vuốt tay từng thẻ, có scroll-snap
-   để mỗi lần vuốt luôn dừng đúng giữa màn hình, giống các sàn TMĐT (Shopee/Tiki...). */
+/* Mobile: khôi phục hiệu ứng marquee tự chạy (trước có tắt vì thẻ hay bị cắt cụt ở 2 mép, đổi
+   sang vuốt tay — nhưng theo phản hồi thực tế người dùng lại muốn THẤY hiệu ứng chạy trên mobile).
+   Chạy chậm hơn hẳn desktop (65s/70s so với 40s/45s) để mỗi thẻ có nhiều thời gian đọc hơn trước
+   khi trôi qua, đỡ cảm giác "cắt cụt" như bản gốc từng bị phàn nàn. Vẫn vuốt tay được bình thường
+   (không set overflow/scroll-snap ép buộc) nhờ animation-play-state:paused khi có tương tác chạm. */
 @media(max-width:768px){
   .testi-marquee-wrap{margin:0 -16px}
-  /* Lớp phủ mờ 2 mép (rộng 120px, thiết kế cho marquee desktop nhiều thẻ) giờ che gần hết
-     bề rộng 1 thẻ trên mobile (thẻ chỉ ~320px) — làm ảnh/chữ như bị mờ/biến mất ở 2 bên.
-     Tắt hẳn trên mobile vì không cần fade-hint khi đã vuốt-dừng từng thẻ rõ ràng. */
-  .testi-marquee-wrap::before,.testi-marquee-wrap::after{display:none}
-  .testi-row{animation:none!important;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:10px 16px;scrollbar-width:none}
-  .testi-row::-webkit-scrollbar{display:none}
-  .testi-card{width:82vw!important;max-width:320px;scroll-snap-align:center}
+  .testi-marquee-wrap::before,.testi-marquee-wrap::after{width:40px}
+  .testi-row-1{animation-duration:65s}
+  .testi-row-2{animation-duration:70s}
+  .testi-card{width:82vw!important;max-width:320px}
 }
 /* Card */
 .testi-card{flex-shrink:0;width:300px;background:var(--dark3);border:1px solid rgba(34,197,94,.1);border-radius:16px;overflow:hidden;transition:.25s}
@@ -3522,7 +3521,7 @@ let _rotateProgressTimer=null;
 let _rotateProgressVal=0;
 let _rotateCats=[];
 let _rotateIdx=0;
-const ROTATE_MS=6000;
+const ROTATE_MS=9500;
 
 function renderMarket(){renderShowcase();}
 
