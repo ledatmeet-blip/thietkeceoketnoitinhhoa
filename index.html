@@ -1817,10 +1817,10 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 <!-- MOBILE BOTTOM TAB BAR — luôn hiện, 1 chạm tới Cộng Đồng / Sàn Sản Phẩm thay vì phải mở menu 3 gạch -->
 <nav class="mobile-tabbar" id="mobile-tabbar">
   <div class="mobile-tabbar-inner">
-    <a href="#hero" class="mobile-tabbar-item" onclick="_tabTapFeedback()"><span class="mtb-ico">🏠</span><span data-i18n="tab_home">Trang chủ</span></a>
+    <a href="#hero" class="mobile-tabbar-item" onclick="_closeAllOverlaysForNav();_tabTapFeedback()"><span class="mtb-ico">🏠</span><span data-i18n="tab_home">Trang chủ</span></a>
     <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="openCeoPage()"><span class="mtb-ico">🤝</span><span data-i18n="tab_community">Cộng Đồng</span></a>
-    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="_tabTapFeedback();document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)"><span class="mtb-ico">🏪</span><span data-i18n="tab_marketplace">Sàn SP</span></a>
-    <a href="#chapters" class="mobile-tabbar-item" onclick="_tabTapFeedback()"><span class="mtb-ico">📖</span><span data-i18n="nav_book">Sách</span></a>
+    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="_closeAllOverlaysForNav();_tabTapFeedback();document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)"><span class="mtb-ico">🏪</span><span data-i18n="tab_marketplace">Sàn SP</span></a>
+    <a href="#chapters" class="mobile-tabbar-item" onclick="_closeAllOverlaysForNav();_tabTapFeedback()"><span class="mtb-ico">📖</span><span data-i18n="nav_book">Sách</span></a>
     <a href="javascript:void(0)" class="mobile-tabbar-item" onclick="_toggleMobileNav()"><span class="mtb-ico">☰</span><span data-i18n="tab_more">Thêm</span></a>
   </div>
 </nav>
@@ -6723,6 +6723,21 @@ function _hideNavLoading(){
 // Dùng cho các tab chỉ cuộn trang (không cần đợi dữ liệu thật) — vẫn cho thấy phản hồi ngay khi
 // bấm, tự ẩn sau khi cuộn mượt xong.
 function _tabTapFeedback(ms=450){_showNavLoading();setTimeout(_hideNavLoading,ms);}
+// Đóng mọi overlay toàn màn hình đang mở (Cộng Đồng, hồ sơ CEO, gian hàng, chi tiết sản phẩm)
+// trước khi điều hướng — nếu không, bấm "Trang chủ"/"Sàn SP" trong lúc đang ở màn Cộng Đồng sẽ
+// không thấy gì đổi (overlay cũ vẫn phủ kín màn hình), phải tự bấm "Quay về" trước rồi mới bấm
+// lại được. Các tab dưới mobile phải luôn hiển thị ngay bất kể đang ở màn nào.
+function _closeAllOverlaysForNav(){
+  if(document.getElementById('ceo-page')?.classList.contains('open'))closeCeoPage();
+  if(document.getElementById('ceo-profile-overlay')?.classList.contains('open'))closeCeoProfile();
+  if(document.getElementById('ceo-booth-overlay')?.classList.contains('open'))closeCeoBooth();
+  if(document.getElementById('product-detail-modal')?.classList.contains('open'))closeProductDetail();
+}
+function _tabNavigate(action){
+  _closeAllOverlaysForNav();
+  _tabTapFeedback();
+  action();
+}
 
 // ===== CEO COMMUNITY PAGE =====
 let _unlockCeoId=null,_unlockCeoName='';
@@ -6732,6 +6747,11 @@ function openCeoPage(){
   // Mở overlay NGAY khi bấm (phản hồi tức thì, tránh cảm giác "bấm không ăn"), rồi mới quyết
   // định render danh sách thật hay hiện vòng xoay chờ — thay vì im lặng đợi /api/read xong mới
   // mở overlay (khiến việc bấm "Cộng Đồng" ở thanh tab mobile lúc trang vừa tải trông như đơ).
+  // Đóng trước các overlay khác (hồ sơ CEO, gian hàng...) nếu đang mở — để bấm "Cộng Đồng" từ
+  // bất kỳ đâu cũng hiển thị ngay, không cần tự bấm "Quay về" trước.
+  document.getElementById('ceo-profile-overlay')?.classList.contains('open')&&closeCeoProfile();
+  document.getElementById('ceo-booth-overlay')?.classList.contains('open')&&closeCeoBooth();
+  document.getElementById('product-detail-modal')?.classList.contains('open')&&closeProductDetail();
   _showNavLoading();
   document.getElementById('ceo-page').classList.add('open');
   document.body.style.overflow='hidden';
