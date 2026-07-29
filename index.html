@@ -1423,6 +1423,39 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .lead-action-btn.del:hover{background:rgba(248,113,113,.15);color:#f87171}
 .leads-empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:.9rem}
 .leads-export-row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+/* Duyệt Sản Phẩm — card grid trực quan, ai cũng thao tác được không cần đọc bảng chữ */
+.ap-prod-section{margin-bottom:30px}
+.ap-prod-section-hdr{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:800;padding:10px 16px;border-radius:10px;margin-bottom:14px}
+.ap-prod-section-hdr.pending{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.ap-prod-section-hdr.approved{background:rgba(34,197,94,.08);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.ap-prod-section-sub{font-weight:400;font-size:.75rem;opacity:.8}
+.ap-prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.ap-prod-card{background:var(--dark3);border:2px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.ap-prod-card.is-pending{border-color:rgba(251,191,36,.35)}
+.ap-prod-card.is-approved{border-color:rgba(34,197,94,.25)}
+.ap-prod-card-img{width:100%;height:130px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ap-prod-card-img img{width:100%;height:100%;object-fit:cover}
+.ap-prod-card-img span{font-size:2rem;opacity:.3}
+.ap-prod-card-body{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ap-prod-card-ceo{font-size:.68rem;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:4px}
+.ap-prod-card-name{font-size:.82rem;font-weight:700;line-height:1.3;min-height:2.2em}
+.ap-prod-card-price{font-size:.85rem;font-weight:800;color:#fff}
+.ap-prod-toggle-row{display:flex;align-items:center;gap:8px;margin-top:2px}
+.ap-prod-toggle{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.ap-prod-toggle input{opacity:0;width:0;height:0}
+.ap-prod-toggle-slider{position:absolute;cursor:pointer;inset:0;background:rgba(251,191,36,.35);border-radius:24px;transition:.2s}
+.ap-prod-toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.ap-prod-toggle input:checked+.ap-prod-toggle-slider{background:#22c55e}
+.ap-prod-toggle input:checked+.ap-prod-toggle-slider::before{transform:translateX(18px)}
+.ap-prod-toggle-label{font-size:.72rem;font-weight:700}
+.ap-prod-toggle-label.on{color:#22c55e}
+.ap-prod-toggle-label.off{color:#fbbf24}
+.ap-prod-card-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px}
+.ap-prod-card-actions button{flex:1;padding:6px;border-radius:8px;border:none;font-size:.7rem;font-weight:700;cursor:pointer}
+.ap-prod-card-edit{background:rgba(255,255,255,.06);color:#fff}
+.ap-prod-card-edit:hover{background:rgba(255,255,255,.12)}
+.ap-prod-card-del{background:rgba(248,113,113,.1);color:#f87171}
+.ap-prod-card-del:hover{background:rgba(248,113,113,.2)}
 /* CEO list */
 .ap-ceo-list{display:flex;flex-direction:column;gap:8px}
 .ap-ceo-row{display:flex;align-items:center;gap:12px;background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:10px 14px;transition:.2s}
@@ -7908,20 +7941,55 @@ async function cpoToggleProductApproval(ceoId,prodId){
 
 // ===== ADMIN: TẤT CẢ SẢN PHẨM CEO — gộp mọi gian hàng vào 1 danh sách phẳng, không ẩn mục
 // nào, để admin không phải mở lần lượt từng gian hàng mới thấy sản phẩm nào chưa duyệt. =====
-function renderApProductsTab(){
+function _apProdCard(r){
+  const pr=r.pr;
+  const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+'cpo-prod-'+r.ceoId+'-'+pr.id)||'';
+  const isApproved=!!pr.approved;
+  return `<div class="ap-prod-card ${isApproved?'is-approved':'is-pending'}">
+    <div class="ap-prod-card-img">${imgSrc?`<img src="${imgSrc}" alt="">`:'<span>🖼️</span>'}</div>
+    <div class="ap-prod-card-body">
+      <div class="ap-prod-card-ceo">🏪 ${r.ceoName||r.ceoId}</div>
+      <div class="ap-prod-card-name">${pr.name||'(chưa đặt tên)'}</div>
+      <div class="ap-prod-card-price">${pr.price||'<span style="opacity:.4;font-weight:400">Chưa có giá</span>'}</div>
+      <label class="ap-prod-toggle-row" title="Bật = hiển thị công khai cho khách xem, Tắt = ẩn khỏi sàn">
+        <span class="ap-prod-toggle">
+          <input type="checkbox" ${isApproved?'checked':''} onchange="cpoToggleProductApproval('${r.ceoId}','${pr.id}').then(renderApProductsTab)">
+          <span class="ap-prod-toggle-slider"></span>
+        </span>
+        <span class="ap-prod-toggle-label ${isApproved?'on':'off'}">${isApproved?'✅ Đang hiển thị':'⏳ Đang ẩn'}</span>
+      </label>
+      <div class="ap-prod-card-actions">
+        <button class="ap-prod-card-edit" onclick="closeAdminPanel();openCeoBooth('${r.ceoId}')">✏️ Sửa</button>
+        <button class="ap-prod-card-del" onclick="cpoDeleteProduct('${r.ceoId}','${pr.id}').then(renderApProductsTab)">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+async function renderApProductsTab(){
   const tab=document.getElementById('ap-tab-products');
   if(!tab)return;
-  const profiles=loadCeoProfiles();
+  tab.innerHTML=`<div class="ap-tab-hdr"><h2>🛍️ Tất Cả Sản Phẩm CEO</h2></div><div class="leads-empty">⏳ Đang tải dữ liệu mới nhất từ server...</div>`;
+  // Luôn lấy bản MỚI NHẤT từ server mỗi lần mở tab này — đây là màn kiểm tra/duyệt, không thể
+  // dựa vào cache cục bộ của tab (dễ bị thiếu sản phẩm người khác vừa thêm ở máy/tab khác).
+  let profiles;
+  try{
+    const r=await fetch('/api/read',{cache:'no-store'});
+    const d=await r.json();
+    profiles=JSON.parse(d[CEO_PROFILES_KEY]||'[]');
+    saveCeoProfiles(profiles); // đồng bộ luôn cache cục bộ để các màn khác cũng thấy đúng
+  }catch(e){
+    profiles=loadCeoProfiles();
+  }
   const rows=[];
   profiles.forEach(p=>{
     (p.products||[]).forEach(pr=>rows.push({ceoId:p.id,ceoName:p.name,pr}));
   });
-  rows.sort((a,b)=>(a.pr.approved===b.pr.approved)?0:(a.pr.approved?1:-1)); // chưa duyệt lên đầu
   const approved=rows.filter(r=>r.pr.approved);
   const pending=rows.filter(r=>!r.pr.approved);
   tab.innerHTML=`
 <div class="ap-tab-hdr">
   <h2>🛍️ Tất Cả Sản Phẩm CEO</h2>
+  <button class="ap-cancel" onclick="renderApProductsTab()">🔄 Tải lại</button>
 </div>
 <div class="leads-summary">
   <div class="leads-kpi"><strong>${rows.length}</strong><span>Tổng sản phẩm (mọi gian hàng)</span></div>
@@ -7929,31 +7997,17 @@ function renderApProductsTab(){
   <div class="leads-kpi" style="border-color:rgba(251,191,36,.25)"><strong style="color:#fbbf24">${pending.length}</strong><span>Chưa duyệt — đang ẩn với khách</span></div>
 </div>
 ${rows.length===0?'<div class="leads-empty">📭 Chưa có sản phẩm nào từ CEO nào</div>':`
-<div class="leads-tbl-wrap">
-<table class="leads-tbl">
-  <thead><tr><th>#</th><th>Ảnh</th><th>Sản phẩm</th><th>CEO / Gian hàng</th><th>Giá</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-  <tbody>
-    ${rows.map((r,i)=>{
-      const pr=r.pr;
-      const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+'cpo-prod-'+r.ceoId+'-'+pr.id)||'';
-      return `<tr>
-      <td style="color:var(--muted);font-size:.72rem">${i+1}</td>
-      <td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" alt="">`:'<span style="opacity:.4;font-size:1.2rem">🖼️</span>'}</td>
-      <td style="font-weight:700;max-width:220px">${pr.name||'—'}</td>
-      <td style="font-size:.75rem;color:var(--muted)">${r.ceoName||r.ceoId}</td>
-      <td style="font-size:.78rem;white-space:nowrap">${pr.price||'—'}</td>
-      <td><span class="lead-status ${pr.approved?'confirmed':'pending'}">${pr.approved?'✅ Đã duyệt':'⏳ Chưa duyệt'}</span></td>
-      <td>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="lead-action-btn confirm" onclick="cpoToggleProductApproval('${r.ceoId}','${pr.id}').then(renderApProductsTab)">${pr.approved?'🚫 Ẩn':'✅ Duyệt'}</button>
-          <button class="lead-action-btn del" onclick="cpoDeleteProduct('${r.ceoId}','${pr.id}').then(renderApProductsTab)">🗑 Xóa</button>
-          <button class="lead-action-btn" onclick="closeAdminPanel();openCeoBooth('${r.ceoId}')">🏪 Mở gian hàng</button>
-        </div>
-      </td>
-    </tr>`;}).join('')}
-  </tbody>
-</table>
-</div>`}
+${pending.length?`
+<div class="ap-prod-section">
+  <div class="ap-prod-section-hdr pending">⏳ CẦN DUYỆT (${pending.length}) <span class="ap-prod-section-sub">— đang ẩn với khách, bật công tắc để đưa lên sàn</span></div>
+  <div class="ap-prod-grid">${pending.map(_apProdCard).join('')}</div>
+</div>`:''}
+${approved.length?`
+<div class="ap-prod-section">
+  <div class="ap-prod-section-hdr approved">✅ ĐÃ DUYỆT (${approved.length}) <span class="ap-prod-section-sub">— đang hiển thị công khai trên sàn</span></div>
+  <div class="ap-prod-grid">${approved.map(_apProdCard).join('')}</div>
+</div>`:''}
+`}
   `;
 }
 
