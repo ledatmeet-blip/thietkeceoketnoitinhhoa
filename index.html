@@ -5037,13 +5037,61 @@ async function adminTriggerDeploy(){
   }
 }
 
+// Lưới an toàn cuối cùng trước khi ghi DB: một vài hàm upload (avatar CEO, ảnh đánh giá...)
+// nhét thẳng base64 vào field .img của 1 phần tử trong mảng rồi gọi _dbWrite(key, cảMảng) —
+// bỏ qua hoàn toàn logic upload-lên-CDN của _syncKeyValue (logic đó chỉ bắt được base64 ở
+// TOP-LEVEL của value, không quét sâu vào bên trong mảng/object lồng nhau). Hậu quả thực tế
+// đã xảy ra: ceo-profiles-v2 phình tới hơn 3.5MB vì hàng chục ảnh CEO/sản phẩm bị nhúng thẳng
+// base64 trong DB thay vì URL CDN — vừa làm chậm trang, vừa có nguy cơ vượt giới hạn 4.5MB của
+// Vercel khiến các lần lưu SAU (kể cả không liên quan tới ảnh) fail âm thầm: admin đang mở tab
+// đó vẫn thấy đúng vì localStorage máy họ đã có sẵn, nhưng máy khác/DB thật không hề nhận được
+// — tới khi cache trình duyệt bị xoá (dọn máy, đổi máy...) thì y như "mất dữ liệu đã lưu".
+// → Quét đệ quy MỌI giá trị trước khi ghi, tự upload base64 còn sót lên Supabase Storage rồi
+// thay bằng URL thật; nếu upload lỗi thì HUỶ ghi + báo rõ, không bao giờ âm thầm nhét base64.
+const _UPLOAD_FAILED = Symbol('upload-failed');
+async function _stripEmbeddedBase64(value, keyHint) {
+  const isStr = typeof value === 'string';
+  let obj = value;
+  if (isStr) {
+    if (value.startsWith('data:image')) {
+      const url = await _uploadBase64ToBlob(keyHint, value);
+      return url || _UPLOAD_FAILED;
+    }
+    if (value[0] !== '{' && value[0] !== '[') return value; // không phải JSON → không có gì để quét
+    try { obj = JSON.parse(value); } catch (e) { return value; }
+  }
+  let ok = true, n = 0;
+  async function walk(node) {
+    if (!ok) return node;
+    if (typeof node === 'string') {
+      if (node.startsWith('data:image') && node.length > 2000) {
+        const url = await _uploadBase64ToBlob(`${keyHint}-e${n++}-${Date.now()}${Math.floor(Math.random()*1e4)}`, node);
+        if (!url) { ok = false; return node; }
+        return url;
+      }
+      return node;
+    }
+    if (Array.isArray(node)) { for (let i=0;i<node.length;i++) node[i]=await walk(node[i]); return node; }
+    if (node && typeof node === 'object') { for (const k of Object.keys(node)) node[k]=await walk(node[k]); return node; }
+    return node;
+  }
+  const cleaned = await walk(obj);
+  if (!ok) return _UPLOAD_FAILED;
+  return isStr ? JSON.stringify(cleaned) : cleaned;
+}
+
 async function _dbWrite(key, value) {
   if (!_IS_LIVE) return;
   try {
+    const sanitized = await _stripEmbeddedBase64(value, key);
+    if (sanitized === _UPLOAD_FAILED) {
+      showToast('❌ Upload ảnh lên CDN thất bại — CHƯA lưu, thử lại giúp mình','error',5500);
+      return;
+    }
     const res = await fetch('/api/admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminEmail: _AE, adminPass: _AP, key, value })
+      body: JSON.stringify({ adminEmail: _AE, adminPass: _AP, key, value: sanitized })
     });
     if (!res.ok){
       showToast('❌ Lỗi lưu database: '+key,'error');
