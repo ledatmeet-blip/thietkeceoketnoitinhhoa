@@ -3904,6 +3904,27 @@ function loadCeoProfiles(){
 function saveCeoProfiles(arr){
   localStorage.setItem(CEO_PROFILES_KEY, JSON.stringify(arr));
 }
+// Sửa lỗi mất dữ liệu khi có 2 phiên/tab admin cùng hoạt động: mọi hàm quản lý sản phẩm trước
+// đây đọc ceo-profiles-v2 từ cache localStorage của CHÍNH tab đó (nạp 1 lần lúc tải trang) rồi
+// ghi đè NGUYÊN mảng 17 hồ sơ lên server. Nếu tab đó đã mở từ trước lúc 1 tab/máy khác thêm sản
+// phẩm mới, lần lưu tiếp theo (dù chỉ sửa 1 CEO khác) sẽ ghi đè mất sạch phần vừa thêm ở nơi
+// khác — đây chính là nguyên nhân 15 ảnh sản phẩm rượu của CEO Đinh Thị Ngân (26/07) còn ảnh
+// trên kho lưu trữ nhưng biến mất khỏi database. Khắc phục: LUÔN lấy bản mới nhất từ server
+// ngay trước khi sửa, áp thay đổi lên bản đó, rồi mới ghi lại — không bao giờ dựa vào cache cũ.
+async function _syncedProfilesUpdate(mutatorFn){
+  let profiles;
+  try{
+    const r=await fetch('/api/read',{cache:'no-store'});
+    const d=await r.json();
+    profiles=JSON.parse(d[CEO_PROFILES_KEY]||'[]');
+  }catch(e){
+    profiles=loadCeoProfiles(); // mất mạng: đành tạm dùng cache cục bộ còn hơn không thao tác được
+  }
+  mutatorFn(profiles);
+  saveCeoProfiles(profiles);
+  await _dbWrite(CEO_PROFILES_KEY,profiles);
+  return profiles;
+}
 function renderCeoGrid(){
   const profiles = loadCeoProfiles();
   if(!profiles.length) return;
@@ -7459,17 +7480,19 @@ function cpoProdUploadImg(ceoId,prodId){
       _clearLoadingToasts();
       const imgKey=IMG_PREFIX+'cpo-prod-'+ceoId+'-'+prodId;
       localStorage.setItem(imgKey,data);
-      // Update profile products array
-      const profiles=loadCeoProfiles();
-      const pidx=profiles.findIndex(p=>p.id===ceoId);
-      if(pidx>=0){
+      // Update profile products array — luôn lấy bản mới nhất từ server trước khi ghi (xem
+      // _syncedProfilesUpdate), tránh ghi đè mất sản phẩm người khác vừa thêm ở gian hàng khác.
+      let updatedBadge='';
+      await _syncedProfilesUpdate(profiles=>{
+        const pidx=profiles.findIndex(p=>p.id===ceoId);
+        if(pidx<0)return;
         const prs=profiles[pidx].products||[];
         const ridx=prs.findIndex(r=>r.id===prodId);
-        if(ridx>=0){prs[ridx].img=data;profiles[pidx].products=prs;saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);}
-      }
+        if(ridx>=0){prs[ridx].img=data;profiles[pidx].products=prs;updatedBadge=prs[ridx].badge||'';}
+      });
       // Update DOM thumbnail
       const thumb=document.querySelector(`[data-prod-id="${prodId}"] .cpo-prod-thumb`);
-      if(thumb){thumb.innerHTML=`<img src="${data}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;if(profiles[pidx]?.products?.find(r=>r.id===prodId)?.badge){thumb.innerHTML+=`<span class="cpo-prod-badge">${profiles[pidx].products.find(r=>r.id===prodId).badge}</span>`;}}
+      if(thumb){thumb.innerHTML=`<img src="${data}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;if(updatedBadge){thumb.innerHTML+=`<span class="cpo-prod-badge">${updatedBadge}</span>`;}}
       showToast('✅ Đã cập nhật ảnh sản phẩm','success');
     }catch(err){_clearLoadingToasts();showToast('❌ Lỗi: '+err.message,'error');}
   };inp.click();
@@ -7494,37 +7517,37 @@ function _starsHtml(rating,reviewCount){
 }
 // Sản phẩm có thể được thêm từ trang hồ sơ cá nhân (_cpoCurrentId) hoặc từ gian hàng/chợ (_boothCurrentId)
 function _cpoActiveId(){return _cpoCurrentId||_boothCurrentId;}
-function cpoAddProduct(){
+async function cpoAddProduct(){
   const ceoId=_cpoActiveId();if(!ceoId)return;
-  const profiles=loadCeoProfiles();
-  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
   const newProd={id:'p'+Date.now(),name:'Sản phẩm mới',desc:'',price:'',oldPrice:'',discount:'',badge:'',img:'',videoUrl:'',link:'',category:'',rating:0,reviewCount:0,soldCount:''};
-  if(!profiles[pidx].products)profiles[pidx].products=[];
-  profiles[pidx].products.push(newProd);
-  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  await _syncedProfilesUpdate(profiles=>{
+    const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+    if(!profiles[pidx].products)profiles[pidx].products=[];
+    profiles[pidx].products.push(newProd);
+  });
   _cpoRefreshView(ceoId);
   setTimeout(()=>cpoEditProduct(ceoId,newProd.id),100);
 }
-function cpoDeleteProduct(ceoId,prodId){
+async function cpoDeleteProduct(ceoId,prodId){
   if(!confirm('Xóa sản phẩm này?'))return;
-  const profiles=loadCeoProfiles();
-  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
-  profiles[pidx].products=(profiles[pidx].products||[]).filter(r=>r.id!==prodId);
-  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  await _syncedProfilesUpdate(profiles=>{
+    const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+    profiles[pidx].products=(profiles[pidx].products||[]).filter(r=>r.id!==prodId);
+  });
   _cpoRefreshView(ceoId);
 }
 // Đổi vị trí hiển thị sản phẩm (lên/xuống) trong danh sách — quyết định thứ tự xuất hiện
 // trên hồ sơ CEO, gian hàng và sàn trưng bày chung.
-function cpoMoveProduct(ceoId,prodId,dir){
-  const profiles=loadCeoProfiles();
-  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
-  const prs=profiles[pidx].products||[];
-  const i=prs.findIndex(r=>r.id===prodId);if(i<0)return;
-  const j=i+dir;
-  if(j<0||j>=prs.length)return;
-  [prs[i],prs[j]]=[prs[j],prs[i]];
-  profiles[pidx].products=prs;
-  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+async function cpoMoveProduct(ceoId,prodId,dir){
+  await _syncedProfilesUpdate(profiles=>{
+    const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+    const prs=profiles[pidx].products||[];
+    const i=prs.findIndex(r=>r.id===prodId);if(i<0)return;
+    const j=i+dir;
+    if(j<0||j>=prs.length)return;
+    [prs[i],prs[j]]=[prs[j],prs[i]];
+    profiles[pidx].products=prs;
+  });
   _cpoRefreshView(ceoId);
 }
 function cpoEditProduct(ceoId,prodId){
@@ -7563,12 +7586,10 @@ function cpoEditProduct(ceoId,prodId){
   if(grid)grid.appendChild(form);
   form.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function cpeSaveProd(ceoId,prodId){
-  const profiles=loadCeoProfiles();
-  const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
-  const prs=profiles[pidx].products||[];
-  const ridx=prs.findIndex(r=>r.id===prodId);if(ridx<0)return;
-  prs[ridx]={...prs[ridx],
+async function cpeSaveProd(ceoId,prodId){
+  // Đọc giá trị form NGAY (đồng bộ) trước khi fetch dữ liệu mới nhất từ server — tránh trường
+  // hợp form đã bị gỡ khỏi DOM lúc await xong.
+  const formVals={
     name:(document.getElementById('cpe-name').value||'').trim(),
     category:(document.getElementById('cpe-category').value||'').trim(),
     badge:(document.getElementById('cpe-badge').value||'').trim(),
@@ -7582,8 +7603,13 @@ function cpeSaveProd(ceoId,prodId){
     videoUrl:(document.getElementById('cpe-video').value||'').trim(),
     desc:(document.getElementById('cpe-desc').value||'').trim(),
   };
-  profiles[pidx].products=prs;
-  saveCeoProfiles(profiles);_dbWrite(CEO_PROFILES_KEY,profiles);
+  await _syncedProfilesUpdate(profiles=>{
+    const pidx=profiles.findIndex(p=>p.id===ceoId);if(pidx<0)return;
+    const prs=profiles[pidx].products||[];
+    const ridx=prs.findIndex(r=>r.id===prodId);if(ridx<0)return;
+    prs[ridx]={...prs[ridx],...formVals};
+    profiles[pidx].products=prs;
+  });
   showToast('✅ Đã lưu sản phẩm','success');
   _cpoRefreshView(ceoId);
 }
@@ -7855,25 +7881,28 @@ function buildCeoApprovedGrid(){
     </div>`;
   }).join('');
 }
-function cpoToggleProductApproval(ceoId,prodId){
-  const profiles=loadCeoProfiles();
-  const pidx=profiles.findIndex(p=>p.id===ceoId);
-  if(pidx<0)return;
-  const prs=profiles[pidx].products||[];
-  const ridx=prs.findIndex(r=>r.id===prodId);
-  if(ridx<0)return;
-  prs[ridx].approved=!prs[ridx].approved;
-  profiles[pidx].products=prs;
-  saveCeoProfiles(profiles);
-  _dbWrite(CEO_PROFILES_KEY,profiles);
+async function cpoToggleProductApproval(ceoId,prodId){
+  let newApproved=null,prodName='',ceoName='';
+  await _syncedProfilesUpdate(profiles=>{
+    const pidx=profiles.findIndex(p=>p.id===ceoId);
+    if(pidx<0)return;
+    const prs=profiles[pidx].products||[];
+    const ridx=prs.findIndex(r=>r.id===prodId);
+    if(ridx<0)return;
+    prs[ridx].approved=!prs[ridx].approved;
+    profiles[pidx].products=prs;
+    newApproved=prs[ridx].approved;
+    prodName=prs[ridx].name;
+    ceoName=profiles[pidx].name;
+  });
+  if(newApproved===null)return;
   buildProdTicker();
   buildCeoApprovedGrid();
   renderShowcase();
   _cpoRefreshView(ceoId);
-  showToast(prs[ridx].approved?'✅ Sản phẩm đã duyệt — hiển thị trên sàn':'🚫 Đã ẩn khỏi sàn trưng bày','success');
-  if(prs[ridx].approved){
-    const ceo=profiles.find(x=>x.id===ceoId);
-    _tgNotify('product_approve',{name:prs[ridx].name,message:'Sản phẩm được duyệt lên sàn',detail:'CEO: '+(ceo?.name||ceoId)});
+  showToast(newApproved?'✅ Sản phẩm đã duyệt — hiển thị trên sàn':'🚫 Đã ẩn khỏi sàn trưng bày','success');
+  if(newApproved){
+    _tgNotify('product_approve',{name:prodName,message:'Sản phẩm được duyệt lên sàn',detail:'CEO: '+(ceoName||ceoId)});
   }
 }
 
@@ -7916,8 +7945,8 @@ ${rows.length===0?'<div class="leads-empty">📭 Chưa có sản phẩm nào t�
       <td><span class="lead-status ${pr.approved?'confirmed':'pending'}">${pr.approved?'✅ Đã duyệt':'⏳ Chưa duyệt'}</span></td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="lead-action-btn confirm" onclick="cpoToggleProductApproval('${r.ceoId}','${pr.id}');renderApProductsTab()">${pr.approved?'🚫 Ẩn':'✅ Duyệt'}</button>
-          <button class="lead-action-btn del" onclick="cpoDeleteProduct('${r.ceoId}','${pr.id}');renderApProductsTab()">🗑 Xóa</button>
+          <button class="lead-action-btn confirm" onclick="cpoToggleProductApproval('${r.ceoId}','${pr.id}').then(renderApProductsTab)">${pr.approved?'🚫 Ẩn':'✅ Duyệt'}</button>
+          <button class="lead-action-btn del" onclick="cpoDeleteProduct('${r.ceoId}','${pr.id}').then(renderApProductsTab)">🗑 Xóa</button>
           <button class="lead-action-btn" onclick="closeAdminPanel();openCeoBooth('${r.ceoId}')">🏪 Mở gian hàng</button>
         </div>
       </td>
