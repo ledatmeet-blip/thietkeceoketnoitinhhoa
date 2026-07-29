@@ -119,6 +119,13 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .mobile-tabbar-item .mtb-ico{font-size:1.3rem;line-height:1}
 .mobile-tabbar-item.hl{color:var(--gold)}
 .mobile-tabbar-item:active{transform:scale(.94)}
+/* Thanh loading mảnh trên cùng — phản hồi ngay khi bấm 1 tab, để không có cảm giác "bấm không
+   ăn" trong lúc chờ dữ liệu (đặc biệt Cộng Đồng cần đợi /api/read xong mới có nội dung). */
+#nav-loading-bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));z-index:99999;opacity:0;pointer-events:none;box-shadow:0 0 8px rgba(34,197,94,.6)}
+#nav-loading-bar.active{opacity:1}
+.ceo-grid-loading{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 20px;color:var(--muted)}
+.ceo-grid-loading .spin{width:34px;height:34px;border:3px solid rgba(34,197,94,.2);border-top-color:var(--gold);border-radius:50%;animation:ceoSpin .7s linear infinite}
+@keyframes ceoSpin{to{transform:rotate(360deg)}}
 @media(max-width:960px){
   .mobile-tabbar{display:block}
   body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
@@ -1810,10 +1817,10 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 <!-- MOBILE BOTTOM TAB BAR — luôn hiện, 1 chạm tới Cộng Đồng / Sàn Sản Phẩm thay vì phải mở menu 3 gạch -->
 <nav class="mobile-tabbar" id="mobile-tabbar">
   <div class="mobile-tabbar-inner">
-    <a href="#hero" class="mobile-tabbar-item"><span class="mtb-ico">🏠</span><span data-i18n="tab_home">Trang chủ</span></a>
+    <a href="#hero" class="mobile-tabbar-item" onclick="_tabTapFeedback()"><span class="mtb-ico">🏠</span><span data-i18n="tab_home">Trang chủ</span></a>
     <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="openCeoPage()"><span class="mtb-ico">🤝</span><span data-i18n="tab_community">Cộng Đồng</span></a>
-    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)"><span class="mtb-ico">🏪</span><span data-i18n="tab_marketplace">Sàn SP</span></a>
-    <a href="#chapters" class="mobile-tabbar-item"><span class="mtb-ico">📖</span><span data-i18n="nav_book">Sách</span></a>
+    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="_tabTapFeedback();document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)"><span class="mtb-ico">🏪</span><span data-i18n="tab_marketplace">Sàn SP</span></a>
+    <a href="#chapters" class="mobile-tabbar-item" onclick="_tabTapFeedback()"><span class="mtb-ico">📖</span><span data-i18n="nav_book">Sách</span></a>
     <a href="javascript:void(0)" class="mobile-tabbar-item" onclick="_toggleMobileNav()"><span class="mtb-ico">☰</span><span data-i18n="tab_more">Thêm</span></a>
   </div>
 </nav>
@@ -6691,26 +6698,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   else window.addEventListener('load', ()=>setTimeout(initGoogleOneTap, 800));
 });
 
+// ===== ĐIỀU HƯỚNG MƯỢT — phản hồi ngay khi bấm, không im lặng chờ =====
+// Thanh loading mảnh trên cùng: cho thấy "đã bấm, đang xử lý" ngay lập tức thay vì im lặng đợi
+// dữ liệu xong mới có phản ứng gì (cảm giác "bấm không ăn"/bị đơ).
+let _navLoadingHideTimer=null;
+function _showNavLoading(){
+  let bar=document.getElementById('nav-loading-bar');
+  if(!bar){bar=document.createElement('div');bar.id='nav-loading-bar';document.body.appendChild(bar);}
+  clearTimeout(_navLoadingHideTimer);
+  bar.style.transition='none';bar.style.width='0%';
+  bar.classList.add('active');
+  requestAnimationFrame(()=>{bar.style.transition='width .5s ease';bar.style.width='75%';});
+}
+function _hideNavLoading(){
+  const bar=document.getElementById('nav-loading-bar');
+  if(!bar)return;
+  bar.style.transition='width .2s ease';bar.style.width='100%';
+  clearTimeout(_navLoadingHideTimer);
+  _navLoadingHideTimer=setTimeout(()=>{
+    bar.style.transition='opacity .25s ease';bar.classList.remove('active');
+    setTimeout(()=>{bar.style.transition='none';bar.style.width='0%';},250);
+  },200);
+}
+// Dùng cho các tab chỉ cuộn trang (không cần đợi dữ liệu thật) — vẫn cho thấy phản hồi ngay khi
+// bấm, tự ẩn sau khi cuộn mượt xong.
+function _tabTapFeedback(ms=450){_showNavLoading();setTimeout(_hideNavLoading,ms);}
+
 // ===== CEO COMMUNITY PAGE =====
 let _unlockCeoId=null,_unlockCeoName='';
 function openCeoPage(){
   // Browsing the community grid is open to everyone (full preview).
   // Actual profile access (viewing docs, connecting) is gated per-click — see clickCeoCard().
-  // Cùng cơ chế chống "bấm quá sớm" như openCeoBooth/openCeoProfile: nếu /api/read chưa kịp về
-  // (dễ gặp khi bấm ngay "Cộng Đồng" ở thanh tab dưới mobile lúc trang vừa tải), renderCeoGrid()
-  // sẽ thấy profiles rỗng và im lặng return — trang mở ra nhưng danh sách CEO trống trơn, y hệt
-  // bị "đơ". Đợi dữ liệu sẵn sàng rồi mới mở, thay vì mở overlay trước rồi render vào chỗ trống.
+  // Mở overlay NGAY khi bấm (phản hồi tức thì, tránh cảm giác "bấm không ăn"), rồi mới quyết
+  // định render danh sách thật hay hiện vòng xoay chờ — thay vì im lặng đợi /api/read xong mới
+  // mở overlay (khiến việc bấm "Cộng Đồng" ở thanh tab mobile lúc trang vừa tải trông như đơ).
+  _showNavLoading();
+  document.getElementById('ceo-page').classList.add('open');
+  document.body.style.overflow='hidden';
   const doOpen=()=>{
     renderCeoGrid();
-    document.getElementById('ceo-page').classList.add('open');
-    document.body.style.overflow='hidden';
     _initCeoUnlocks();
     _fillCeoSidebar();
     buildCeoTicker();
+    _hideNavLoading();
   };
-  if(_dbDataApplied) doOpen();
-  else if(_IS_LIVE) _dbFetchPromise.then(doOpen);
-  else doOpen();
+  if(_dbDataApplied){
+    doOpen();
+  }else{
+    const grid=document.querySelector('#ceo-page .ceo-grid');
+    if(grid)grid.innerHTML='<div class="ceo-grid-loading"><div class="spin"></div><span>Đang tải danh sách CEO...</span></div>';
+    if(_IS_LIVE)_dbFetchPromise.then(doOpen);else doOpen();
+  }
 }
 function buildCeoTicker(){
   const track = document.getElementById('ceo-ticker-track');
