@@ -1195,6 +1195,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .ceo-prod-ticker-overflow{overflow:hidden;mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%)}
 .ceo-prod-ticker-track{display:flex;gap:14px;animation:ceo-scroll-left 38s linear infinite;width:max-content;padding:6px 0}
 @media(hover:hover) and (pointer:fine){.ceo-prod-ticker-track:hover{animation-play-state:paused}}
+@media(max-width:768px){.ceo-prod-ticker-track{animation-duration:62s}}
 .cpo-prod-ticker-card{width:220px;flex-shrink:0;background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:13px;overflow:hidden;cursor:pointer;transition:.22s}
 .cpo-prod-ticker-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .cpo-prod-ticker-thumb{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:2rem}
@@ -3526,7 +3527,7 @@ let _rotateProgressTimer=null;
 let _rotateProgressVal=0;
 let _rotateCats=[];
 let _rotateIdx=0;
-const ROTATE_MS=9500;
+const ROTATE_MS=13000;
 
 function renderMarket(){renderShowcase();}
 
