@@ -7472,10 +7472,13 @@ function buildCpoProductCard(pr,ceoId,ceo){
   const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+imgKey)||'';
   const isApproved=!!pr.approved;
   const approveBtn=window.adminMode?`
-    <button onclick="event.stopPropagation();cpoToggleProductApproval('${ceoId}','${pr.id}')"
-      style="width:100%;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid ${isApproved?'rgba(239,68,68,.35)':'rgba(16,185,129,.35)'};background:${isApproved?'rgba(239,68,68,.1)':'rgba(16,185,129,.1)'};color:${isApproved?'#f87171':'#10b981'}">
-      ${isApproved?'🚫 Ẩn khỏi sàn':'✅ Duyệt lên sàn trưng bày'}
-    </button>`:'';
+    <label class="ap-prod-toggle-row" style="margin-top:8px;justify-content:center" onclick="event.stopPropagation()" title="Bật = hiển thị công khai cho khách xem, Tắt = ẩn khỏi sàn. Có thể bật/tắt nhiều sản phẩm rồi bấm Lưu 1 lần.">
+      <span class="ap-prod-toggle">
+        <input type="checkbox" ${isApproved?'checked':''} onchange="_apProdMarkPending('${ceoId}','${pr.id}',this)">
+        <span class="ap-prod-toggle-slider"></span>
+      </span>
+      <span class="ap-prod-toggle-label ${isApproved?'on':'off'}">${isApproved?'✅ Đang hiển thị':'⏳ Đang ẩn'}</span>
+    </label>`:'';
   const approvedBadge=isApproved?`<div style="position:absolute;bottom:7px;right:7px;background:rgba(16,185,129,.9);color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:50px">✓ Đang hiển thị</div>`:'';
   return `<div class="cpo-prod-card" onclick="openCeoBooth('${ceoId}')" data-prod-id="${pr.id}">
     <div class="cpo-prod-thumb" data-img="${imgKey}" onclick="${window.adminMode?'event.stopPropagation();cpoProdUploadImg(\''+ceoId+'\',\''+pr.id+'\')':''}" style="position:relative">
@@ -7947,10 +7950,13 @@ async function cpoToggleProductApproval(ceoId,prodId){
 // bấm là 1 lượt gọi mạng + toast + render lại cả trang (gây khó chịu khi duyệt nhiều sản phẩm
 // liên tiếp, xem phản hồi của Đạt). Bấm công tắc chỉ đổi hiển thị tại chỗ, KHÔNG gọi server. =====
 let _apProdPending={};
+// checkboxEl có thể nằm trong card của tab "Duyệt Sản Phẩm" (.ap-prod-card) HOẶC trong màn
+// "Quản lý sản phẩm gian hàng" ngay tại hồ sơ/gian hàng CEO (.cpo-prod-card) — dùng chung 1 cơ
+// chế gộp-rồi-lưu cho cả 2 nơi để duyệt hàng loạt ở đâu cũng không bị "đá ra" giữa chừng.
 function _apProdMarkPending(ceoId,prodId,checkboxEl){
   const key=ceoId+'::'+prodId;
   _apProdPending[key]={ceoId,prodId,approved:checkboxEl.checked};
-  const card=checkboxEl.closest('.ap-prod-card');
+  const card=checkboxEl.closest('.ap-prod-card, .cpo-prod-card');
   const label=card?.querySelector('.ap-prod-toggle-label');
   if(label){
     label.textContent=checkboxEl.checked?'🔵 Sẽ hiển thị (chưa lưu)':'🔵 Sẽ ẩn (chưa lưu)';
@@ -7961,14 +7967,13 @@ function _apProdMarkPending(ceoId,prodId,checkboxEl){
 }
 function _apProdRenderSaveBar(){
   const count=Object.keys(_apProdPending).length;
-  const tab=document.getElementById('ap-tab-products');
   let bar=document.getElementById('ap-prod-savebar');
   if(!count){bar?.remove();return;}
   if(!bar){
     bar=document.createElement('div');
     bar.id='ap-prod-savebar';
     bar.className='ap-prod-savebar';
-    tab?.appendChild(bar);
+    document.body.appendChild(bar); // position:fixed — gắn vào body để hiện đúng dù đang ở màn nào
   }
   bar.innerHTML=`
     <span>🔵 <strong>${count}</strong> thay đổi chưa lưu</span>
@@ -7977,9 +7982,17 @@ function _apProdRenderSaveBar(){
       <button class="ap-save" onclick="_apProdSaveAllPending()">💾 Lưu ${count} thay đổi</button>
     </div>`;
 }
+// Làm mới đúng màn đang mở sau khi lưu — tab "Duyệt Sản Phẩm" hoặc gian hàng/hồ sơ CEO.
+function _apProdRefreshCurrentView(){
+  const prodTab=document.getElementById('ap-tab-products');
+  if(prodTab?.classList.contains('active')){renderApProductsTab();return;}
+  const ceoId=_cpoActiveId();
+  if(ceoId)_cpoRefreshView(ceoId);
+}
 function _apProdDiscardPending(){
   _apProdPending={};
-  renderApProductsTab();
+  document.getElementById('ap-prod-savebar')?.remove();
+  _apProdRefreshCurrentView();
 }
 async function _apProdSaveAllPending(){
   const changes=Object.values(_apProdPending);
@@ -7995,8 +8008,9 @@ async function _apProdSaveAllPending(){
   });
   showToast(`✅ Đã lưu ${changes.length} thay đổi duyệt sản phẩm`,'success');
   _apProdPending={};
+  document.getElementById('ap-prod-savebar')?.remove();
   buildProdTicker();buildCeoApprovedGrid();renderShowcase();
-  renderApProductsTab();
+  _apProdRefreshCurrentView();
 }
 
 // ===== ADMIN: TẤT CẢ SẢN PHẨM CEO — gộp mọi gian hàng vào 1 danh sách phẳng, không ẩn mục
