@@ -8226,6 +8226,10 @@ function _getAllGalleryMediaItems(){
 // Both read from the exact same comm-gallery-* pool, so anything added anywhere shows up everywhere relevant.
 const CC_VISIBLE_SIDE=1;
 const _ccInstances={};
+// Touch device HOẶC màn hẹp — dùng để tắt rotateY() 3D cho carousel (xem lý do tại _ccRender).
+function _isMobileViewport(){
+  return (window.matchMedia && matchMedia('(pointer:coarse)').matches) || window.innerWidth<=700;
+}
 function _ccRegister(key,ids,filterType){
   // Lưới an toàn: nếu instance cũ đã tồn tại (vd initGallery() lỡ bị gọi lại lần 2), dọn sạch
   // các thẻ DOM nó đang theo dõi trước khi thay bằng instance mới — nếu không các thẻ đó bị
@@ -8276,7 +8280,12 @@ function _ccRender(key){
     const tx=offset*400;
     const tz=-abs*260;
     const ty=abs*8;
-    const ry=offset*-30;
+    // rotateY() 3D + <video> không tương thích tốt trên nhiều trình duyệt mobile (Safari/Chrome
+    // Android) — thẻ video ở vị trí bị xoay 3D thường render ra MÀU ĐEN thay vì hình ảnh thật,
+    // dù video vẫn đang chạy/pause đúng bên dưới. Đây chính là hiện tượng "video chạy chút rồi
+    // tắt màu đen" khi carousel tự chuyển sang thẻ kế tiếp. Bỏ hẳn phép xoay trên mobile — vẫn
+    // giữ chiều sâu qua translateX/Z + scale + opacity, chỉ khác là các thẻ không nghiêng nữa.
+    const ry=_isMobileViewport()?0:offset*-30;
     const scale=1-abs*0.18;
     const op=Math.max(0,1-abs*0.35);
     const isActive=it.gid===activeGid;
