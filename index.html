@@ -7976,7 +7976,7 @@ async function renderApProductsTab(){
     const r=await fetch('/api/read',{cache:'no-store'});
     const d=await r.json();
     profiles=JSON.parse(d[CEO_PROFILES_KEY]||'[]');
-    saveCeoProfiles(profiles); // đồng bộ luôn cache cục bộ để các màn khác cũng thấy đúng
+    _lsSet(CEO_PROFILES_KEY,JSON.stringify(profiles)); // chỉ cập nhật cache cục bộ, KHÔNG ghi ngược lên server (chỉ đang xem, chưa đổi gì)
   }catch(e){
     profiles=loadCeoProfiles();
   }
