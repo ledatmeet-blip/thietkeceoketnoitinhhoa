@@ -6960,7 +6960,21 @@ function searchCeos(val){
 
 // ===== CEO PROFILE OVERLAY =====
 let _cpoCurrentId=null;
-function openCeoProfile(id){
+// Kéo lại community-join-requests-v1 mới nhất từ server — dùng khi trạng thái local đang
+// khác "approved", vì admin có thể vừa duyệt qua Telegram/Admin Panel ở một phiên/thiết bị
+// khác trong lúc tab này vẫn đang cầm bản cache cũ từ lúc tải trang.
+async function _refreshJoinStatusFromServer(){
+  if(!_IS_LIVE)return;
+  try{
+    const r=await fetch('/api/read',{cache:'no-store'});
+    if(!r.ok)return;
+    const d=await r.json();
+    const raw=d[JOIN_REQ_KEY];
+    if(raw===undefined)return;
+    localStorage.setItem(JOIN_REQ_KEY, typeof raw==='string'?raw:JSON.stringify(raw));
+  }catch(e){}
+}
+async function openCeoProfile(id){
   const profiles=loadCeoProfiles();
   const p=profiles.find(x=>x.id===id);
   if(!p)return;
@@ -6971,6 +6985,10 @@ function openCeoProfile(id){
   if(!window.adminMode && !_isCeoUnlockedForUser(id,currentUser?.email)){
     if(!currentUser){ openLogin(); return; }
     let status=_getJoinStatus(currentUser.email);
+    if(status!=='approved'){
+      await _refreshJoinStatusFromServer();
+      status=_getJoinStatus(currentUser.email);
+    }
     // Khách bấm vào tính năng cần quyền lợi lần đầu → tạo yêu cầu tham gia cộng đồng ngay tại
     // đây (thay vì tự động lúc đăng nhập) để admin thấy và duyệt được.
     if(!status){ _createJoinRequest(currentUser.name,currentUser.email); status='pending'; }
