@@ -3878,6 +3878,7 @@ function switchApTab(tab, btn){
   else if(tab==='settings') renderApSettingsTab();
   else if(tab==='leads') renderApLeadsTab();
   else if(tab==='members') renderApMembersTab();
+  else if(tab==='products') renderApProductsTab();
 }
 
 // --- CEO PROFILES ---
@@ -7876,6 +7877,57 @@ function cpoToggleProductApproval(ceoId,prodId){
   }
 }
 
+// ===== ADMIN: TẤT CẢ SẢN PHẨM CEO — gộp mọi gian hàng vào 1 danh sách phẳng, không ẩn mục
+// nào, để admin không phải mở lần lượt từng gian hàng mới thấy sản phẩm nào chưa duyệt. =====
+function renderApProductsTab(){
+  const tab=document.getElementById('ap-tab-products');
+  if(!tab)return;
+  const profiles=loadCeoProfiles();
+  const rows=[];
+  profiles.forEach(p=>{
+    (p.products||[]).forEach(pr=>rows.push({ceoId:p.id,ceoName:p.name,pr}));
+  });
+  rows.sort((a,b)=>(a.pr.approved===b.pr.approved)?0:(a.pr.approved?1:-1)); // chưa duyệt lên đầu
+  const approved=rows.filter(r=>r.pr.approved);
+  const pending=rows.filter(r=>!r.pr.approved);
+  tab.innerHTML=`
+<div class="ap-tab-hdr">
+  <h2>🛍️ Tất Cả Sản Phẩm CEO</h2>
+</div>
+<div class="leads-summary">
+  <div class="leads-kpi"><strong>${rows.length}</strong><span>Tổng sản phẩm (mọi gian hàng)</span></div>
+  <div class="leads-kpi green"><strong>${approved.length}</strong><span>Đã duyệt — đang hiển thị công khai</span></div>
+  <div class="leads-kpi" style="border-color:rgba(251,191,36,.25)"><strong style="color:#fbbf24">${pending.length}</strong><span>Chưa duyệt — đang ẩn với khách</span></div>
+</div>
+${rows.length===0?'<div class="leads-empty">📭 Chưa có sản phẩm nào từ CEO nào</div>':`
+<div class="leads-tbl-wrap">
+<table class="leads-tbl">
+  <thead><tr><th>#</th><th>Ảnh</th><th>Sản phẩm</th><th>CEO / Gian hàng</th><th>Giá</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+  <tbody>
+    ${rows.map((r,i)=>{
+      const pr=r.pr;
+      const imgSrc=pr.img||localStorage.getItem(IMG_PREFIX+'cpo-prod-'+r.ceoId+'-'+pr.id)||'';
+      return `<tr>
+      <td style="color:var(--muted);font-size:.72rem">${i+1}</td>
+      <td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" alt="">`:'<span style="opacity:.4;font-size:1.2rem">🖼️</span>'}</td>
+      <td style="font-weight:700;max-width:220px">${pr.name||'—'}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${r.ceoName||r.ceoId}</td>
+      <td style="font-size:.78rem;white-space:nowrap">${pr.price||'—'}</td>
+      <td><span class="lead-status ${pr.approved?'confirmed':'pending'}">${pr.approved?'✅ Đã duyệt':'⏳ Chưa duyệt'}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="lead-action-btn confirm" onclick="cpoToggleProductApproval('${r.ceoId}','${pr.id}');renderApProductsTab()">${pr.approved?'🚫 Ẩn':'✅ Duyệt'}</button>
+          <button class="lead-action-btn del" onclick="cpoDeleteProduct('${r.ceoId}','${pr.id}');renderApProductsTab()">🗑 Xóa</button>
+          <button class="lead-action-btn" onclick="closeAdminPanel();openCeoBooth('${r.ceoId}')">🏪 Mở gian hàng</button>
+        </div>
+      </td>
+    </tr>`;}).join('')}
+  </tbody>
+</table>
+</div>`}
+  `;
+}
+
 // ===== COMMUNITY GALLERY — 3D depth carousel =====
 const GAL_PREFIX='comm-gallery-';
 // Detect YouTube/Vimeo links vs. a directly-hosted video file (e.g. uploaded to Blob storage)
@@ -8889,6 +8941,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
       <button class="ap-nav-btn" onclick="switchApTab('showcase',this)"><span class="ap-ico">🏪</span><span>Sàn Sản Phẩm</span></button>
       <button class="ap-nav-btn" onclick="switchApTab('testimonials',this)"><span class="ap-ico">⭐</span><span>Đánh Giá Khách Hàng</span></button>
       <div class="ap-nav-sec">Báo Cáo</div>
+      <button class="ap-nav-btn" onclick="switchApTab('products',this)"><span class="ap-ico">🛍️</span><span>Duyệt Sản Phẩm</span></button>
       <button class="ap-nav-btn" onclick="switchApTab('members',this)"><span class="ap-ico">🪪</span><span>Duyệt Thành Viên</span></button>
       <button class="ap-nav-btn" onclick="switchApTab('leads',this)"><span class="ap-ico">📋</span><span>Đăng Ký & Tài Chính</span></button>
       <div class="ap-nav-sec">Cài Đặt</div>
@@ -8910,6 +8963,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
       <div class="ap-tab" id="ap-tab-settings"></div>
       <div class="ap-tab" id="ap-tab-leads"></div>
       <div class="ap-tab" id="ap-tab-members"></div>
+      <div class="ap-tab" id="ap-tab-products"></div>
     </main>
   </div>
 </div>
