@@ -111,6 +111,20 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .mobile-nav a.mnav-hl{color:var(--gold);border-left-color:var(--gold);background:rgba(34,197,94,.05)}
 .mobile-nav-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:302}
 .mobile-nav-close:hover{background:rgba(34,197,94,.12);color:var(--gold)}
+/* ===== MOBILE BOTTOM TAB BAR — kiểu Shopee/Tiki/Zalo, quen thuộc với người dùng VN, để 2 mục
+   quan trọng nhất (Cộng Đồng, Sàn Sản Phẩm) luôn 1 chạm thay vì phải mở menu 3 gạch ===== */
+.mobile-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:950;background:var(--dark2);border-top:1px solid rgba(255,255,255,.08);box-shadow:0 -6px 24px rgba(0,0,0,.4);padding:6px 2px calc(6px + env(safe-area-inset-bottom))}
+.mobile-tabbar-inner{display:flex;align-items:stretch}
+.mobile-tabbar-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1;background:none;border:none;color:rgba(255,255,255,.55);font-size:.62rem;font-weight:700;padding:5px 2px;cursor:pointer;text-decoration:none;line-height:1.2}
+.mobile-tabbar-item .mtb-ico{font-size:1.3rem;line-height:1}
+.mobile-tabbar-item.hl{color:var(--gold)}
+.mobile-tabbar-item:active{transform:scale(.94)}
+@media(max-width:960px){
+  .mobile-tabbar{display:block}
+  body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+  .float-btns{bottom:76px}
+  #admin-toast{bottom:76px}
+}
 /* ===== LANG SWITCHER ===== */
 .lang-switcher{display:flex;align-items:center;border:1px solid rgba(34,197,94,.28);border-radius:20px;overflow:hidden;flex-shrink:0}
 .lang-btn{padding:5px 9px;cursor:pointer;color:var(--muted);background:transparent;border:none;font-size:.7rem;font-weight:800;transition:.2s;letter-spacing:.5px;line-height:1}
@@ -1793,6 +1807,17 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
   </div>
 </nav>
 
+<!-- MOBILE BOTTOM TAB BAR — luôn hiện, 1 chạm tới Cộng Đồng / Sàn Sản Phẩm thay vì phải mở menu 3 gạch -->
+<nav class="mobile-tabbar" id="mobile-tabbar">
+  <div class="mobile-tabbar-inner">
+    <a href="#hero" class="mobile-tabbar-item"><span class="mtb-ico">🏠</span><span data-i18n="tab_home">Trang chủ</span></a>
+    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="openCeoPage()"><span class="mtb-ico">🤝</span><span data-i18n="tab_community">Cộng Đồng</span></a>
+    <a href="javascript:void(0)" class="mobile-tabbar-item hl" onclick="document.querySelector('#san-thanh-vien').scrollIntoView({behavior:'smooth'});scSelectCat('all',null)"><span class="mtb-ico">🏪</span><span data-i18n="tab_marketplace">Sàn SP</span></a>
+    <a href="#chapters" class="mobile-tabbar-item"><span class="mtb-ico">📖</span><span data-i18n="nav_book">Sách</span></a>
+    <a href="javascript:void(0)" class="mobile-tabbar-item" onclick="_toggleMobileNav()"><span class="mtb-ico">☰</span><span data-i18n="tab_more">Thêm</span></a>
+  </div>
+</nav>
+
 <!-- HERO -->
 <section id="hero">
   <div class="container">
@@ -3281,6 +3306,7 @@ const _I18N={
     btn_admin:'Quản Trị', btn_login:'Đăng nhập',
     btn_order_now:'Đặt Sách Ngay', lbl_member:'Thành Viên',
     mob_menu:'MENU',
+    tab_home:'Trang chủ', tab_community:'Cộng Đồng', tab_marketplace:'Sàn SP', tab_more:'Thêm',
   },
   en:{
     nav_book:'Book', nav_author:'Author', nav_reviews:'Reviews',
@@ -3292,6 +3318,7 @@ const _I18N={
     btn_admin:'Admin', btn_login:'Sign In',
     btn_order_now:'Order Now', lbl_member:'Member',
     mob_menu:'MENU',
+    tab_home:'Home', tab_community:'Community', tab_marketplace:'Market', tab_more:'More',
   }
 };
 let _currentLang=localStorage.getItem('_lang')||'vi';
