@@ -1456,6 +1456,10 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .ap-prod-card-edit:hover{background:rgba(255,255,255,.12)}
 .ap-prod-card-del{background:rgba(248,113,113,.1);color:#f87171}
 .ap-prod-card-del:hover{background:rgba(248,113,113,.2)}
+.ap-prod-card.has-pending-change{border-color:#60a5fa;box-shadow:0 0 0 1px rgba(96,165,250,.3)}
+.ap-prod-toggle-label.pending-change{color:#60a5fa}
+.ap-prod-savebar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--dark2);border:1px solid rgba(96,165,250,.4);box-shadow:0 8px 28px rgba(0,0,0,.5);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:16px;color:#fff;font-size:.85rem;animation:apSavebarIn .2s ease}
+@keyframes apSavebarIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 /* CEO list */
 .ap-ceo-list{display:flex;flex-direction:column;gap:8px}
 .ap-ceo-row{display:flex;align-items:center;gap:12px;background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:10px 14px;transition:.2s}
@@ -7939,6 +7943,62 @@ async function cpoToggleProductApproval(ceoId,prodId){
   }
 }
 
+// ===== DUYỆT HÀNG LOẠT — bật/tắt nhiều công tắc trước, chỉ 1 lần "Lưu" ở cuối để tránh mỗi lần
+// bấm là 1 lượt gọi mạng + toast + render lại cả trang (gây khó chịu khi duyệt nhiều sản phẩm
+// liên tiếp, xem phản hồi của Đạt). Bấm công tắc chỉ đổi hiển thị tại chỗ, KHÔNG gọi server. =====
+let _apProdPending={};
+function _apProdMarkPending(ceoId,prodId,checkboxEl){
+  const key=ceoId+'::'+prodId;
+  _apProdPending[key]={ceoId,prodId,approved:checkboxEl.checked};
+  const card=checkboxEl.closest('.ap-prod-card');
+  const label=card?.querySelector('.ap-prod-toggle-label');
+  if(label){
+    label.textContent=checkboxEl.checked?'🔵 Sẽ hiển thị (chưa lưu)':'🔵 Sẽ ẩn (chưa lưu)';
+    label.className='ap-prod-toggle-label pending-change';
+  }
+  card?.classList.add('has-pending-change');
+  _apProdRenderSaveBar();
+}
+function _apProdRenderSaveBar(){
+  const count=Object.keys(_apProdPending).length;
+  const tab=document.getElementById('ap-tab-products');
+  let bar=document.getElementById('ap-prod-savebar');
+  if(!count){bar?.remove();return;}
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='ap-prod-savebar';
+    bar.className='ap-prod-savebar';
+    tab?.appendChild(bar);
+  }
+  bar.innerHTML=`
+    <span>🔵 <strong>${count}</strong> thay đổi chưa lưu</span>
+    <div style="display:flex;gap:8px">
+      <button class="ap-cancel" onclick="_apProdDiscardPending()">↩️ Huỷ hết</button>
+      <button class="ap-save" onclick="_apProdSaveAllPending()">💾 Lưu ${count} thay đổi</button>
+    </div>`;
+}
+function _apProdDiscardPending(){
+  _apProdPending={};
+  renderApProductsTab();
+}
+async function _apProdSaveAllPending(){
+  const changes=Object.values(_apProdPending);
+  if(!changes.length)return;
+  const bar=document.getElementById('ap-prod-savebar');
+  if(bar)bar.innerHTML='<span>⏳ Đang lưu...</span>';
+  await _syncedProfilesUpdate(profiles=>{
+    changes.forEach(c=>{
+      const p=profiles.find(x=>x.id===c.ceoId);if(!p)return;
+      const pr=(p.products||[]).find(x=>x.id===c.prodId);if(!pr)return;
+      pr.approved=c.approved;
+    });
+  });
+  showToast(`✅ Đã lưu ${changes.length} thay đổi duyệt sản phẩm`,'success');
+  _apProdPending={};
+  buildProdTicker();buildCeoApprovedGrid();renderShowcase();
+  renderApProductsTab();
+}
+
 // ===== ADMIN: TẤT CẢ SẢN PHẨM CEO — gộp mọi gian hàng vào 1 danh sách phẳng, không ẩn mục
 // nào, để admin không phải mở lần lượt từng gian hàng mới thấy sản phẩm nào chưa duyệt. =====
 function _apProdCard(r){
@@ -7951,9 +8011,9 @@ function _apProdCard(r){
       <div class="ap-prod-card-ceo">🏪 ${r.ceoName||r.ceoId}</div>
       <div class="ap-prod-card-name">${pr.name||'(chưa đặt tên)'}</div>
       <div class="ap-prod-card-price">${pr.price||'<span style="opacity:.4;font-weight:400">Chưa có giá</span>'}</div>
-      <label class="ap-prod-toggle-row" title="Bật = hiển thị công khai cho khách xem, Tắt = ẩn khỏi sàn">
+      <label class="ap-prod-toggle-row" title="Bật = hiển thị công khai cho khách xem, Tắt = ẩn khỏi sàn. Có thể bật/tắt nhiều sản phẩm rồi bấm Lưu 1 lần.">
         <span class="ap-prod-toggle">
-          <input type="checkbox" ${isApproved?'checked':''} onchange="cpoToggleProductApproval('${r.ceoId}','${pr.id}').then(renderApProductsTab)">
+          <input type="checkbox" ${isApproved?'checked':''} onchange="_apProdMarkPending('${r.ceoId}','${pr.id}',this)">
           <span class="ap-prod-toggle-slider"></span>
         </span>
         <span class="ap-prod-toggle-label ${isApproved?'on':'off'}">${isApproved?'✅ Đang hiển thị':'⏳ Đang ẩn'}</span>
@@ -7968,6 +8028,7 @@ function _apProdCard(r){
 async function renderApProductsTab(){
   const tab=document.getElementById('ap-tab-products');
   if(!tab)return;
+  _apProdPending={}; // mỗi lần render lại là lấy bản gốc mới từ server — bỏ mọi thay đổi tạm chưa lưu trước đó
   tab.innerHTML=`<div class="ap-tab-hdr"><h2>🛍️ Tất Cả Sản Phẩm CEO</h2></div><div class="leads-empty">⏳ Đang tải dữ liệu mới nhất từ server...</div>`;
   // Luôn lấy bản MỚI NHẤT từ server mỗi lần mở tab này — đây là màn kiểm tra/duyệt, không thể
   // dựa vào cache cục bộ của tab (dễ bị thiếu sản phẩm người khác vừa thêm ở máy/tab khác).
