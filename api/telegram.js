@@ -6,6 +6,8 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 const ADMIN_IDS    = (process.env.TELEGRAM_ADMIN_CHAT_ID || '')
   .split(',').map(s => s.trim()).filter(Boolean);
 const SITE_URL     = 'https://ceoketnoitinhhoa.vn';
+const ADMIN_EMAIL  = process.env.ADMIN_EMAIL;
+const ADMIN_PASS   = process.env.ADMIN_PASS;
 
 // ── Conversation memory (per chat, in-memory — sống trong lúc function còn "ấm") ──
 const _history = new Map();
@@ -156,12 +158,122 @@ async function tgAction(chatId) {
   }).catch(() => {});
 }
 
+async function tgAnswerCallback(callbackId, text) {
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ callback_query_id: callbackId, text, show_alert: false }),
+  }).catch(() => {});
+}
+
+async function tgEditText(chatId, messageId, text) {
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId, message_id: messageId, text, parse_mode: 'Markdown',
+      reply_markup: { inline_keyboard: [] }, // xoá nút sau khi đã xử lý, tránh bấm lại nhầm
+    }),
+  }).catch(() => {});
+}
+
+// ── Duyệt thành viên cộng đồng ngay trong Telegram (thay vì phải vào Admin Panel) ──
+function parseArr(v) {
+  if (Array.isArray(v)) return v;
+  try { return JSON.parse(v || '[]'); } catch (e) { return []; }
+}
+
+async function readSiteData() {
+  const r = await fetch(`${SITE_URL}/api/read`, { cache: 'no-store' });
+  return r.json();
+}
+
+async function writeAdminKey(key, value) {
+  const r = await fetch(`${SITE_URL}/api/admin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ adminEmail: ADMIN_EMAIL, adminPass: ADMIN_PASS, key, value }),
+  }).catch(() => null);
+  return !!r && r.ok;
+}
+
+async function getJoinRequests() {
+  const d = await readSiteData();
+  return parseArr(d['community-join-requests-v1']);
+}
+
+// idOrEmail: khớp theo id (bấm nút) hoặc email (gõ lệnh /duyet email@...)
+async function setJoinRequestStatus(idOrEmail, status) {
+  const reqs = await getJoinRequests();
+  const needle = (idOrEmail || '').trim().toLowerCase();
+  const req = reqs.find(r => r.id === idOrEmail || (r.email || '').trim().toLowerCase() === needle);
+  if (!req) return null;
+  req.status = status;
+  const ok = await writeAdminKey('community-join-requests-v1', reqs);
+  return ok ? req : null;
+}
+
+async function cmdListPending(chatId) {
+  const reqs = await getJoinRequests();
+  const pending = reqs.filter(r => r.status === 'pending');
+  if (!pending.length) {
+    await tgSend(chatId, '📭 Không có yêu cầu tham gia cộng đồng nào đang chờ duyệt.');
+    return;
+  }
+  const shown = pending.slice(0, 15);
+  const listText = shown.map((r, i) => `${i + 1}. ${r.name || '—'} — ${r.email || '—'}`).join('\n');
+  const rows = shown.map(r => ([
+    { text: `✅ ${(r.name || r.email || '—').slice(0, 22)}`, callback_data: `apj:${r.id}` },
+    { text: '🚫 Từ chối', callback_data: `rej:${r.id}` },
+  ]));
+  await tgSend(chatId,
+    `🪪 *${pending.length} yêu cầu đang chờ duyệt*\n\n${listText}\n\nBấm nút bên dưới để duyệt nhanh 👇`,
+    { reply_markup: { inline_keyboard: rows } }
+  );
+}
+
+async function handleCallbackQuery(cq) {
+  const chatId    = String(cq.message?.chat?.id || '');
+  const messageId = cq.message?.message_id;
+  const data      = cq.data || '';
+
+  if (ADMIN_IDS.length && !ADMIN_IDS.includes(chatId)) {
+    await tgAnswerCallback(cq.id, '🔒 Không có quyền.');
+    return;
+  }
+
+  const [action, id] = data.split(':');
+  if (!id || (action !== 'apj' && action !== 'rej')) {
+    await tgAnswerCallback(cq.id, '');
+    return;
+  }
+
+  const status = action === 'apj' ? 'approved' : 'rejected';
+  const req = await setJoinRequestStatus(id, status);
+  if (!req) {
+    await tgAnswerCallback(cq.id, '⚠️ Không tìm thấy (có thể đã xử lý rồi).');
+    return;
+  }
+
+  await tgAnswerCallback(cq.id, status === 'approved' ? '✅ Đã duyệt!' : '🚫 Đã từ chối.');
+
+  const label = status === 'approved' ? '✅ *ĐÃ DUYỆT THÀNH VIÊN*' : '🚫 *ĐÃ TỪ CHỐI*';
+  const newText = `${label}\n👤 ${req.name || '—'}\n📧 ${req.email || '—'}`;
+  if (chatId && messageId) await tgEditText(chatId, messageId, newText);
+}
+
 // ── Webhook handler ────────────────────────────────────────────────────────────
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('ok');
 
   const update = await req.json().catch(() => null);
   if (!update) return new Response('ok');
+
+  // Bấm nút "✅ Duyệt" / "🚫 Từ chối" trên thông báo Telegram
+  if (update.callback_query) {
+    await handleCallbackQuery(update.callback_query);
+    return new Response('ok');
+  }
 
   const msg = update.message || update.edited_message;
   if (!msg?.text) return new Response('ok');
@@ -181,6 +293,9 @@ export default async function handler(req) {
       `👋 Chào Đạt!\n\n` +
       `Mình là cánh tay phải của bạn cho *CEO Kết Nối Tinh Hoa* — nắm hết code, dữ liệu sống, mọi thứ 🧠\n\n` +
       `Hỏi thẳng đi, đừng ngại dài dòng, mình hiểu hết!\n\n` +
+      `/duyet — xem & duyệt nhanh yêu cầu tham gia cộng đồng đang chờ\n` +
+      `/duyet email@... — duyệt thẳng 1 người theo email\n` +
+      `/tuchoi email@... — từ chối 1 người theo email\n` +
       `/clear — reset cuộc trò chuyện`
     );
     return new Response('ok');
@@ -189,6 +304,22 @@ export default async function handler(req) {
   if (text === '/clear') {
     _history.delete(chatId);
     await tgSend(chatId, '🧹 Xoá lịch sử xong, bắt đầu lại nào 🚀');
+    return new Response('ok');
+  }
+
+  if (text === '/duyet' || text.startsWith('/duyet ')) {
+    const arg = text.slice('/duyet'.length).trim();
+    if (!arg) { await cmdListPending(chatId); return new Response('ok'); }
+    const r = await setJoinRequestStatus(arg, 'approved');
+    await tgSend(chatId, r ? `✅ Đã duyệt: *${r.name || r.email}*` : `⚠️ Không tìm thấy yêu cầu khớp "${arg}"`);
+    return new Response('ok');
+  }
+
+  if (text.startsWith('/tuchoi')) {
+    const arg = text.slice('/tuchoi'.length).trim();
+    if (!arg) { await tgSend(chatId, 'Dùng: /tuchoi email@...'); return new Response('ok'); }
+    const r = await setJoinRequestStatus(arg, 'rejected');
+    await tgSend(chatId, r ? `🚫 Đã từ chối: *${r.name || r.email}*` : `⚠️ Không tìm thấy yêu cầu khớp "${arg}"`);
     return new Response('ok');
   }
 

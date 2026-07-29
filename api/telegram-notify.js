@@ -165,11 +165,22 @@ export default async function handler(req) {
   const { event, data = {} } = body;
   const text = buildMessage(event, data);
 
+  // Duyệt nhanh ngay trong Telegram — bấm nút thay vì phải đăng nhập Admin Panel.
+  const replyMarkup = event === 'community_join_request' && data.id
+    ? { inline_keyboard: [[
+        { text: '✅ Duyệt', callback_data: `apj:${data.id}` },
+        { text: '🚫 Từ chối', callback_data: `rej:${data.id}` },
+      ]] }
+    : undefined;
+
   const results = await Promise.all(ADMIN_IDS.map(chatId =>
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
+      body: JSON.stringify({
+        chat_id: chatId, text, parse_mode: 'Markdown',
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
     }).then(r => r.json()).catch(() => ({ ok: false }))
   ));
 

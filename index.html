@@ -5884,7 +5884,7 @@ function _createJoinRequest(name,email){
   const req={id:'jr'+Date.now()+Math.floor(Math.random()*1000),name:name||'',email:(email||'').trim(),status:'pending',ts:new Date().toISOString()};
   reqs.unshift(req);
   _saveJoinRequests(reqs);
-  _tgNotify('community_join_request',{name:req.name,email:req.email});
+  _tgNotify('community_join_request',{id:req.id,name:req.name,email:req.email});
   return req;
 }
 function _setJoinRequestStatus(id,status){
