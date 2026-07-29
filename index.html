@@ -6696,12 +6696,21 @@ let _unlockCeoId=null,_unlockCeoName='';
 function openCeoPage(){
   // Browsing the community grid is open to everyone (full preview).
   // Actual profile access (viewing docs, connecting) is gated per-click — see clickCeoCard().
-  renderCeoGrid();
-  document.getElementById('ceo-page').classList.add('open');
-  document.body.style.overflow='hidden';
-  _initCeoUnlocks();
-  _fillCeoSidebar();
-  buildCeoTicker();
+  // Cùng cơ chế chống "bấm quá sớm" như openCeoBooth/openCeoProfile: nếu /api/read chưa kịp về
+  // (dễ gặp khi bấm ngay "Cộng Đồng" ở thanh tab dưới mobile lúc trang vừa tải), renderCeoGrid()
+  // sẽ thấy profiles rỗng và im lặng return — trang mở ra nhưng danh sách CEO trống trơn, y hệt
+  // bị "đơ". Đợi dữ liệu sẵn sàng rồi mới mở, thay vì mở overlay trước rồi render vào chỗ trống.
+  const doOpen=()=>{
+    renderCeoGrid();
+    document.getElementById('ceo-page').classList.add('open');
+    document.body.style.overflow='hidden';
+    _initCeoUnlocks();
+    _fillCeoSidebar();
+    buildCeoTicker();
+  };
+  if(_dbDataApplied) doOpen();
+  else if(_IS_LIVE) _dbFetchPromise.then(doOpen);
+  else doOpen();
 }
 function buildCeoTicker(){
   const track = document.getElementById('ceo-ticker-track');
