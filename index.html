@@ -168,7 +168,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .admin-mode .events-edit-btn{display:flex}
 .events-scroll-wrap{height:276px;overflow:hidden;mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 88%,transparent)}
 .events-track{display:flex;flex-direction:column;animation:evt-scroll-up 22s linear infinite}
-.events-track:hover{animation-play-state:paused}
+@media(hover:hover) and (pointer:fine){.events-track:hover{animation-play-state:paused}}
 @keyframes evt-scroll-up{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
 .event-item{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:default}
 .event-date{background:var(--ceo-red);border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:52px}
@@ -455,7 +455,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .market-row{display:flex;gap:16px;width:max-content;padding:8px 0}
 .market-row-1{animation:scrollLeft 35s linear infinite}
 .market-row-2{animation:scrollRight 38s linear infinite}
-.market-row:hover{animation-play-state:paused}
+@media(hover:hover) and (pointer:fine){.market-row:hover{animation-play-state:paused}}
 /* Product card */
 .product-card{flex-shrink:0;width:240px;background:var(--dark3);border:1px solid rgba(34,197,94,.08);border-radius:14px;overflow:hidden;transition:.25s;cursor:pointer}
 .product-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5)}
@@ -664,7 +664,12 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .testi-row{display:flex;gap:16px;width:max-content;padding:10px 0}
 .testi-row-1{animation:scrollLeft 40s linear infinite}
 .testi-row-2{animation:scrollRight 45s linear infinite}
-.testi-row:hover{animation-play-state:paused}
+/* Chỉ pause khi thật sự có chuột hover (desktop) — trên điện thoại chạm tay có thể để lại
+   trạng thái :hover "dính" mãi (không có chuột để rời ra), làm marquee đứng im vĩnh viễn ngay
+   khi lướt ngón tay ngang qua khu vực này dù CSS animation vẫn "running" về mặt kỹ thuật. */
+@media(hover:hover) and (pointer:fine){
+  .testi-row:hover{animation-play-state:paused}
+}
 @keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
 /* Mobile: khôi phục hiệu ứng marquee tự chạy (trước có tắt vì thẻ hay bị cắt cụt ở 2 mép, đổi
@@ -1189,7 +1194,7 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 /* ── CEO Product Ticker ─────────────────────────────────────────────────── */
 .ceo-prod-ticker-overflow{overflow:hidden;mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%)}
 .ceo-prod-ticker-track{display:flex;gap:14px;animation:ceo-scroll-left 38s linear infinite;width:max-content;padding:6px 0}
-.ceo-prod-ticker-track:hover{animation-play-state:paused}
+@media(hover:hover) and (pointer:fine){.ceo-prod-ticker-track:hover{animation-play-state:paused}}
 .cpo-prod-ticker-card{width:220px;flex-shrink:0;background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:13px;overflow:hidden;cursor:pointer;transition:.22s}
 .cpo-prod-ticker-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .cpo-prod-ticker-thumb{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:2rem}
@@ -1278,7 +1283,7 @@ textarea.booth-field-input{resize:vertical;line-height:1.6;font-size:.8rem}
 .ceo-ticker-count{font-size:.72rem;color:var(--gold);font-weight:700;margin-left:auto;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);border-radius:50px;padding:3px 10px}
 .ceo-ticker-overflow{overflow:hidden;mask-image:linear-gradient(to right,transparent 0%,#000 7%,#000 93%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 7%,#000 93%,transparent 100%)}
 .ceo-ticker-track{display:flex;gap:12px;animation:ceo-scroll-left 40s linear infinite;width:max-content;padding:4px 0}
-.ceo-ticker-track:hover{animation-play-state:paused}
+@media(hover:hover) and (pointer:fine){.ceo-ticker-track:hover{animation-play-state:paused}}
 @keyframes ceo-scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ceo-tick-item{display:flex;align-items:center;gap:12px;background:var(--dark3);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 16px;min-width:230px;max-width:230px;cursor:pointer;transition:.25s;flex-shrink:0}
 .ceo-tick-item:hover{border-color:rgba(34,197,94,.3);background:var(--dark4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
