@@ -724,8 +724,9 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .admin-mode .ws-img-wrap{cursor:pointer}
 .ws-box{background:var(--dark3);border:2px solid rgba(34,197,94,.35);border-radius:var(--radius);padding:30px;position:relative}
 .ws-event-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:50px;padding:5px 16px;font-size:.74rem;color:var(--gold);font-weight:800;margin-bottom:14px;letter-spacing:.3px}
-.ws-hot-flag{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;font-size:.72rem;font-weight:900;padding:6px 16px;border-radius:50px;margin:0 0 12px 8px;letter-spacing:.3px;animation:ws-hot-pulse 1.4s ease-in-out infinite;vertical-align:middle}
-@keyframes ws-hot-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,.55)}50%{transform:scale(1.06);box-shadow:0 0 0 9px rgba(220,38,38,0)}}
+.ws-hot-flag{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;font-size:.85rem;font-weight:900;padding:9px 22px;border-radius:50px;margin:0 0 14px 8px;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.35);box-shadow:0 4px 18px rgba(220,38,38,.45);animation:ws-hot-pulse 1.4s ease-in-out infinite;vertical-align:middle}
+@keyframes ws-hot-pulse{0%,100%{transform:scale(1);box-shadow:0 4px 18px rgba(220,38,38,.45),0 0 0 0 rgba(220,38,38,.55)}50%{transform:scale(1.06);box-shadow:0 4px 18px rgba(220,38,38,.45),0 0 0 10px rgba(220,38,38,0)}}
+@media(max-width:700px){.ws-hot-flag{font-size:.78rem;padding:8px 18px;display:flex;width:fit-content}}
 .ws-countdown-wrap{margin:16px 0}
 .ws-countdown-label{font-size:.78rem;color:var(--gold);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ws-countdown-boxes{display:flex;gap:8px}
@@ -737,7 +738,8 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .ws-title{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.25;margin-bottom:6px}
 .ws-title span{color:var(--gold)}
 .ws-meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
-.ws-meta-item{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 12px;font-size:.78rem;color:var(--muted)}
+.ws-meta-item{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 12px;font-size:.74rem;color:rgba(255,255,255,.5)}
+.ws-meta-item strong{color:#fff;font-weight:700}
 .ws-meta-item strong{color:#fff;font-weight:600}
 .ws-price-row{display:flex;align-items:baseline;gap:10px;margin:16px 0 8px;flex-wrap:wrap}
 .ws-price{font-size:2.2rem;font-weight:900;color:var(--gold);line-height:1}
@@ -2213,7 +2215,7 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
       <!-- Right: Event details -->
       <div class="ws-box">
         <div class="ws-event-badge">🎤 <span id="ws-badge-text">WORKSHOP ĐỘC QUYỀN</span></div>
-        <span class="ws-hot-flag" id="ws-hot-flag" style="display:none">🔥 SỰ KIỆN SẮP DIỄN RA — HOT HOT</span>
+        <span class="ws-hot-flag" id="ws-hot-flag" style="display:none;cursor:pointer" onclick="openEventsListOverlay()" title="Xem tất cả sự kiện sắp diễn ra">🔥 SỰ KIỆN SẮP DIỄN RA — HOT HOT</span>
         <div class="ws-title" id="ws-title-display">Kết Nối <span id="ws-title-accent-display">Tinh Hoa CEO 2025</span></div>
         <div class="ws-meta-row">
           <div class="ws-meta-item">📅 <strong id="ws-date-display">--/--/----</strong></div>
