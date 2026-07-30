@@ -426,7 +426,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 #cc-video-lightbox-inner video,#cc-video-lightbox-inner iframe{width:100%;height:100%;border:0;display:block}
 #cc-video-lb-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:.2s}
 #cc-video-lb-close:hover{background:rgba(255,255,255,.24)}
-#video-url-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:700;display:none;align-items:center;justify-content:center}
+#video-url-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9100;display:none;align-items:center;justify-content:center}
 #video-url-modal.open{display:flex}
 .vmodal-box{background:var(--dark3);border:1px solid rgba(34,197,94,.25);border-radius:16px;padding:28px;width:min(440px,92vw)}
 .vmodal-box h4{color:var(--gold);margin-bottom:16px;font-size:1rem;font-weight:700}
@@ -1210,6 +1210,20 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 /* ── CEO BOOTH OVERLAY (Gian Hàng Doanh Nghiệp) ──────────────────────────── */
 #ceo-booth-overlay{position:fixed;inset:0;z-index:9000;background:var(--dark);overflow-y:auto;display:none;flex-direction:column}
 #ceo-booth-overlay.open{display:flex}
+/* ── EVENTS LIST + EVENT DETAIL OVERLAYS (Sự Kiện Sắp Tới → xem chi tiết → đăng ký) ──────── */
+#events-list-overlay,#event-detail-overlay{position:fixed;inset:0;z-index:9000;background:var(--dark);overflow-y:auto;display:none;flex-direction:column}
+#events-list-overlay.open,#event-detail-overlay.open{display:flex}
+.events-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:20px}
+.events-list-card{background:var(--dark3);border:1px solid rgba(34,197,94,.18);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;display:flex;flex-direction:column}
+.events-list-card:hover{border-color:rgba(34,197,94,.4);transform:translateY(-3px)}
+.elc-img{width:100%;height:150px;background:var(--dark4);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.elc-img img{width:100%;height:100%;object-fit:cover}
+.elc-img span{font-size:2rem;opacity:.3}
+.elc-body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.elc-date{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--gold);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:50px;padding:3px 10px;width:fit-content}
+.elc-title{font-size:1rem;font-weight:800;color:#fff;line-height:1.35}
+.elc-desc{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1}
+.elc-btn{margin-top:4px;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:800;font-size:.82rem;cursor:pointer;text-align:center}
 .booth-topbar{position:sticky;top:0;z-index:10;background:rgba(4,2,0,.94);backdrop-filter:blur(12px);display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
 .booth-back{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:8px;padding:7px 14px;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
 .booth-back:hover{background:rgba(255,255,255,.13)}
@@ -2276,6 +2290,31 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
   </div>
 </section>
 
+<!-- EVENTS LIST OVERLAY — mở khi bấm "📅 Sự Kiện Sắp Tới", liệt kê mọi sự kiện quản trị đã tạo -->
+<div id="events-list-overlay">
+  <div class="booth-topbar">
+    <button class="booth-back" onclick="closeEventsListOverlay()">← Quay về trang chủ</button>
+    <span class="booth-topbar-title">📅 Sự Kiện Sắp Tới</span>
+  </div>
+  <div class="container" style="padding-top:28px;padding-bottom:60px">
+    <h2 class="section-title">Tất Cả <span>Sự Kiện</span></h2>
+    <p class="section-sub">Xem chi tiết và đăng ký tham dự các sự kiện của CLB</p>
+    <div id="events-list-grid" class="events-list-grid"></div>
+  </div>
+</div>
+
+<!-- EVENT DETAIL OVERLAY — trang chi tiết đầy đủ tính năng cho 1 sự kiện, giống hệt khối Sự Kiện
+     Workshop chính (poster, đếm ngược, đăng ký, suất còn lại) nhưng dựng động theo id sự kiện. -->
+<div id="event-detail-overlay">
+  <div class="booth-topbar">
+    <button class="booth-back" onclick="closeEventDetail()">← Quay về trang chủ</button>
+    <span class="booth-topbar-title" id="ed-topbar-title">Chi tiết sự kiện</span>
+  </div>
+  <div class="container" style="padding-top:28px;padding-bottom:60px">
+    <div class="ws-grid" id="ed-body"><!-- rendered by JS --></div>
+  </div>
+</div>
+
 <!-- Workshop Registration Modal -->
 <div id="ws-reg-modal">
   <div class="ws-modal-box">
@@ -2440,10 +2479,10 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
       </div>
       <div class="community-events fade-up">
         <div class="events-hdr">
-          <h4>📅 Sự Kiện Sắp Tới</h4>
+          <h4 style="cursor:pointer" onclick="openEventsListOverlay()" title="Xem tất cả sự kiện">📅 Sự Kiện Sắp Tới →</h4>
           <button class="events-edit-btn" onclick="openEventsAdmin()">✏️ Quản lý sự kiện</button>
         </div>
-        <div class="events-scroll-wrap">
+        <div class="events-scroll-wrap" onclick="openEventsListOverlay()" style="cursor:pointer" title="Xem tất cả sự kiện">
           <div class="events-track" id="events-track"><!-- rendered by JS --></div>
         </div>
       </div>
@@ -5567,14 +5606,33 @@ function openEventEditor(id){
   const ev=id?evts.find(e=>e.id===id):{id:'',day:'',month:'Tháng ',title:'',desc:''};
   const slot=document.getElementById('ea-editor-slot');
   if(!slot)return;
+  const imgKey='ee-poster-'+(id||'new');
+  const imgSrc=ev.img||localStorage.getItem(IMG_PREFIX+imgKey)||'';
   slot.innerHTML=`<div class="ea-editor">
     <div class="ea-editor-title">${id?'Chỉnh sửa sự kiện':'Thêm sự kiện mới'}</div>
     <div class="ee-row2">
-      <div class="ee-field"><label class="ee-lbl">Ngày</label><input class="ee-inp" id="ee-day" placeholder="15" value="${ev.day||''}"></div>
+      <div class="ee-field"><label class="ee-lbl">Ngày (số, hiện trên vé sự kiện)</label><input class="ee-inp" id="ee-day" placeholder="15" value="${ev.day||''}"></div>
       <div class="ee-field"><label class="ee-lbl">Tháng</label><input class="ee-inp" id="ee-month" placeholder="Tháng 7" value="${ev.month||''}"></div>
     </div>
-    <div class="ee-field"><label class="ee-lbl">Tiêu đề sự kiện</label><input class="ee-inp" id="ee-title" placeholder="CEO Networking Hà Nội" value="${ev.title||''}"></div>
-    <div class="ee-field"><label class="ee-lbl">Mô tả</label><textarea class="ee-inp ee-ta" id="ee-desc" placeholder="Mô tả ngắn về sự kiện...">${ev.desc||''}</textarea></div>
+    <div class="ee-field"><label class="ee-lbl">Tiêu đề sự kiện (hiện ở danh sách)</label><input class="ee-inp" id="ee-title" placeholder="CEO Networking Hà Nội" value="${ev.title||''}"></div>
+    <div class="ee-field"><label class="ee-lbl">Mô tả ngắn (hiện ở danh sách)</label><textarea class="ee-inp ee-ta" id="ee-desc" placeholder="Mô tả ngắn về sự kiện...">${ev.desc||''}</textarea></div>
+    <div style="border-top:1px dashed rgba(255,255,255,.1);margin:6px 0;padding-top:10px;font-size:.74rem;font-weight:700;color:var(--gold)">📋 Trang chi tiết đầy đủ (giống Sự Kiện Workshop chính) — khách bấm "Xem chi tiết" sẽ thấy các thông tin dưới đây</div>
+    <div class="ee-field">
+      <label class="ee-lbl">Ảnh poster sự kiện</label>
+      <div class="ws-img-wrap" data-img="${imgKey}" onclick="_eeUploadPoster('${imgKey}')" style="width:140px;height:100px;min-height:100px;aspect-ratio:unset;cursor:pointer">
+        ${imgSrc?`<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover" alt="">`:`<div class="img-ph" style="height:100%;min-height:100px"><p style="font-size:.65rem">Bấm để upload</p></div>`}
+      </div>
+    </div>
+    <div class="ee-row2">
+      <div class="ee-field"><label class="ee-lbl">Ngày diễn ra (dd/mm/yyyy)</label><input class="ee-inp" id="ee2-date" placeholder="15/08/2026" value="${ev.date||''}"></div>
+      <div class="ee-field"><label class="ee-lbl">Giờ (VD 08:00-17:00)</label><input class="ee-inp" id="ee2-time" placeholder="08:00-17:00" value="${ev.time||''}"></div>
+    </div>
+    <div class="ee-field"><label class="ee-lbl">Địa điểm</label><input class="ee-inp" id="ee2-location" placeholder="Hà Nội" value="${ev.location||''}"></div>
+    <div class="ee-row2">
+      <div class="ee-field"><label class="ee-lbl">Giá (Miễn phí / 500.000đ)</label><input class="ee-inp" id="ee2-price" placeholder="Miễn phí" value="${ev.price||''}"></div>
+      <div class="ee-field"><label class="ee-lbl">Tổng suất</label><input class="ee-inp" id="ee2-seats-total" type="number" placeholder="50" value="${ev.seatsTotal||''}"></div>
+    </div>
+    <div class="ee-field"><label class="ee-lbl">Điểm nổi bật (mỗi dòng 1 điểm)</label><textarea class="ee-inp ee-ta" id="ee2-highlights" placeholder="Gặp gỡ CEO tinh hoa&#10;Networking cao cấp">${Array.isArray(ev.highlights)?ev.highlights.join('\n'):''}</textarea></div>
     <div class="ee-form-actions">
       <button class="ee-save" onclick="saveEventForm()">💾 Lưu</button>
       ${id?`<button class="ee-del" onclick="deleteEventItem('${id}')">🗑 Xóa</button>`:''}
@@ -5583,6 +5641,19 @@ function openEventEditor(id){
   </div>`;
   slot.scrollIntoView({behavior:'smooth',block:'nearest'});
   document.getElementById('ee-title').focus();
+}
+function _eeUploadPoster(imgKey){
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      localStorage.setItem(IMG_PREFIX+imgKey,ev.target.result);
+      const wrap=document.querySelector(`[data-img="${imgKey}"]`);
+      if(wrap)wrap.innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+    };
+    r.readAsDataURL(file);
+  };inp.click();
 }
 function cancelEventEditor(){
   const slot=document.getElementById('ea-editor-slot');
@@ -5595,12 +5666,23 @@ function saveEventForm(){
   const title=(document.getElementById('ee-title').value||'').trim();
   const desc=(document.getElementById('ee-desc').value||'').trim();
   if(!title){document.getElementById('ee-title').focus();return;}
+  const date=(document.getElementById('ee2-date')?.value||'').trim();
+  const time=(document.getElementById('ee2-time')?.value||'').trim();
+  const location=(document.getElementById('ee2-location')?.value||'').trim();
+  const price=(document.getElementById('ee2-price')?.value||'').trim();
+  const seatsTotal=parseInt(document.getElementById('ee2-seats-total')?.value)||50;
+  const highlights=(document.getElementById('ee2-highlights')?.value||'').split('\n').map(s=>s.trim()).filter(Boolean);
   const evts=loadEvents();
+  const newId=_editingEventId||evtId();
+  const imgKey='ee-poster-'+(_editingEventId||'new');
+  const img=localStorage.getItem(IMG_PREFIX+imgKey)||'';
   if(_editingEventId){
     const idx=evts.findIndex(e=>e.id===_editingEventId);
-    if(idx>=0)evts[idx]={...evts[idx],day,month,title,desc};
+    if(idx>=0)evts[idx]={...evts[idx],day,month,title,desc,date,time,location,price,seatsTotal,highlights,img:img||evts[idx].img};
   } else {
-    evts.push({id:evtId(),day,month,title,desc});
+    evts.push({id:newId,day,month,title,desc,date,time,location,price,seatsTotal,seatsTaken:0,highlights,img});
+    // Ảnh poster upload lúc "thêm mới" tạm lưu ở key "ee-poster-new" — chuyển sang key đúng theo id thật vừa tạo.
+    if(img){localStorage.setItem(IMG_PREFIX+'ee-poster-'+newId,img);localStorage.removeItem(IMG_PREFIX+'ee-poster-new');}
   }
   saveEvents(evts);
   renderEventsTicker();
@@ -5613,6 +5695,133 @@ function deleteEventItem(id){
   saveEvents(evts);
   renderEventsTicker();
   renderEaList();
+}
+
+// ===== EVENTS LIST OVERLAY + EVENT DETAIL OVERLAY =====
+// "Sự Kiện Sắp Tới" giờ mở ra 1 trang liệt kê mọi sự kiện quản trị đã tạo trong ceo-events-v1 —
+// bấm 1 sự kiện mở trang chi tiết ĐẦY ĐỦ TÍNH NĂNG giống hệt khối "Sự Kiện Workshop" chính ở
+// trang chủ (poster, đếm ngược, đăng ký, thanh toán, suất còn lại) nhưng dựng động theo từng id,
+// dùng chung logic đăng ký/thanh toán/vé (xem openWsRegModal — nay nhận thêm eventId tuỳ chọn).
+function openEventsListOverlay(){
+  document.getElementById('events-list-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  _renderEventsListGrid();
+}
+function closeEventsListOverlay(){
+  document.getElementById('events-list-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function _renderEventsListGrid(){
+  const grid=document.getElementById('events-list-grid');
+  if(!grid)return;
+  const evts=loadEvents();
+  if(!evts.length){grid.innerHTML='<div class="leads-empty">📭 Chưa có sự kiện nào</div>';return;}
+  grid.innerHTML=evts.map(ev=>{
+    const imgSrc=ev.img||localStorage.getItem(IMG_PREFIX+'ee-poster-'+ev.id)||'';
+    return `<div class="events-list-card" onclick="openEventDetail('${ev.id}')">
+      <div class="elc-img">${imgSrc?`<img src="${imgSrc}" alt="">`:'<span>📅</span>'}</div>
+      <div class="elc-body">
+        <div class="elc-date">📅 ${ev.day||'?'} ${ev.month||''}</div>
+        <div class="elc-title">${ev.title||'(chưa đặt tên)'}</div>
+        <div class="elc-desc">${ev.desc||''}</div>
+        <div class="elc-btn">Xem chi tiết →</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+let _edCurrentEventId=null;
+let _edCountdownInterval=null;
+function openEventDetail(id){
+  const ev=loadEvents().find(e=>e.id===id);
+  if(!ev)return;
+  _edCurrentEventId=id;
+  document.getElementById('events-list-overlay').classList.remove('open');
+  document.getElementById('event-detail-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  _edRenderDetail(ev);
+}
+function closeEventDetail(){
+  document.getElementById('event-detail-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  if(_edCountdownInterval){clearInterval(_edCountdownInterval);_edCountdownInterval=null;}
+  _edCurrentEventId=null;
+}
+function _edRenderDetail(ev){
+  const imgSrc=ev.img||localStorage.getItem(IMG_PREFIX+'ee-poster-'+ev.id)||'';
+  const titleEl=document.getElementById('ed-topbar-title');
+  if(titleEl)titleEl.textContent=ev.title||'Sự kiện';
+  const taken=parseInt(ev.seatsTaken)||0,total=parseInt(ev.seatsTotal)||50;
+  const highlights=Array.isArray(ev.highlights)?ev.highlights:[];
+  document.getElementById('ed-body').innerHTML=`
+    <div class="ws-img-wrap" style="min-height:360px">
+      ${imgSrc?`<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover" alt="">`:`
+      <div class="img-ph" style="height:100%;min-height:360px">
+        <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        <p>Ảnh poster sự kiện</p>
+      </div>`}
+    </div>
+    <div class="ws-box">
+      <div class="ws-event-badge">🎤 <span>${ev.badge||'SỰ KIỆN CLB'}</span></div>
+      <span class="ws-hot-flag" id="ed-hot-flag" style="display:none">🔥 SỰ KIỆN SẮP DIỄN RA — HOT HOT</span>
+      <div class="ws-title">${ev.title||'Sự kiện'}</div>
+      <div class="ws-meta-row">
+        <div class="ws-meta-item">📅 <strong>${ev.date||'--/--/----'}</strong></div>
+        <div class="ws-meta-item">🕐 <strong>${ev.time||'--:-- – --:--'}</strong></div>
+        <div class="ws-meta-item">📍 <strong>${ev.location||'Hà Nội'}</strong></div>
+      </div>
+      <div class="ws-price-row">
+        <div class="ws-price">${ev.price||'Miễn phí'}</div>
+      </div>
+      <div class="ws-desc">${ev.desc||''}</div>
+      ${highlights.length?`<div class="ws-highlights">${highlights.map(h=>`<div class="ws-hl">${h}</div>`).join('')}</div>`:''}
+      <div class="ws-countdown-wrap" id="ed-countdown-wrap" style="display:none">
+        <div class="ws-countdown-label">⏳ Đăng ký đóng lại sau:</div>
+        <div class="ws-countdown-boxes">
+          <div class="ws-cd-box"><div class="ws-cd-num" id="ed-cd-days">00</div><div class="ws-cd-label">Ngày</div></div>
+          <div class="ws-cd-box"><div class="ws-cd-num" id="ed-cd-hrs">00</div><div class="ws-cd-label">Giờ</div></div>
+          <div class="ws-cd-box"><div class="ws-cd-num" id="ed-cd-min">00</div><div class="ws-cd-label">Phút</div></div>
+          <div class="ws-cd-box"><div class="ws-cd-num" id="ed-cd-sec">00</div><div class="ws-cd-label">Giây</div></div>
+        </div>
+      </div>
+      <div class="ws-btn-row">
+        <button class="ws-btn-reg" id="ed-reg-btn" onclick="openWsRegModal('${ev.id}')">🎟️ Đăng Ký Tham Dự</button>
+      </div>
+      <div class="ws-seats-bar">
+        <div class="ws-seats-text">🔥 Đã đăng ký: <strong style="color:var(--gold)">${taken}</strong> / <strong>${total}</strong> suất</div>
+        <div class="ws-seats-track"><div class="ws-seats-fill" style="width:${Math.min(100,Math.round(taken/total*100))}%"></div></div>
+      </div>
+      ${window.adminMode?`<div style="margin-top:14px"><button class="ap-save" onclick="closeEventDetail();openEventsAdmin();openEventEditor('${ev.id}')">✏️ Sửa sự kiện này</button></div>`:''}
+    </div>`;
+  _edUpdateCountdown(ev);
+}
+function _edUpdateCountdown(ev){
+  if(_edCountdownInterval){clearInterval(_edCountdownInterval);_edCountdownInterval=null;}
+  const target=_wsRegCloseDate(ev);
+  const hotFlag=document.getElementById('ed-hot-flag');
+  const cdWrap=document.getElementById('ed-countdown-wrap');
+  const regBtn=document.getElementById('ed-reg-btn');
+  function setOpen(isOpen){
+    if(!regBtn)return;
+    if(isOpen){regBtn.classList.remove('ws-reg-closed');regBtn.textContent='🎟️ Đăng Ký Tham Dự';regBtn.onclick=()=>openWsRegModal(ev.id);}
+    else{regBtn.classList.add('ws-reg-closed');regBtn.textContent='⛔ Đã Hết Hạn Đăng Ký';regBtn.onclick=null;}
+  }
+  if(!target){if(hotFlag)hotFlag.style.display='none';if(cdWrap)cdWrap.style.display='none';setOpen(true);return;}
+  const p=n=>String(n).padStart(2,'0');
+  function tick(){
+    const left=target.getTime()-Date.now();
+    if(left<=0){
+      if(hotFlag)hotFlag.style.display='none';if(cdWrap)cdWrap.style.display='none';
+      setOpen(false);clearInterval(_edCountdownInterval);_edCountdownInterval=null;return;
+    }
+    if(hotFlag)hotFlag.style.display='inline-flex';if(cdWrap)cdWrap.style.display='';
+    setOpen(true);
+    document.getElementById('ed-cd-days').textContent=p(Math.floor(left/86400000));
+    document.getElementById('ed-cd-hrs').textContent=p(Math.floor((left%86400000)/3600000));
+    document.getElementById('ed-cd-min').textContent=p(Math.floor((left%3600000)/60000));
+    document.getElementById('ed-cd-sec').textContent=p(Math.floor((left%60000)/1000));
+  }
+  tick();
+  _edCountdownInterval=setInterval(tick,1000);
 }
 
 // ===== LOGIN / GOOGLE AUTH =====
@@ -6359,15 +6568,21 @@ function wsSaveEvent(){
 }
 
 // --- Registration Modal ---
-function openWsRegModal(){
-  const ev=_loadWsEvent();
+// eventId (tuỳ chọn): id trong ceo-events-v1 khi đăng ký từ trang chi tiết 1 sự kiện phụ (xem
+// openEventDetail) — bỏ trống thì dùng đúng sự kiện Workshop chính ở trang chủ như trước giờ.
+let _wsRegEventId=null;
+function _wsRegLoadEvent(){return _wsRegEventId?loadEvents().find(e=>e.id===_wsRegEventId):_loadWsEvent();}
+function openWsRegModal(eventId){
+  _wsRegEventId=eventId||null;
+  const ev=_wsRegLoadEvent();
+  if(!ev)return;
   const target=_wsRegCloseDate(ev);
   if(target&&Date.now()>=target.getTime()){
     showToast('⛔ Đã đóng đăng ký (trước giờ diễn ra sự kiện 1 ngày).','error');
     return;
   }
   const nm=document.getElementById('ws-reg-event-name');
-  if(nm)nm.textContent=(ev.title1||'Workshop')+' '+(ev.title2||'CEO Kết Nối Tinh Hoa');
+  if(nm)nm.textContent=_wsRegEventId?(ev.title||'Sự kiện'):((ev.title1||'Workshop')+' '+(ev.title2||'CEO Kết Nối Tinh Hoa'));
   ['wsr-name','wsr-phone','wsr-email','wsr-role','wsr-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ws-reg-modal').classList.add('open');
   document.body.style.overflow='hidden';
@@ -6379,25 +6594,37 @@ function closeWsRegModal(){
 function submitWsReg(){
   const g=id=>document.getElementById(id)?.value?.trim()||'';
   if(!g('wsr-name')||!g('wsr-phone')){showToast('Vui lòng điền họ tên và số điện thoại','error');return;}
-  const ev=_loadWsEvent();
-  const reg={id:'reg'+Date.now(),name:g('wsr-name'),phone:g('wsr-phone'),email:g('wsr-email'),role:g('wsr-role'),note:g('wsr-note'),event:(ev.title1||'Workshop')+' '+(ev.title2||''),ts:new Date().toISOString()};
+  const ev=_wsRegLoadEvent();
+  const eventLabel=_wsRegEventId?(ev.title||'Sự kiện'):((ev.title1||'Workshop')+' '+(ev.title2||''));
+  const reg={id:'reg'+Date.now(),name:g('wsr-name'),phone:g('wsr-phone'),email:g('wsr-email'),role:g('wsr-role'),note:g('wsr-note'),event:eventLabel,ts:new Date().toISOString()};
   const regs=JSON.parse(localStorage.getItem(WS_REGS_KEY)||'[]');
   regs.push(reg);
   localStorage.setItem(WS_REGS_KEY,JSON.stringify(regs));
   // Save to unified leads
-  const wsPrice=parseFloat((_loadWsEvent().price||'').replace(/[^\d]/g,''))||0;
+  const wsPrice=parseFloat((ev.price||'').replace(/[^\d]/g,''))||0;
   _saveLead({source:'workshop',name:reg.name,phone:reg.phone,email:reg.email,profession:reg.role,note:reg.note||'',amount:wsPrice,status:'new'});
-  // Update seat count
-  const updEv={..._loadWsEvent(),seatsTaken:(parseInt(ev.seatsTaken)||0)+1};
-  _saveWsEvent(updEv);_wsRender(updEv);
+  // Update seat count — sự kiện chính (WS_EVENT_KEY) hoặc 1 sự kiện phụ trong ceo-events-v1.
+  let updEv;
+  if(_wsRegEventId){
+    const evts=loadEvents();
+    const idx=evts.findIndex(e=>e.id===_wsRegEventId);
+    if(idx>=0){evts[idx]={...evts[idx],seatsTaken:(parseInt(evts[idx].seatsTaken)||0)+1};updEv=evts[idx];saveEvents(evts);}
+    else updEv=ev;
+    if(document.getElementById('event-detail-overlay')?.classList.contains('open'))_edRenderDetail(updEv);
+    renderEventsTicker();
+  }else{
+    updEv={...ev,seatsTaken:(parseInt(ev.seatsTaken)||0)+1};
+    _saveWsEvent(updEv);_wsRender(updEv);
+  }
   closeWsRegModal();
   _tgNotify('workshop_reg',{name:reg.name,phone:reg.phone,email:reg.email,role:reg.role,event:reg.event,amount:wsPrice});
-  if(wsPrice>0){ openWsPaymentFlow(reg,updEv,wsPrice); }
-  else{ openWsTicketModal(reg,updEv,wsPrice); }
+  const useTemplate=!_wsRegEventId; // chỉ sự kiện chính mới dùng ảnh mẫu vé admin đã thiết kế sẵn
+  if(wsPrice>0){ openWsPaymentFlow(reg,updEv,wsPrice,useTemplate); }
+  else{ openWsTicketModal(reg,updEv,wsPrice,useTemplate); }
 }
 // Workshop có phí: đi qua đúng quy trình thanh toán+xác thực dùng chung (giống Kết nối CEO/Thành viên)
 // trước khi mở vé — thay vì phát vé ngay khi chưa xác nhận đã thanh toán.
-async function openWsPaymentFlow(reg,ev,wsPrice){
+async function openWsPaymentFlow(reg,ev,wsPrice,useTemplate){
   document.getElementById('pay-content').textContent='Đang tạo mã...';
   document.getElementById('pay-amount').textContent=wsPrice.toLocaleString('vi-VN')+'đ';
   document.getElementById('ceo-payment-modal').classList.add('open');
@@ -6410,7 +6637,7 @@ async function openWsPaymentFlow(reg,ev,wsPrice){
     tgPaidEvent:'workshop_paid',
     tgSuccessEvent:'workshop_activated',
     codeInputId:'activate-code-inp',
-    onSuccess:()=>{ openWsTicketModal(reg,ev,wsPrice); }
+    onSuccess:()=>{ openWsTicketModal(reg,ev,wsPrice,useTemplate); }
   };
   const ref=await pfCreateRef('workshop',reg.event||'Workshop',wsPrice);
   document.getElementById('pay-content').textContent=ref||'Lỗi tạo mã — vui lòng thử lại';
@@ -6418,7 +6645,7 @@ async function openWsPaymentFlow(reg,ev,wsPrice){
 }
 let _wsTicketData=null;
 let _wsTicketCanvas=null;
-function openWsTicketModal(reg,ev,wsPrice){
+function openWsTicketModal(reg,ev,wsPrice,useTemplate=true){
   const $=id=>document.getElementById(id);
   const payBlock=$('wst-payment-block');
   if(wsPrice>0){
@@ -6448,7 +6675,7 @@ function openWsTicketModal(reg,ev,wsPrice){
     _wsTicketCanvas=c;
     img.src=c.toDataURL('image/png');
     img.style.display='block';loading.style.display='none';
-  });
+  },useTemplate);
 }
 function closeWsTicketModal(){
   document.getElementById('ws-ticket-modal').classList.remove('open');
@@ -6468,8 +6695,11 @@ const WST_FIELD_POS={
   phone:{x:592,y:317,maxW:137,size:17},
   role:{x:592,y:364,maxW:137,size:17},
 };
-function _buildWsTicketCanvas(data,done){
-  const bgSrc=localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||'';
+function _buildWsTicketCanvas(data,done,useTemplate=true){
+  // useTemplate=false (sự kiện phụ ngoài Workshop chính): luôn dùng khối thông tin dự phòng —
+  // mẫu vé admin thiết kế đã in sẵn tên "Kết Nối Tinh Hoa CEO 2026" nên không phù hợp cho sự
+  // kiện khác. Admin muốn vé riêng cho sự kiện nào thì tự thiết kế thêm sau.
+  const bgSrc=useTemplate?(localStorage.getItem(IMG_PREFIX+'workshop-ticket-bg')||''):'';
   const w=1000,imgH=700,infoH=340;
   const c=document.createElement('canvas');
   c.width=w;
