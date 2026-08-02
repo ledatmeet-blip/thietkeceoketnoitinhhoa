@@ -1003,6 +1003,57 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 #ai-chat-send-btn{width:38px;height:38px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-size:1rem;cursor:pointer;flex-shrink:0}
 @media(max-width:480px){#ai-chat-panel{right:16px;bottom:16px}}
 
+/* ===== COMMUNITY CHAT PANEL — kiểu Messenger ===== */
+#community-chat-panel{position:fixed;bottom:24px;right:96px;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100vh - 100px));background:var(--dark3);border:1px solid rgba(34,197,94,.22);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.55);z-index:9300;display:none;flex-direction:column;overflow:hidden}
+#community-chat-panel.open{display:flex}
+#cchat-list-view,#cchat-thread-view{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.cchat-hdr{display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(21,128,61,.1));border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;font-weight:800;font-size:.9rem;color:#fff}
+.cchat-close-btn,.cchat-back-btn{background:rgba(255,255,255,.08);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.9rem;flex-shrink:0}
+.cchat-thread-name{font-size:.85rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cchat-thread-status{font-size:.68rem;color:var(--muted)}
+.cchat-search-row{padding:10px 14px;flex-shrink:0}
+.cchat-search-row input{width:100%;background:var(--dark4);border:1.5px solid rgba(255,255,255,.08);color:var(--text);padding:9px 13px;border-radius:20px;font-size:.82rem;outline:none;font-family:inherit}
+.cchat-search-row input:focus{border-color:var(--gold)}
+.cchat-list-body{flex:1;overflow-y:auto;padding:4px 8px 12px}
+.cchat-section-lbl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:10px 8px 6px}
+.cchat-empty{text-align:center;color:var(--muted);font-size:.78rem;padding:24px 16px;line-height:1.6}
+.cchat-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;cursor:pointer;transition:.15s;position:relative}
+.cchat-row:hover{background:rgba(255,255,255,.05)}
+.cchat-row-info{flex:1;min-width:0}
+.cchat-row-name{font-size:.83rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cchat-row-sub{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cchat-dot{width:9px;height:9px;border-radius:50%;background:#555;flex-shrink:0;box-shadow:0 0 0 2px var(--dark3)}
+.cchat-dot.online{background:#22c55e;box-shadow:0 0 6px #22c55e,0 0 0 2px var(--dark3)}
+.cchat-unread-badge{background:var(--gold);color:#0a0a0a;font-size:.68rem;font-weight:800;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.cchat-mini-btn{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--gold);border-radius:8px;padding:5px 9px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.cchat-mini-btn.accept{background:rgba(34,197,94,.18)}
+.cchat-mini-btn.reject{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3);color:#f87171}
+.cchat-pending-lbl{font-size:.68rem;color:var(--muted);font-style:italic}
+.cchat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cchat-msg{display:flex;align-items:flex-end;gap:6px;max-width:88%}
+.cchat-msg.mine{align-self:flex-end;flex-direction:row-reverse}
+.cchat-msg.theirs{align-self:flex-start}
+.cchat-bubble{padding:9px 13px;border-radius:16px;font-size:.83rem;line-height:1.5;position:relative;cursor:pointer}
+.cchat-msg.mine .cchat-bubble{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:600;border-bottom-right-radius:4px}
+.cchat-msg.theirs .cchat-bubble{background:var(--dark4);color:var(--text);border-bottom-left-radius:4px}
+.cchat-bubble-text{white-space:pre-wrap;word-break:break-word}
+.cchat-bubble-time{font-size:.62rem;opacity:.6;margin-top:3px;text-align:right}
+.cchat-reply-quote{font-size:.72rem;opacity:.75;border-left:2px solid currentColor;padding-left:6px;margin-bottom:4px}
+.cchat-reply-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;opacity:0;transition:.15s;flex-shrink:0}
+.cchat-msg:hover .cchat-reply-btn{opacity:1}
+.cchat-reply-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);font-size:.74rem;color:var(--muted);flex-shrink:0}
+.cchat-reply-bar button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem}
+.cchat-record-indicator{padding:8px 14px;background:rgba(248,113,113,.1);color:#f87171;font-size:.78rem;font-weight:700;text-align:center;flex-shrink:0}
+.cchat-emoji-picker{display:none;grid-template-columns:repeat(8,1fr);gap:4px;padding:10px;max-height:130px;overflow-y:auto;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.cchat-emoji-picker span{font-size:1.2rem;text-align:center;cursor:pointer;border-radius:6px;padding:3px}
+.cchat-emoji-picker span:hover{background:rgba(255,255,255,.08)}
+.cchat-input-row{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.cchat-input-row input{flex:1;background:var(--dark4);border:1.5px solid rgba(255,255,255,.08);color:var(--text);padding:9px 13px;border-radius:20px;font-size:.83rem;outline:none;font-family:inherit;min-width:0}
+.cchat-input-row input:focus{border-color:var(--gold)}
+.cchat-icon-btn{background:none;border:none;font-size:1.15rem;cursor:pointer;flex-shrink:0;padding:4px}
+.cchat-send-btn{width:36px;height:36px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-size:.95rem;cursor:pointer;flex-shrink:0}
+@media(max-width:480px){#community-chat-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 90px)}}
+
 /* ===== CEO COMMUNITY PAGE ===== */
 #ceo-page{position:fixed;inset:0;background:var(--dark);z-index:860;display:none;flex-direction:column;overflow:hidden}
 #ceo-page.open{display:flex}
@@ -2845,10 +2896,55 @@ textarea.cpo-field-input{text-align:left;font-size:.8rem;line-height:1.6}
 
 <!-- FLOATING BUTTONS -->
 <div class="float-btns">
+  <button class="float-btn" id="btn-community-chat" title="Chat Cộng Đồng" onclick="toggleCommunityChat()" style="position:relative">
+    👥<span id="cchat-fab-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.62rem;font-weight:800;min-width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center;padding:0 3px">0</span>
+  </button>
   <button class="float-btn" id="btn-ai-chat" title="Hỏi Trợ Lý AI" onclick="toggleAiChat()">🤖</button>
   <button class="float-btn" id="btn-music" title="Nhạc nền" onclick="toggleBgMusic()">🔊</button>
   <button class="float-btn" id="btn-zalo" title="Chat Zalo" onclick="window.open('https://zalo.me/0936678813','_blank')">💬</button>
   <button class="float-btn" id="btn-top" title="Lên đầu trang" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+</div>
+
+<!-- COMMUNITY CHAT PANEL — kiểu Messenger: danh sách hội thoại/kết nối <-> khung chat 1-1 -->
+<div id="community-chat-panel">
+  <!-- Màn danh sách -->
+  <div id="cchat-list-view">
+    <div class="cchat-hdr">
+      <span>👥 Chat Cộng Đồng</span>
+      <button class="cchat-close-btn" onclick="closeCommunityChat()">✕</button>
+    </div>
+    <div class="cchat-search-row">
+      <input id="cchat-search-inp" placeholder="🔍 Tìm thành viên để kết nối..." oninput="chatSearchMembers(this.value)">
+    </div>
+    <div id="cchat-list-body" class="cchat-list-body"></div>
+  </div>
+  <!-- Màn hội thoại 1-1 -->
+  <div id="cchat-thread-view" style="display:none">
+    <div class="cchat-hdr">
+      <button class="cchat-back-btn" onclick="_chatShowListView()">←</button>
+      <span id="cchat-thread-avatar"></span>
+      <div style="flex:1;min-width:0">
+        <div id="cchat-thread-name" class="cchat-thread-name"></div>
+        <div id="cchat-thread-status" class="cchat-thread-status"></div>
+      </div>
+      <button class="cchat-close-btn" onclick="closeCommunityChat()">✕</button>
+    </div>
+    <div id="cchat-messages" class="cchat-messages"></div>
+    <div id="cchat-reply-bar" class="cchat-reply-bar" style="display:none">
+      <span>↩ <span id="cchat-reply-preview"></span></span>
+      <button onclick="_chatCancelReply()">✕</button>
+    </div>
+    <div id="cchat-record-indicator" class="cchat-record-indicator" style="display:none">
+      🔴 Đang ghi âm... <span id="cchat-record-time">00:00</span>
+    </div>
+    <div id="cchat-emoji-picker" class="cchat-emoji-picker" style="display:none"></div>
+    <div class="cchat-input-row">
+      <button class="cchat-icon-btn" onclick="chatToggleEmojiPicker()" title="Emoji">😊</button>
+      <input id="cchat-input" placeholder="Nhắn tin..." onkeydown="chatInputKeydown(event)">
+      <button class="cchat-icon-btn" onclick="chatToggleVoiceRecord()" title="Ghi âm thoại">🎤</button>
+      <button class="cchat-send-btn" onclick="chatSendMessage()" title="Gửi">➤</button>
+    </div>
+  </div>
 </div>
 <audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
 
@@ -4236,6 +4332,7 @@ function openCeoEditor(id){
       <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:12px;margin-top:4px;font-size:.78rem;font-weight:700;color:var(--gold)">📋 Thông tin hồ sơ thành viên</div>
       <div class="ap-field"><label class="ap-lbl">Ngày sinh</label><input class="ap-inp" id="ee-dob" value="${p.dob||''}" placeholder="DD/MM/YYYY"></div>
       <div class="ap-field"><label class="ap-lbl">Số điện thoại</label><input class="ap-inp" id="ee-phone" value="${p.phone||''}" placeholder="0912345678"></div>
+      <div class="ap-field"><label class="ap-lbl">Email (dùng làm tài khoản thành viên + chat)</label><input class="ap-inp" id="ee-ceo-email" value="${p.email||''}" placeholder="ceo@email.com" type="email"></div>
       <div class="ap-field"><label class="ap-lbl">Chức vụ</label><input class="ap-inp" id="ee-title" value="${p.title||''}" placeholder="GĐ / Chủ Tịch HĐQT..."></div>
       <div class="ap-field"><label class="ap-lbl">Học vị</label><input class="ap-inp" id="ee-degree" value="${p.degree||''}" placeholder="Đại Học / Thạc sĩ / Tiến sỹ"></div>
       <div class="ap-field"><label class="ap-lbl">Vai trò trong CLB</label><input class="ap-inp" id="ee-club-role" value="${p.clubRole||''}" placeholder="Chủ Tịch CLB / Phó CT CLB..."></div>
@@ -4267,35 +4364,36 @@ function closeCeoEditor(){
   const slot=document.getElementById('ap-ceo-editor-slot');
   if(slot)slot.innerHTML='';
 }
-function saveCeoProfileForm(){
+async function saveCeoProfileForm(){
   const g=id=>((document.getElementById(id)||{}).value||'').trim();
   const code=g('ee-code'),name=g('ee-name'),role=g('ee-role'),tags=g('ee-tags');
   const loc=g('ee-loc'),emoji=g('ee-emoji')||'👔',unlockCode=g('ee-unlock-code');
   const bio=g('ee-bio'),dob=g('ee-dob'),phone=g('ee-phone'),title=g('ee-title');
   const degree=g('ee-degree'),clubRole=g('ee-club-role'),feeDate=g('ee-fee-date');
   const company=g('ee-company'),industries=g('ee-industries'),docs=g('ee-docs');
+  const email=g('ee-ceo-email').toLowerCase();
   if(!name){document.getElementById('ee-name').focus();return;}
-  const profiles=loadCeoProfiles();
   const prevImg=document.querySelector('#ap-edit-prev img');
   const img=prevImg?prevImg.src:'';
-  const extra={code,name,role,tags,loc,emoji,unlockCode,bio,dob,phone,title,degree,clubRole,feeDate,company,industries,docs};
-  if(_editingCeoId){
-    const idx=profiles.findIndex(p=>p.id===_editingCeoId);
-    if(idx>=0){
-      const updated={...profiles[idx],...extra};
-      if(img&&img.startsWith('data:image'))updated.img=img;
-      profiles[idx]=updated;
-      if(unlockCode)localStorage.setItem('ceo-code-'+_editingCeoId,unlockCode);
-      if(img&&img.startsWith('data:image'))localStorage.setItem(IMG_PREFIX+'ceo-'+_editingCeoId,img);
+  const extra={code,name,role,tags,loc,emoji,unlockCode,bio,dob,phone,title,degree,clubRole,feeDate,company,industries,docs,email};
+  const editingId=_editingCeoId;
+  await _syncedProfilesUpdate(profiles=>{
+    if(editingId){
+      const idx=profiles.findIndex(p=>p.id===editingId);
+      if(idx>=0){
+        const updated={...profiles[idx],...extra};
+        if(img&&img.startsWith('data:image'))updated.img=img;
+        profiles[idx]=updated;
+        if(unlockCode)localStorage.setItem('ceo-code-'+editingId,unlockCode);
+        if(img&&img.startsWith('data:image'))localStorage.setItem(IMG_PREFIX+'ceo-'+editingId,img);
+      }
+    } else {
+      const newId='c'+(Date.now()%100000);
+      profiles.push({id:newId,...extra,img,products:[]});
+      if(img)localStorage.setItem(IMG_PREFIX+'ceo-'+newId,img);
+      if(unlockCode)localStorage.setItem('ceo-code-'+newId,unlockCode);
     }
-  } else {
-    const newId='c'+(Date.now()%100000);
-    profiles.push({id:newId,...extra,img,products:[]});
-    if(img)localStorage.setItem(IMG_PREFIX+'ceo-'+newId,img);
-    if(unlockCode)localStorage.setItem('ceo-code-'+newId,unlockCode);
-  }
-  saveCeoProfiles(profiles);
-  _dbWrite(CEO_PROFILES_KEY,profiles);
+  });
   showToast('✅ Đã lưu hồ sơ CEO','success');
   renderCeoGrid();
   renderApCeoTab();
@@ -5993,6 +6091,7 @@ function updateUserUI(user){
   if(avatar){avatar.classList.add('visible'); if(user.picture) img.src=user.picture; else img.src='';}
   const isMember = _isAdminEmail(user.email) || localStorage.getItem('ceo-member')==='active';
   if(isMember) _showMemberBadge(); else _showGuestBadge();
+  if(typeof _chatMaybeStartPresence==='function')_chatMaybeStartPresence(user.email);
 }
 
 // ===== MEMBERSHIP =====
@@ -6949,6 +7048,377 @@ document.addEventListener('DOMContentLoaded', async () => {
   if(typeof google !== 'undefined') initGoogleOneTap();
   else window.addEventListener('load', ()=>setTimeout(initGoogleOneTap, 800));
 });
+
+// =====================================================================================
+// ===== CHAT CỘNG ĐỒNG — mỗi hồ sơ CEO (có email) + mỗi thành viên đã được duyệt tham
+// gia CLB đều là 1 tài khoản chat, kết bạn/kết nối rồi nhắn tin qua lại như Messenger/
+// Telegram: tin nhắn văn bản, trả lời tin, ghi âm thoại, chấm tròn online/offline.
+// Không dùng WebSocket thật (tránh phải dựng thêm hạ tầng realtime + RLS phức tạp cho 1
+// web tĩnh không có hệ thống đăng nhập/JWT thật) — thay vào đó: heartbeat mỗi 20s để biết
+// ai đang online, và polling tin nhắn mới mỗi vài giây trong lúc khung chat đang mở. Với
+// quy mô cộng đồng CLB (vài trăm thành viên), độ trễ vài giây là chấp nhận được.
+// =====================================================================================
+function _chatAllMembers(){
+  const list=[];
+  const seen=new Set();
+  loadCeoProfiles().forEach(p=>{
+    const e=(p.email||'').trim().toLowerCase();
+    if(!e||seen.has(e))return;
+    seen.add(e);
+    list.push({email:e,name:p.name||e,avatar:p.img||localStorage.getItem(IMG_PREFIX+'ceo-'+p.id)||'',roleLabel:'CEO'+(p.role?' — '+p.role:''),isCeo:true,ceoId:p.id});
+  });
+  _loadJoinRequests().filter(r=>r.status==='approved').forEach(r=>{
+    const e=(r.email||'').trim().toLowerCase();
+    if(!e||seen.has(e))return;
+    seen.add(e);
+    list.push({email:e,name:r.name||e,avatar:'',roleLabel:'Thành viên CLB',isCeo:false,ceoId:null});
+  });
+  return list;
+}
+function _chatFindMember(email){
+  const e=(email||'').trim().toLowerCase();
+  return _chatAllMembers().find(m=>m.email===e)||null;
+}
+function _chatAvatarHtml(member,size){
+  size=size||36;
+  if(member&&member.avatar)return `<img src="${member.avatar}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover" alt="">`;
+  const initial=((member&&member.name)||'?').trim().charAt(0).toUpperCase();
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-weight:800;font-size:${size*0.42}px">${initial}</div>`;
+}
+
+// ── Trạng thái chat toàn cục ─────────────────────────────────────────────────────────
+let _chatMyEmail=null;
+let _chatActivePeer=null;
+let _chatContactsData={accepted:[],incoming:[],outgoing:[]};
+let _chatOnlineSet=new Set();
+let _chatHeartbeatTimer=null,_chatPresenceTimer=null,_chatThreadPollTimer=null,_chatConvPollTimer=null;
+let _chatMessages=[];
+let _chatLastMsgId=0;
+let _chatReplyTo=null;
+let _chatRecorder=null,_chatRecordChunks=[],_chatRecordStart=0,_chatRecordTimerInt=null;
+
+// ── Presence (nhịp tim + polling ai đang online) ────────────────────────────────────
+function _chatMaybeStartPresence(email){
+  if(!email)return;
+  _chatMyEmail=email.trim().toLowerCase();
+  if(_chatHeartbeatTimer)return; // đã chạy rồi, khỏi chạy lại
+  const beat=()=>{ fetch('/api/chat-heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_chatMyEmail})}).catch(()=>{}); };
+  beat();
+  _chatHeartbeatTimer=setInterval(beat,20000);
+  const refreshPresence=async()=>{
+    try{
+      const r=await fetch('/api/chat-presence',{cache:'no-store'});
+      if(!r.ok)return;
+      const d=await r.json();
+      _chatOnlineSet=new Set((d.online||[]).map(e=>e.toLowerCase()));
+      _chatUpdateOnlineDots();
+      const badge=document.getElementById('cchat-fab-badge');
+      // Không phiền admin/khách chưa đăng nhập — chấm đỏ trên nút nổi chỉ hiện khi có tin chưa đọc (xem _chatRefreshConversations).
+    }catch(e){}
+  };
+  refreshPresence();
+  _chatPresenceTimer=setInterval(refreshPresence,15000);
+  _chatRefreshConversations(); // để cập nhật số tin chưa đọc trên nút nổi ngay cả khi chưa mở khung chat
+  _chatConvPollTimer=setInterval(_chatRefreshConversations,20000);
+}
+function _chatUpdateOnlineDots(){
+  document.querySelectorAll('[data-chat-email]').forEach(el=>{
+    const dot=el.querySelector('.cchat-dot');
+    if(dot)dot.classList.toggle('online',_chatOnlineSet.has(el.dataset.chatEmail));
+  });
+}
+
+// ── Mở/đóng khung chat ───────────────────────────────────────────────────────────────
+function toggleCommunityChat(){
+  const panel=document.getElementById('community-chat-panel');
+  if(!panel)return;
+  if(panel.classList.contains('open'))closeCommunityChat();else openCommunityChat();
+}
+function openCommunityChat(){
+  if(!currentUser?.email){ showToast('Vui lòng đăng nhập để dùng Chat Cộng Đồng','error'); openLogin(); return; }
+  const email=currentUser.email.trim().toLowerCase();
+  if(!_chatFindMember(email) && !_isAdminEmail(email)){
+    showToast('Tài khoản của bạn chưa được gán làm thành viên chat. Cần được duyệt tham gia CLB hoặc gán email vào hồ sơ CEO.','error',5000);
+    return;
+  }
+  _chatMaybeStartPresence(email);
+  document.getElementById('community-chat-panel').classList.add('open');
+  _chatShowListView();
+  _chatRefreshContacts();
+  _chatRefreshConversations();
+}
+function closeCommunityChat(){
+  document.getElementById('community-chat-panel').classList.remove('open');
+  _chatStopThreadPoll();
+}
+function _chatShowListView(){
+  _chatActivePeer=null;
+  _chatStopThreadPoll();
+  document.getElementById('cchat-list-view').style.display='flex';
+  document.getElementById('cchat-thread-view').style.display='none';
+}
+
+// ── Danh bạ / kết nối (giống thêm bạn bè) ────────────────────────────────────────────
+async function _chatRefreshContacts(){
+  if(!_chatMyEmail)return;
+  try{
+    const r=await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',email:_chatMyEmail})});
+    if(!r.ok)return;
+    _chatContactsData=await r.json();
+    _chatRenderListView();
+  }catch(e){}
+}
+function _chatContactStatusWith(email){
+  const e=(email||'').trim().toLowerCase();
+  if(_chatContactsData.accepted.some(c=>c.requester_email===e||c.target_email===e))return 'accepted';
+  if(_chatContactsData.outgoing.some(c=>c.target_email===e))return 'outgoing';
+  if(_chatContactsData.incoming.some(c=>c.requester_email===e))return 'incoming';
+  return 'none';
+}
+async function _chatSendContactRequest(email){
+  await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'request',email:_chatMyEmail,targetEmail:email})});
+  showToast('✅ Đã gửi lời mời kết nối','success');
+  _chatRefreshContacts();
+}
+async function _chatRespondContact(requestId,accept){
+  await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:accept?'accept':'reject',requestId})});
+  _chatRefreshContacts();
+}
+
+// ── Danh sách hội thoại (màn hình chính của khung chat) ─────────────────────────────
+let _chatConversations=[];
+async function _chatRefreshConversations(){
+  if(!_chatMyEmail)return;
+  try{
+    const r=await fetch('/api/chat-conversations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_chatMyEmail})});
+    if(!r.ok)return;
+    _chatConversations=(await r.json()).conversations||[];
+    const totalUnread=_chatConversations.reduce((s,c)=>s+(c.unread||0),0);
+    const fab=document.getElementById('cchat-fab-badge');
+    if(fab){fab.textContent=totalUnread>9?'9+':totalUnread;fab.style.display=totalUnread>0?'flex':'none';}
+    if(document.getElementById('community-chat-panel')?.classList.contains('open') && !_chatActivePeer)_chatRenderListView();
+  }catch(e){}
+}
+let _chatSearchQuery='';
+function chatSearchMembers(q){
+  _chatSearchQuery=(q||'').trim().toLowerCase();
+  _chatRenderListView();
+}
+function _chatRenderListView(){
+  const box=document.getElementById('cchat-list-body');
+  if(!box)return;
+  const incoming=_chatContactsData.incoming||[];
+  let html='';
+  if(incoming.length){
+    html+=`<div class="cchat-section-lbl">🔔 Lời mời kết nối (${incoming.length})</div>`;
+    incoming.forEach(req=>{
+      const m=_chatFindMember(req.requester_email)||{email:req.requester_email,name:req.requester_email};
+      html+=`<div class="cchat-row">
+        ${_chatAvatarHtml(m,40)}
+        <div class="cchat-row-info"><div class="cchat-row-name">${m.name}</div><div class="cchat-row-sub">${m.roleLabel||''}</div></div>
+        <div style="display:flex;gap:4px">
+          <button class="cchat-mini-btn accept" onclick="_chatRespondContact(${req.id},true)">✓</button>
+          <button class="cchat-mini-btn reject" onclick="_chatRespondContact(${req.id},false)">✕</button>
+        </div>
+      </div>`;
+    });
+  }
+  if(_chatSearchQuery){
+    const results=_chatAllMembers().filter(m=>m.email!==_chatMyEmail && (m.name.toLowerCase().includes(_chatSearchQuery)||m.email.includes(_chatSearchQuery)));
+    html+=`<div class="cchat-section-lbl">🔍 Kết quả tìm kiếm</div>`;
+    if(!results.length)html+=`<div class="cchat-empty">Không tìm thấy thành viên nào</div>`;
+    results.forEach(m=>{
+      const status=_chatContactStatusWith(m.email);
+      let actionHtml='';
+      if(status==='accepted')actionHtml=`<button class="cchat-mini-btn" onclick="_chatOpenThread('${m.email}')">💬</button>`;
+      else if(status==='outgoing')actionHtml=`<span class="cchat-pending-lbl">Đã gửi lời mời</span>`;
+      else if(status==='incoming')actionHtml=`<span class="cchat-pending-lbl">Xem ở mục lời mời ↑</span>`;
+      else actionHtml=`<button class="cchat-mini-btn" onclick="_chatSendContactRequest('${m.email}')">➕ Kết nối</button>`;
+      html+=`<div class="cchat-row" data-chat-email="${m.email}">
+        <span class="cchat-dot ${_chatOnlineSet.has(m.email)?'online':''}"></span>
+        ${_chatAvatarHtml(m,40)}
+        <div class="cchat-row-info"><div class="cchat-row-name">${m.name}</div><div class="cchat-row-sub">${m.roleLabel||''}</div></div>
+        ${actionHtml}
+      </div>`;
+    });
+  }else{
+    html+=`<div class="cchat-section-lbl">💬 Đoạn chat</div>`;
+    if(!_chatConversations.length)html+=`<div class="cchat-empty">Chưa có đoạn chat nào — tìm kiếm thành viên ở ô trên để kết nối và bắt đầu trò chuyện.</div>`;
+    _chatConversations.forEach(c=>{
+      const m=_chatFindMember(c.otherEmail)||{email:c.otherEmail,name:c.otherEmail};
+      const preview=c.type==='voice'?'🎤 Tin nhắn thoại':(c.content||'').slice(0,40);
+      const mine=c.from_email===_chatMyEmail;
+      html+=`<div class="cchat-row" data-chat-email="${m.email}" onclick="_chatOpenThread('${m.email}')">
+        <span class="cchat-dot ${_chatOnlineSet.has(m.email)?'online':''}"></span>
+        ${_chatAvatarHtml(m,44)}
+        <div class="cchat-row-info"><div class="cchat-row-name">${m.name}</div><div class="cchat-row-sub">${mine?'Bạn: ':''}${preview}</div></div>
+        ${c.unread?`<span class="cchat-unread-badge">${c.unread}</span>`:''}
+      </div>`;
+    });
+  }
+  box.innerHTML=html;
+  _chatUpdateOnlineDots();
+}
+
+// ── Khung hội thoại (thread) — gửi/nhận/trả lời/ghi âm ──────────────────────────────
+function _chatOpenThread(email){
+  _chatActivePeer=email;
+  const m=_chatFindMember(email)||{email,name:email};
+  document.getElementById('cchat-list-view').style.display='none';
+  document.getElementById('cchat-thread-view').style.display='flex';
+  document.getElementById('cchat-thread-avatar').innerHTML=_chatAvatarHtml(m,34);
+  document.getElementById('cchat-thread-name').textContent=m.name;
+  document.getElementById('cchat-thread-status').textContent=_chatOnlineSet.has(email)?'🟢 Đang hoạt động':'⚪ Ngoại tuyến';
+  document.getElementById('cchat-messages').innerHTML='<div class="cchat-empty">Đang tải tin nhắn...</div>';
+  _chatCancelReply();
+  _chatLastMsgId=0;
+  _chatMessages=[];
+  _chatLoadHistory();
+  _chatStopThreadPoll();
+  _chatThreadPollTimer=setInterval(_chatPollNewMessages,4000);
+  fetch('/api/chat-mark-read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({myEmail:_chatMyEmail,otherEmail:email})}).catch(()=>{});
+}
+function _chatStopThreadPoll(){
+  if(_chatThreadPollTimer){clearInterval(_chatThreadPollTimer);_chatThreadPollTimer=null;}
+}
+async function _chatLoadHistory(){
+  try{
+    const r=await fetch('/api/chat-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email1:_chatMyEmail,email2:_chatActivePeer})});
+    const d=await r.json();
+    _chatMessages=d.messages||[];
+    if(_chatMessages.length)_chatLastMsgId=_chatMessages[_chatMessages.length-1].id;
+    _chatRenderMessages();
+  }catch(e){
+    document.getElementById('cchat-messages').innerHTML='<div class="cchat-empty">Không tải được tin nhắn — kiểm tra kết nối mạng.</div>';
+  }
+}
+async function _chatPollNewMessages(){
+  if(!_chatActivePeer)return;
+  try{
+    const r=await fetch('/api/chat-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email1:_chatMyEmail,email2:_chatActivePeer,sinceId:_chatLastMsgId})});
+    const d=await r.json();
+    const news=d.messages||[];
+    if(news.length){
+      _chatMessages=_chatMessages.concat(news);
+      _chatLastMsgId=news[news.length-1].id;
+      _chatRenderMessages();
+      fetch('/api/chat-mark-read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({myEmail:_chatMyEmail,otherEmail:_chatActivePeer})}).catch(()=>{});
+    }
+  }catch(e){}
+}
+function _chatFindMsgById(id){return _chatMessages.find(m=>String(m.id)===String(id));}
+function _chatRenderMessages(){
+  const box=document.getElementById('cchat-messages');
+  if(!box)return;
+  const wasNearBottom=box.scrollTop+box.clientHeight>=box.scrollHeight-40;
+  box.innerHTML=_chatMessages.map(m=>{
+    const mine=m.from_email===_chatMyEmail;
+    const replyMsg=m.reply_to_id?_chatFindMsgById(m.reply_to_id):null;
+    const replyHtml=replyMsg?`<div class="cchat-reply-quote">↩ ${replyMsg.type==='voice'?'🎤 Tin nhắn thoại':(replyMsg.content||'').slice(0,60)}</div>`:'';
+    const time=new Date(m.created_at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+    let bodyHtml;
+    if(m.type==='voice'){
+      bodyHtml=`<audio controls src="${m.content}" style="height:36px;max-width:220px"></audio>`;
+    }else{
+      bodyHtml=`<div class="cchat-bubble-text">${_chatEscapeHtml(m.content||'')}</div>`;
+    }
+    return `<div class="cchat-msg ${mine?'mine':'theirs'}" data-msg-id="${m.id}">
+      <div class="cchat-bubble" ondblclick="_chatSetReply('${m.id}')">
+        ${replyHtml}
+        ${bodyHtml}
+        <div class="cchat-bubble-time">${time}</div>
+      </div>
+      <button class="cchat-reply-btn" onclick="_chatSetReply('${m.id}')" title="Trả lời">↩</button>
+    </div>`;
+  }).join('') || '<div class="cchat-empty">Chưa có tin nhắn — gửi lời chào đầu tiên!</div>';
+  if(wasNearBottom)box.scrollTop=box.scrollHeight;
+}
+function _chatEscapeHtml(s){
+  const d=document.createElement('div');d.textContent=s;return d.innerHTML;
+}
+function _chatSetReply(msgId){
+  const m=_chatFindMsgById(msgId);
+  if(!m)return;
+  _chatReplyTo=m;
+  const bar=document.getElementById('cchat-reply-bar');
+  bar.style.display='flex';
+  document.getElementById('cchat-reply-preview').textContent=(m.type==='voice'?'🎤 Tin nhắn thoại':m.content||'').slice(0,70);
+  document.getElementById('cchat-input').focus();
+}
+function _chatCancelReply(){
+  _chatReplyTo=null;
+  const bar=document.getElementById('cchat-reply-bar');
+  if(bar)bar.style.display='none';
+}
+async function chatSendMessage(){
+  const inp=document.getElementById('cchat-input');
+  const text=(inp.value||'').trim();
+  if(!text||!_chatActivePeer)return;
+  inp.value='';
+  const replyId=_chatReplyTo?_chatReplyTo.id:null;
+  _chatCancelReply();
+  try{
+    const r=await fetch('/api/chat-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'text',content:text,replyToId:replyId})});
+    const d=await r.json();
+    if(d.message){_chatMessages.push(d.message);_chatLastMsgId=d.message.id;_chatRenderMessages();_chatRefreshConversations();}
+  }catch(e){showToast('❌ Gửi tin nhắn thất bại','error');}
+}
+function chatInputKeydown(ev){
+  if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();chatSendMessage();}
+}
+
+// ── Ghi âm thoại ──────────────────────────────────────────────────────────────────
+async function chatToggleVoiceRecord(){
+  if(_chatRecorder&&_chatRecorder.state==='recording'){_chatRecorder.stop();return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    _chatRecordChunks=[];
+    _chatRecorder=new MediaRecorder(stream);
+    _chatRecorder.ondataavailable=e=>{if(e.data.size>0)_chatRecordChunks.push(e.data);};
+    _chatRecorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      clearInterval(_chatRecordTimerInt);
+      document.getElementById('cchat-record-indicator').style.display='none';
+      const durationSec=Math.round((Date.now()-_chatRecordStart)/1000);
+      if(durationSec<1){showToast('Ghi âm quá ngắn','error');return;}
+      const blob=new Blob(_chatRecordChunks,{type:'audio/webm'});
+      showToast('🎤 Đang gửi tin nhắn thoại...','loading',0);
+      const url=await _uploadDirect('chat-voice-'+Date.now(),new File([blob],'voice.webm',{type:'audio/webm'}));
+      _clearLoadingToasts();
+      if(!url){showToast('❌ Gửi tin nhắn thoại thất bại','error');return;}
+      const replyId=_chatReplyTo?_chatReplyTo.id:null;
+      _chatCancelReply();
+      const r=await fetch('/api/chat-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'voice',content:url,durationSec,replyToId:replyId})});
+      const d=await r.json();
+      if(d.message){_chatMessages.push(d.message);_chatLastMsgId=d.message.id;_chatRenderMessages();_chatRefreshConversations();}
+    };
+    _chatRecorder.start();
+    _chatRecordStart=Date.now();
+    const ind=document.getElementById('cchat-record-indicator');
+    ind.style.display='flex';
+    _chatRecordTimerInt=setInterval(()=>{
+      const sec=Math.floor((Date.now()-_chatRecordStart)/1000);
+      document.getElementById('cchat-record-time').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+    },250);
+  }catch(e){
+    showToast('❌ Không dùng được microphone — kiểm tra quyền truy cập','error');
+  }
+}
+
+// ── Emoji picker (bộ emoji tự chọn — không phụ thuộc thư viện ngoài) ────────────────
+const CHAT_EMOJI_SET=['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤩','🥳','😇','🙂','😉','😅','😢','😭','😡','🤔','😴','👍','👎','👏','🙏','💪','🤝','✌️','🤞','👋','🔥','❤️','💚','💛','💙','💜','🖤','💯','🎉','🎊','⭐','✨','☕','🍷','🎂','🎁','📈','💰','💼','🏆','🚀','✅','❌'];
+function chatToggleEmojiPicker(){
+  const p=document.getElementById('cchat-emoji-picker');
+  if(!p)return;
+  if(p.style.display==='grid'){p.style.display='none';return;}
+  p.innerHTML=CHAT_EMOJI_SET.map(e=>`<span onclick="chatInsertEmoji('${e}')">${e}</span>`).join('');
+  p.style.display='grid';
+}
+function chatInsertEmoji(e){
+  const inp=document.getElementById('cchat-input');
+  inp.value+=e;
+  inp.focus();
+}
 
 // ===== ĐIỀU HƯỚNG MƯỢT — phản hồi ngay khi bấm, không im lặng chờ =====
 // Thanh loading mảnh trên cùng: cho thấy "đã bấm, đang xử lý" ngay lập tức thay vì im lặng đợi
