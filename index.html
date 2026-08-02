@@ -7086,6 +7086,12 @@ function _chatAvatarHtml(member,size){
   return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-weight:800;font-size:${size*0.42}px">${initial}</div>`;
 }
 
+// Toàn bộ thao tác chat gộp vào 1 endpoint /api/chat (dispatch qua "op") — Vercel Hobby giới
+// hạn tối đa 12 Serverless Functions/deployment nên không tách file riêng cho từng thao tác.
+async function _chatApi(op,payload){
+  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op,...payload})});
+  return r.json();
+}
 // ── Trạng thái chat toàn cục ─────────────────────────────────────────────────────────
 let _chatMyEmail=null;
 let _chatActivePeer=null;
@@ -7102,14 +7108,12 @@ function _chatMaybeStartPresence(email){
   if(!email)return;
   _chatMyEmail=email.trim().toLowerCase();
   if(_chatHeartbeatTimer)return; // đã chạy rồi, khỏi chạy lại
-  const beat=()=>{ fetch('/api/chat-heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_chatMyEmail})}).catch(()=>{}); };
+  const beat=()=>{ _chatApi('heartbeat',{email:_chatMyEmail}).catch(()=>{}); };
   beat();
   _chatHeartbeatTimer=setInterval(beat,20000);
   const refreshPresence=async()=>{
     try{
-      const r=await fetch('/api/chat-presence',{cache:'no-store'});
-      if(!r.ok)return;
-      const d=await r.json();
+      const d=await _chatApi('presence',{});
       _chatOnlineSet=new Set((d.online||[]).map(e=>e.toLowerCase()));
       _chatUpdateOnlineDots();
       const badge=document.getElementById('cchat-fab-badge');
@@ -7162,9 +7166,7 @@ function _chatShowListView(){
 async function _chatRefreshContacts(){
   if(!_chatMyEmail)return;
   try{
-    const r=await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',email:_chatMyEmail})});
-    if(!r.ok)return;
-    _chatContactsData=await r.json();
+    _chatContactsData=await _chatApi('contactList',{email:_chatMyEmail});
     _chatRenderListView();
   }catch(e){}
 }
@@ -7176,12 +7178,12 @@ function _chatContactStatusWith(email){
   return 'none';
 }
 async function _chatSendContactRequest(email){
-  await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'request',email:_chatMyEmail,targetEmail:email})});
+  await _chatApi('contactRequest',{email:_chatMyEmail,targetEmail:email});
   showToast('✅ Đã gửi lời mời kết nối','success');
   _chatRefreshContacts();
 }
 async function _chatRespondContact(requestId,accept){
-  await fetch('/api/chat-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:accept?'accept':'reject',requestId})});
+  await _chatApi(accept?'contactAccept':'contactReject',{requestId});
   _chatRefreshContacts();
 }
 
@@ -7190,9 +7192,7 @@ let _chatConversations=[];
 async function _chatRefreshConversations(){
   if(!_chatMyEmail)return;
   try{
-    const r=await fetch('/api/chat-conversations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_chatMyEmail})});
-    if(!r.ok)return;
-    _chatConversations=(await r.json()).conversations||[];
+    _chatConversations=(await _chatApi('conversations',{email:_chatMyEmail})).conversations||[];
     const totalUnread=_chatConversations.reduce((s,c)=>s+(c.unread||0),0);
     const fab=document.getElementById('cchat-fab-badge');
     if(fab){fab.textContent=totalUnread>9?'9+':totalUnread;fab.style.display=totalUnread>0?'flex':'none';}
@@ -7276,15 +7276,14 @@ function _chatOpenThread(email){
   _chatLoadHistory();
   _chatStopThreadPoll();
   _chatThreadPollTimer=setInterval(_chatPollNewMessages,4000);
-  fetch('/api/chat-mark-read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({myEmail:_chatMyEmail,otherEmail:email})}).catch(()=>{});
+  _chatApi('markRead',{myEmail:_chatMyEmail,otherEmail:email}).catch(()=>{});
 }
 function _chatStopThreadPoll(){
   if(_chatThreadPollTimer){clearInterval(_chatThreadPollTimer);_chatThreadPollTimer=null;}
 }
 async function _chatLoadHistory(){
   try{
-    const r=await fetch('/api/chat-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email1:_chatMyEmail,email2:_chatActivePeer})});
-    const d=await r.json();
+    const d=await _chatApi('history',{email1:_chatMyEmail,email2:_chatActivePeer});
     _chatMessages=d.messages||[];
     if(_chatMessages.length)_chatLastMsgId=_chatMessages[_chatMessages.length-1].id;
     _chatRenderMessages();
@@ -7295,14 +7294,13 @@ async function _chatLoadHistory(){
 async function _chatPollNewMessages(){
   if(!_chatActivePeer)return;
   try{
-    const r=await fetch('/api/chat-history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email1:_chatMyEmail,email2:_chatActivePeer,sinceId:_chatLastMsgId})});
-    const d=await r.json();
+    const d=await _chatApi('history',{email1:_chatMyEmail,email2:_chatActivePeer,sinceId:_chatLastMsgId});
     const news=d.messages||[];
     if(news.length){
       _chatMessages=_chatMessages.concat(news);
       _chatLastMsgId=news[news.length-1].id;
       _chatRenderMessages();
-      fetch('/api/chat-mark-read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({myEmail:_chatMyEmail,otherEmail:_chatActivePeer})}).catch(()=>{});
+      _chatApi('markRead',{myEmail:_chatMyEmail,otherEmail:_chatActivePeer}).catch(()=>{});
     }
   }catch(e){}
 }
@@ -7358,8 +7356,7 @@ async function chatSendMessage(){
   const replyId=_chatReplyTo?_chatReplyTo.id:null;
   _chatCancelReply();
   try{
-    const r=await fetch('/api/chat-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'text',content:text,replyToId:replyId})});
-    const d=await r.json();
+    const d=await _chatApi('send',{fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'text',content:text,replyToId:replyId});
     if(d.message){_chatMessages.push(d.message);_chatLastMsgId=d.message.id;_chatRenderMessages();_chatRefreshConversations();}
   }catch(e){showToast('❌ Gửi tin nhắn thất bại','error');}
 }
@@ -7388,8 +7385,7 @@ async function chatToggleVoiceRecord(){
       if(!url){showToast('❌ Gửi tin nhắn thoại thất bại','error');return;}
       const replyId=_chatReplyTo?_chatReplyTo.id:null;
       _chatCancelReply();
-      const r=await fetch('/api/chat-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'voice',content:url,durationSec,replyToId:replyId})});
-      const d=await r.json();
+      const d=await _chatApi('send',{fromEmail:_chatMyEmail,toEmail:_chatActivePeer,type:'voice',content:url,durationSec,replyToId:replyId});
       if(d.message){_chatMessages.push(d.message);_chatLastMsgId=d.message.id;_chatRenderMessages();_chatRefreshConversations();}
     };
     _chatRecorder.start();
