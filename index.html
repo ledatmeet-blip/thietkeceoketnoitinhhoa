@@ -5613,11 +5613,11 @@ function openEventEditor(id){
   slot.innerHTML=`<div class="ea-editor">
     <div class="ea-editor-title">${id?'Chỉnh sửa sự kiện':'Thêm sự kiện mới'}</div>
     <div class="ee-row2">
-      <div class="ee-field"><label class="ee-lbl">Ngày (số, hiện trên vé sự kiện)</label><input class="ee-inp" id="ee-day" placeholder="15" value="${ev.day||''}"></div>
-      <div class="ee-field"><label class="ee-lbl">Tháng</label><input class="ee-inp" id="ee-month" placeholder="Tháng 7" value="${ev.month||''}"></div>
+      <div class="ee-field"><label class="ee-lbl">Ngày (số, hiện trên vé sự kiện)</label><input class="ee-inp" id="eev-day" placeholder="15" value="${ev.day||''}"></div>
+      <div class="ee-field"><label class="ee-lbl">Tháng</label><input class="ee-inp" id="eev-month" placeholder="Tháng 7" value="${ev.month||''}"></div>
     </div>
-    <div class="ee-field"><label class="ee-lbl">Tiêu đề sự kiện (hiện ở danh sách)</label><input class="ee-inp" id="ee-title" placeholder="CEO Networking Hà Nội" value="${ev.title||''}"></div>
-    <div class="ee-field"><label class="ee-lbl">Mô tả ngắn (hiện ở danh sách)</label><textarea class="ee-inp ee-ta" id="ee-desc" placeholder="Mô tả ngắn về sự kiện...">${ev.desc||''}</textarea></div>
+    <div class="ee-field"><label class="ee-lbl">Tiêu đề sự kiện (hiện ở danh sách)</label><input class="ee-inp" id="eev-title" placeholder="CEO Networking Hà Nội" value="${ev.title||''}"></div>
+    <div class="ee-field"><label class="ee-lbl">Mô tả ngắn (hiện ở danh sách)</label><textarea class="ee-inp ee-ta" id="eev-desc" placeholder="Mô tả ngắn về sự kiện...">${ev.desc||''}</textarea></div>
     <div style="border-top:1px dashed rgba(255,255,255,.1);margin:6px 0;padding-top:10px;font-size:.74rem;font-weight:700;color:var(--gold)">📋 Trang chi tiết đầy đủ (giống Sự Kiện Workshop chính) — khách bấm "Xem chi tiết" sẽ thấy các thông tin dưới đây</div>
     <div class="ee-field">
       <label class="ee-lbl">Ảnh poster sự kiện</label>
@@ -5642,7 +5642,7 @@ function openEventEditor(id){
     </div>
   </div>`;
   slot.scrollIntoView({behavior:'smooth',block:'nearest'});
-  document.getElementById('ee-title').focus();
+  document.getElementById('eev-title').focus();
 }
 function _eeUploadPoster(imgKey){
   const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
@@ -5663,11 +5663,11 @@ function cancelEventEditor(){
   _editingEventId=null;
 }
 function saveEventForm(){
-  const day=(document.getElementById('ee-day').value||'').trim();
-  const month=(document.getElementById('ee-month').value||'').trim();
-  const title=(document.getElementById('ee-title').value||'').trim();
-  const desc=(document.getElementById('ee-desc').value||'').trim();
-  if(!title){document.getElementById('ee-title').focus();return;}
+  const day=(document.getElementById('eev-day').value||'').trim();
+  const month=(document.getElementById('eev-month').value||'').trim();
+  const title=(document.getElementById('eev-title').value||'').trim();
+  const desc=(document.getElementById('eev-desc').value||'').trim();
+  if(!title){document.getElementById('eev-title').focus();return;}
   const date=(document.getElementById('ee2-date')?.value||'').trim();
   const time=(document.getElementById('ee2-time')?.value||'').trim();
   const location=(document.getElementById('ee2-location')?.value||'').trim();
