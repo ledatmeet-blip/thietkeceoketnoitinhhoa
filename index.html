@@ -4107,6 +4107,7 @@ function switchApTab(tab, btn){
   else if(tab==='leads') renderApLeadsTab();
   else if(tab==='members') renderApMembersTab();
   else if(tab==='products') renderApProductsTab();
+  else if(tab==='chatmembers') renderApChatMembersTab();
 }
 
 // --- CEO PROFILES ---
@@ -4333,6 +4334,14 @@ function openCeoEditor(id){
       <div class="ap-field"><label class="ap-lbl">Ngày sinh</label><input class="ap-inp" id="ee-dob" value="${p.dob||''}" placeholder="DD/MM/YYYY"></div>
       <div class="ap-field"><label class="ap-lbl">Số điện thoại</label><input class="ap-inp" id="ee-phone" value="${p.phone||''}" placeholder="0912345678"></div>
       <div class="ap-field"><label class="ap-lbl">Email (dùng làm tài khoản thành viên + chat)</label><input class="ap-inp" id="ee-ceo-email" value="${p.email||''}" placeholder="ceo@email.com" type="email"></div>
+      <div class="ap-field ap-form-full" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px">
+        <span style="font-size:.76rem;color:var(--muted)">💬 Trạng thái chat:</span>
+        <span style="font-size:.76rem;font-weight:800;color:${_chatMemberStatus(p.email||'')==='approved'?'#22c55e':_chatMemberStatus(p.email||'')==='blocked'?'#f87171':'#fbbf24'}">${_chatMemberStatus(p.email||'')==='approved'?'✅ Đã duyệt':_chatMemberStatus(p.email||'')==='blocked'?'🚫 Đã chặn':'⏳ Chưa duyệt'}</span>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          ${_chatMemberStatus(p.email||'')!=='approved'?`<button class="ap-save" style="padding:6px 12px;font-size:.74rem" onclick="chatApproveMemberFromForm('${p.id||''}')">✅ Duyệt chat</button>`:''}
+          ${_chatMemberStatus(p.email||'')!=='blocked'?`<button class="ap-cancel" style="padding:6px 12px;font-size:.74rem;color:#f87171;border-color:rgba(248,113,113,.3)" onclick="chatBlockMemberFromForm()">🚫 Chặn chat</button>`:''}
+        </div>
+      </div>
       <div class="ap-field"><label class="ap-lbl">Chức vụ</label><input class="ap-inp" id="ee-title" value="${p.title||''}" placeholder="GĐ / Chủ Tịch HĐQT..."></div>
       <div class="ap-field"><label class="ap-lbl">Học vị</label><input class="ap-inp" id="ee-degree" value="${p.degree||''}" placeholder="Đại Học / Thạc sĩ / Tiến sỹ"></div>
       <div class="ap-field"><label class="ap-lbl">Vai trò trong CLB</label><input class="ap-inp" id="ee-club-role" value="${p.clubRole||''}" placeholder="Chủ Tịch CLB / Phó CT CLB..."></div>
@@ -5150,6 +5159,7 @@ const _DB_SYNC_RE = [
   /^ceo-filter-cats-v1$/,
   /^ws-event-v1$/,
   /^ceo-albums-v1$/,
+  /^chat-members-v1$/,
 ];
 const _lsSet = localStorage.setItem.bind(localStorage);
 
@@ -7058,20 +7068,119 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ai đang online, và polling tin nhắn mới mỗi vài giây trong lúc khung chat đang mở. Với
 // quy mô cộng đồng CLB (vài trăm thành viên), độ trễ vài giây là chấp nhận được.
 // =====================================================================================
+// Danh sách chat KHÔNG còn tự động = mọi hồ sơ CEO có email / mọi thành viên CLB đã duyệt nữa
+// — quản trị phải DUYỆT RIÊNG từng người vào chat (tab "Duyệt Thành Viên Chat"), và có thể
+// chặn/xoá bất kỳ lúc nào nếu vi phạm văn hoá chat. chat-members-v1 là danh sách trạng thái
+// (approved/blocked); tên/ảnh/vai trò vẫn lấy động từ hồ sơ CEO hoặc yêu cầu tham gia CLB để
+// luôn khớp dữ liệu mới nhất.
+const CHAT_MEMBERS_KEY='chat-members-v1';
+function _loadChatMembers(){try{return JSON.parse(localStorage.getItem(CHAT_MEMBERS_KEY)||'[]');}catch(e){return[];}}
+function _saveChatMembers(arr){localStorage.setItem(CHAT_MEMBERS_KEY,JSON.stringify(arr));}
+function _chatMemberStatus(email){
+  const e=(email||'').trim().toLowerCase();
+  const rec=_loadChatMembers().find(m=>m.email===e);
+  return rec?rec.status:'none'; // 'none' | 'approved' | 'blocked'
+}
+function chatApproveMember(email,name,source,ceoId){
+  const e=(email||'').trim().toLowerCase();
+  if(!e){showToast('Cần có email trước đã','error');return;}
+  const list=_loadChatMembers();
+  const idx=list.findIndex(m=>m.email===e);
+  const entry={email:e,name:name||e,source:source||'member',ceoId:ceoId||null,status:'approved',ts:new Date().toISOString()};
+  if(idx>=0)list[idx]=entry;else list.push(entry);
+  _saveChatMembers(list);
+  showToast('✅ Đã duyệt thành viên chat: '+entry.name,'success');
+  if(typeof renderApChatMembersTab==='function')renderApChatMembersTab();
+  if(_editingCeoId===ceoId)openCeoEditor(ceoId); // vẽ lại nút/badge trạng thái ngay trong form đang mở
+}
+function chatBlockMember(email,name){
+  const e=(email||'').trim().toLowerCase();
+  if(!e)return;
+  const list=_loadChatMembers();
+  const idx=list.findIndex(m=>m.email===e);
+  if(idx>=0){list[idx].status='blocked';list[idx].ts=new Date().toISOString();}
+  else list.push({email:e,name:name||e,source:'member',ceoId:null,status:'blocked',ts:new Date().toISOString()});
+  _saveChatMembers(list);
+  showToast('🚫 Đã chặn — không thể chat nữa','success');
+  if(typeof renderApChatMembersTab==='function')renderApChatMembersTab();
+}
+function chatRemoveMember(email){
+  if(!confirm('Xoá thành viên này khỏi danh sách chat? (Có thể duyệt lại sau nếu cần)'))return;
+  const e=(email||'').trim().toLowerCase();
+  _saveChatMembers(_loadChatMembers().filter(m=>m.email!==e));
+  showToast('🗑 Đã xoá khỏi danh sách chat','success');
+  if(typeof renderApChatMembersTab==='function')renderApChatMembersTab();
+}
+// Đọc trực tiếp từ form hồ sơ CEO đang mở — cho phép duyệt/chặn chat ngay tại chỗ khi vừa điền
+// email xong, không cần lưu hồ sơ trước rồi mới qua tab riêng.
+function chatApproveMemberFromForm(ceoId){
+  const email=(document.getElementById('ee-ceo-email')?.value||'').trim().toLowerCase();
+  const name=(document.getElementById('ee-name')?.value||'').trim();
+  chatApproveMember(email,name,'ceo',ceoId||_editingCeoId||null);
+}
+function chatBlockMemberFromForm(){
+  const email=(document.getElementById('ee-ceo-email')?.value||'').trim().toLowerCase();
+  const name=(document.getElementById('ee-name')?.value||'').trim();
+  chatBlockMember(email,name);
+}
+// ===== ADMIN TAB: Duyệt Thành Viên Chat — gộp mọi ứng viên (CEO có email + thành viên CLB đã
+// duyệt) vào 1 bảng, duyệt/chặn/xoá ngay tại chỗ, không cần mở từng hồ sơ CEO riêng lẻ. =====
+function renderApChatMembersTab(){
+  const tab=document.getElementById('ap-tab-chatmembers');
+  if(!tab)return;
+  const statusOf=email=>_chatMemberStatus(email);
+  const ceoCandidates=loadCeoProfiles().filter(p=>p.email).map(p=>({email:p.email,name:p.name,source:'CEO',ceoId:p.id,status:statusOf(p.email)}));
+  const ceoEmails=new Set(ceoCandidates.map(c=>c.email.trim().toLowerCase()));
+  const memberCandidates=_loadJoinRequests().filter(r=>r.status==='approved'&&r.email&&!ceoEmails.has(r.email.trim().toLowerCase())).map(r=>({email:r.email,name:r.name,source:'Thành viên CLB',ceoId:null,status:statusOf(r.email)}));
+  const all=[...ceoCandidates,...memberCandidates];
+  const approvedCount=all.filter(c=>c.status==='approved').length;
+  const blockedCount=all.filter(c=>c.status==='blocked').length;
+  const pendingCount=all.filter(c=>c.status==='none').length;
+  const esc=s=>(s||'').replace(/'/g,"\\'");
+  const row=c=>{
+    const statusLbl={approved:'✅ Đã duyệt',blocked:'🚫 Đã chặn',none:'⏳ Chưa duyệt'}[c.status];
+    const statusCls={approved:'confirmed',blocked:'cancelled',none:'pending'}[c.status];
+    return `<tr>
+      <td style="font-weight:700">${c.name||'—'}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${c.email}</td>
+      <td style="font-size:.75rem">${c.source}</td>
+      <td><span class="lead-status ${statusCls}">${statusLbl}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${c.status!=='approved'?`<button class="lead-action-btn confirm" onclick="chatApproveMember('${c.email}','${esc(c.name)}','${c.ceoId?'ceo':'member'}','${c.ceoId||''}')">✅ Duyệt</button>`:''}
+          ${c.status!=='blocked'?`<button class="lead-action-btn cancel" onclick="chatBlockMember('${c.email}','${esc(c.name)}')">🚫 Chặn</button>`:''}
+          ${c.status!=='none'?`<button class="lead-action-btn del" onclick="chatRemoveMember('${c.email}')">🗑 Xoá</button>`:''}
+        </div>
+      </td>
+    </tr>`;
+  };
+  tab.innerHTML=`
+  <div class="ap-tab-hdr"><h2>💬 Duyệt Thành Viên Chat</h2></div>
+  <div class="leads-summary">
+    <div class="leads-kpi green"><strong>${approvedCount}</strong><span>Đã duyệt chat</span></div>
+    <div class="leads-kpi" style="border-color:rgba(251,191,36,.25)"><strong style="color:#fbbf24">${pendingCount}</strong><span>Chưa duyệt</span></div>
+    <div class="leads-kpi" style="border-color:rgba(248,113,113,.2)"><strong style="color:#f87171">${blockedCount}</strong><span>Đã chặn</span></div>
+  </div>
+  ${all.length===0?'<div class="leads-empty">📭 Chưa có CEO nào có email, cũng chưa có thành viên CLB nào được duyệt tham gia</div>':`
+  <div class="leads-tbl-wrap">
+  <table class="leads-tbl">
+    <thead><tr><th>Tên</th><th>Email</th><th>Nguồn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+    <tbody>${all.map(row).join('')}</tbody>
+  </table>
+  </div>`}
+  `;
+}
 function _chatAllMembers(){
   const list=[];
-  const seen=new Set();
-  loadCeoProfiles().forEach(p=>{
-    const e=(p.email||'').trim().toLowerCase();
-    if(!e||seen.has(e))return;
-    seen.add(e);
-    list.push({email:e,name:p.name||e,avatar:p.img||localStorage.getItem(IMG_PREFIX+'ceo-'+p.id)||'',roleLabel:'CEO'+(p.role?' — '+p.role:''),isCeo:true,ceoId:p.id});
-  });
-  _loadJoinRequests().filter(r=>r.status==='approved').forEach(r=>{
-    const e=(r.email||'').trim().toLowerCase();
-    if(!e||seen.has(e))return;
-    seen.add(e);
-    list.push({email:e,name:r.name||e,avatar:'',roleLabel:'Thành viên CLB',isCeo:false,ceoId:null});
+  const ceoByEmail={};
+  loadCeoProfiles().forEach(p=>{const e=(p.email||'').trim().toLowerCase();if(e)ceoByEmail[e]=p;});
+  const joinByEmail={};
+  _loadJoinRequests().forEach(r=>{const e=(r.email||'').trim().toLowerCase();if(e)joinByEmail[e]=r;});
+  _loadChatMembers().filter(m=>m.status==='approved').forEach(m=>{
+    const p=ceoByEmail[m.email];
+    if(p){list.push({email:m.email,name:p.name||m.name,avatar:p.img||localStorage.getItem(IMG_PREFIX+'ceo-'+p.id)||'',roleLabel:'CEO'+(p.role?' — '+p.role:''),isCeo:true,ceoId:p.id});return;}
+    const r=joinByEmail[m.email];
+    list.push({email:m.email,name:(r&&r.name)||m.name,avatar:'',roleLabel:'Thành viên CLB',isCeo:false,ceoId:null});
   });
   return list;
 }
@@ -9922,6 +10031,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
       <div class="ap-nav-sec">Báo Cáo</div>
       <button class="ap-nav-btn" onclick="switchApTab('products',this)"><span class="ap-ico">🛍️</span><span>Duyệt Sản Phẩm</span></button>
       <button class="ap-nav-btn" onclick="switchApTab('members',this)"><span class="ap-ico">🪪</span><span>Duyệt Thành Viên</span></button>
+      <button class="ap-nav-btn" onclick="switchApTab('chatmembers',this)"><span class="ap-ico">💬</span><span>Duyệt Thành Viên Chat</span></button>
       <button class="ap-nav-btn" onclick="switchApTab('leads',this)"><span class="ap-ico">📋</span><span>Đăng Ký & Tài Chính</span></button>
       <div class="ap-nav-sec">Cài Đặt</div>
       <button class="ap-nav-btn" onclick="switchApTab('design',this)"><span class="ap-ico">🎨</span><span>Thiết Kế & Ảnh</span></button>
@@ -9943,6 +10053,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
       <div class="ap-tab" id="ap-tab-leads"></div>
       <div class="ap-tab" id="ap-tab-members"></div>
       <div class="ap-tab" id="ap-tab-products"></div>
+      <div class="ap-tab" id="ap-tab-chatmembers"></div>
     </main>
   </div>
 </div>
