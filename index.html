@@ -9046,7 +9046,7 @@ function _ccRegister(key,ids,filterType){
     if(old.timer)clearInterval(old.timer);
     if(old.cardEls)Object.values(old.cardEls).forEach(el=>el.remove());
   }
-  _ccInstances[key]={items:[],index:0,timer:null,ids,filterType};
+  _ccInstances[key]={items:[],index:0,timer:null,ids,filterType,visible:false};
 }
 function _ccLoad(key){
   const inst=_ccInstances[key];if(!inst)return;
@@ -9131,7 +9131,7 @@ function _ccRender(key){
     if(labelEl)labelEl.textContent=it.label||(it.type==='video'?'Video cộng đồng':'');
     const vid=el.querySelector('video');
     if(vid){
-      if(isActive){if(vid.paused)vid.play().catch(()=>{});}
+      if(isActive&&inst.visible){if(vid.paused)vid.play().catch(()=>{});}
       else if(!vid.paused){vid.pause();}
     }
     const playBadge=el.querySelector('.cc-play-badge');
@@ -9163,6 +9163,10 @@ function _ccNext(key){const inst=_ccInstances[key];if(inst)_ccGoTo(key,inst.inde
 function _ccStartAutoplay(key){
   const inst=_ccInstances[key];if(!inst)return;
   if(inst.timer){clearInterval(inst.timer);inst.timer=null;}
+  // Chỉ tự chạy vòng carousel (và video) khi khối này đang thật sự hiện trong khung nhìn —
+  // xem IntersectionObserver ở initGallery(). Nếu không, người dùng lướt xuống sẽ thấy carousel
+  // đã tự chuyển qua vài lượt / video đã tự phát rồi tắt từ lúc còn ở ngoài màn hình.
+  if(!inst.visible)return;
   if(inst.items.length<2)return;
   inst.timer=setInterval(()=>{inst.index=(inst.index+1)%inst.items.length;_ccRender(key);},7000);
 }
@@ -9261,11 +9265,27 @@ function openGalleryLightbox(src){
     attachSwipe('video','ccv-stage');
   });
 })();
+// Lướt tới khối carousel (trong khung nhìn) mới tự chạy vòng + tự phát video đang active; lướt
+// qua khỏi thì dừng lại (đỡ tốn pin/băng thông phát video lúc người dùng còn chưa nhìn thấy).
+function _ccObserveVisibility(key,stageId){
+  const stage=document.getElementById(stageId);if(!stage)return;
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      const inst=_ccInstances[key];if(!inst)return;
+      inst.visible=entry.isIntersecting;
+      if(entry.isIntersecting){_ccRender(key);_ccStartAutoplay(key);}
+      else{_ccPauseAutoplay(key);_ccRender(key);}
+    });
+  },{threshold:0.3});
+  io.observe(stage);
+}
 function initGallery(){
   _ccRegister('main',{track:'cc-track',dots:'cc-dots',empty:'cc-empty'},'all');
   _ccRegister('video',{track:'ccv-track',dots:'ccv-dots',empty:'ccv-empty'},'video');
   _ccLoad('main');
   _ccLoad('video');
+  _ccObserveVisibility('main','cc-stage');
+  _ccObserveVisibility('video','ccv-stage');
   renderAlbumsRow();
 }
 
