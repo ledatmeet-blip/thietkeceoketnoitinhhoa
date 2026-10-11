@@ -9832,7 +9832,10 @@ async function fbFullBuildBook(){
   fbFullPageFlip=new St.PageFlip(document.getElementById('flipbook-full-book'),{
     width:baseW, height:baseH, size:'stretch',
     minWidth:240, maxWidth:1100, minHeight:320, maxHeight:1500,
-    maxShadowOpacity:0.5, showCover:true, mobileScrollSupport:false,
+    // showCover:false (khác bản gốc ở trên) — sách này có thêm 1 trang mở đầu + 1 trang
+    // đóng riêng, ghép cặp (1,2)...(31,32) để trang mở đầu đi cùng bìa, trang đóng đi
+    // cùng trang CEO cuối, thay vì hiện bìa/trang cuối đứng 1 mình cạnh khoảng trắng.
+    maxShadowOpacity:0.5, showCover:false, mobileScrollSupport:false,
     usePortrait:true, drawShadow:true
   });
   fbFullPageFlip.loadFromImages(images);
