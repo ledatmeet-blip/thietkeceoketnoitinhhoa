@@ -489,7 +489,7 @@ nav a.nav-highlight:hover{background:rgba(34,197,94,.15)}
 .fb-nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:1200;display:flex;align-items:center;gap:14px;padding:7px 14px;background:rgba(22,22,22,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:50px;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .fb-nav button{width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:1.35rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;padding:0}
 .fb-nav button:hover{background:var(--gold,#f0c040);color:#161616}
-.fb-nav #fb-page-indicator{color:#fff;font-size:.85rem;font-weight:600;min-width:66px;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.fb-nav #fb-page-indicator,.fb-nav #fb-full-page-indicator{color:#fff;font-size:.85rem;font-weight:600;min-width:66px;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 
 #login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9100;display:none;align-items:center;justify-content:center;padding:20px}
 #login-overlay.open{display:flex}
@@ -1103,8 +1103,12 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
    .ceo-grid nên dùng .fb-full-card để _initCeoUnlocks()/filterCeos()/searchCeos() bỏ qua nó
    (3 hàm đó dùng querySelectorAll('.ceo-card:not(.fb-full-card)')) dù tái dùng chung style .ceo-card. */
 .fb-full-feature{margin-bottom:20px}
-.fb-full-feature-label{font-size:.78rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.fb-full-feature-label{font-size:.78rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
 .fb-full-card{max-width:240px}
+/* Ảnh bìa sách là ảnh dọc (không phải ảnh vuông như avatar CEO) — hiện NGUYÊN hình, không cắt
+   mất chữ/icon ở mép dưới bìa như khi dùng chung aspect-ratio:1 + object-fit:cover của CEO thật. */
+.fb-full-card .ceo-card-img{aspect-ratio:2/3}
+.fb-full-card .ceo-card-img img{object-fit:contain;background:#000}
 /* CEO Card Quick-Edit (admin mode) */
 .ceo-card-edit-btn{position:absolute;bottom:8px;right:8px;z-index:10;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--gold);border-radius:8px;padding:4px 9px;font-size:.68rem;font-weight:800;cursor:pointer;opacity:0;transition:.2s;backdrop-filter:blur(4px);display:none}
 .admin-mode .ceo-card-edit-btn{display:block}
@@ -1143,6 +1147,17 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 #ceo-success-modal.open{display:flex}
 #fb-full-success-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9102;display:none;align-items:center;justify-content:center;padding:20px}
 #fb-full-success-modal.open{display:flex}
+/* Sách lật "Hồ Sơ CEO full" — TỰ CHỦ hoàn toàn (PDF.js + StPageFlip, y hệt kỹ thuật của
+   #flipbook-overlay ở dưới) thay vì nhúng iframe sang fliphtml5.com: không chỉ giấu được
+   địa chỉ link, mà còn KHÔNG CÒN watermark/logo FlipHTML5 nào cả vì không còn dùng dịch vụ
+   đó nữa. Overlay/biến state tách riêng hoàn toàn khỏi #flipbook-overlay (sách "Điều Kiện
+   Tham Gia") để không rủi ro ảnh hưởng luồng đó.*/
+#flipbook-full-overlay{position:fixed;inset:0;background:#2f2f2b;background:radial-gradient(circle at 50% 40%,#3d3d37 0%,#262622 100%);z-index:9150;display:none}
+#flipbook-full-overlay.open{display:flex;flex-direction:column}
+#flipbook-full-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:60px 16px 82px;box-sizing:border-box}
+#flipbook-full-book{margin:0 auto}
+#flipbook-full-book .fb-page{background-color:#fff;background-size:cover;background-position:center;box-shadow:0 0 6px rgba(0,0,0,.15)}
+#fb-full-loading{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;font-size:.95rem;font-weight:600;z-index:1160;text-align:center;padding:24px}
 #join-status-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1010;display:none;align-items:center;justify-content:center;padding:20px}
 #join-status-modal.open{display:flex}
 .success-ceo-box{background:var(--dark3);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:36px 28px;width:min(400px,100%);text-align:center}
@@ -7931,7 +7946,6 @@ function closeSuccessModal(){
 // mỗi người mua 1 key riêng để tránh 2 người mua cùng lúc ghi đè nhau.
 // ═══════════════════════════════════════════════════════════════════════════
 const FB_FULL_PRICE=199000;
-const FB_FULL_URL='https://online.fliphtml5.com/mxtoi/oefq/';
 const FB_FULL_LABEL='Hồ Sơ CEO full';
 function _fbFullPurchaseKey(email){
   const e=(email||'').trim().toLowerCase();
@@ -7993,7 +8007,7 @@ async function _fbFullStartPayment(){
 }
 function openFlipbookFullReader(){
   closeFlipbookFullSuccessModal();
-  window.open(FB_FULL_URL,'_blank');
+  openFlipbookFullBook();
 }
 function closeFlipbookFullSuccessModal(){
   document.getElementById('fb-full-success-modal')?.classList.remove('open');
@@ -9727,7 +9741,130 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') fbPrev();
   else if(e.key==='ArrowRight') fbNext();
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeFlipbookFullSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeFlipbookFullSuccessModal(); closeFlipbookFullBook(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+
+// ===== FLIPBOOK "Hồ Sơ CEO full" — bộ đọc RIÊNG (PDF.js + StPageFlip), tách biệt hoàn toàn
+// khỏi fbPageFlip/fbBuilt/FB_PDF_URL/#flipbook-overlay ở trên (sách "Điều Kiện Tham Gia") để
+// không rủi ro gì tới luồng đó. Dùng lại fbLoadScript/FB_PDFJS/FB_PDFJS_WORKER/FB_PAGEFLIP
+// (chỉ là URL thư viện CDN dùng chung, không có state riêng nên an toàn khi tái sử dụng).
+const FB_FULL_PDF_URL='ho-so-ceo-full.pdf';
+let fbFullPageFlip=null, fbFullBuilt=false, fbFullBuilding=false, fbFullPageRatio=0.707;
+
+function fbFullFit(){
+  const book=document.getElementById('flipbook-full-book');
+  if(!book) return;
+  const topGap=60, bottomGap=82, sideGap=16;
+  const availW=Math.max(220, window.innerWidth - 2*sideGap);
+  const availH=Math.max(220, window.innerHeight - topGap - bottomGap);
+  const twoPage=window.innerWidth>=820;
+  let width;
+  if(twoPage){ width=Math.min(availW, 2*fbFullPageRatio*availH, 1040); }
+  else       { width=Math.min(availW, fbFullPageRatio*availH, 560); }
+  book.style.width=Math.round(width)+'px';
+  if(fbFullPageFlip && fbFullBuilt){ try{ fbFullPageFlip.update(); }catch(e){} }
+}
+const fbFullDpr=Math.min(window.devicePixelRatio||1,3);
+let fbFullCanvasObserving=null, fbFullLastPatchedW=null, fbFullLastPatchedH=null;
+function fbFullSetupRetinaCanvas(){
+  const bookEl=document.getElementById('flipbook-full-book');
+  if(!bookEl) return;
+  const mo=new MutationObserver(()=>{
+    const canvas=bookEl.querySelector('canvas');
+    if(canvas && canvas!==fbFullCanvasObserving){
+      fbFullCanvasObserving=canvas;
+      fbFullApplyRetinaScale(canvas);
+      new MutationObserver(()=>fbFullApplyRetinaScale(canvas))
+        .observe(canvas,{attributes:true,attributeFilter:['width','height']});
+    }
+  });
+  mo.observe(bookEl,{childList:true,subtree:true});
+}
+function fbFullApplyRetinaScale(canvas){
+  if(fbFullDpr<=1) return;
+  const w=canvas.width, h=canvas.height;
+  if(!w||!h||(w===fbFullLastPatchedW&&h===fbFullLastPatchedH)) return;
+  const newW=Math.round(w*fbFullDpr), newH=Math.round(h*fbFullDpr);
+  canvas.width=newW; canvas.height=newH;
+  fbFullLastPatchedW=newW; fbFullLastPatchedH=newH;
+  const ctx=canvas.getContext('2d');
+  if(ctx) ctx.scale(fbFullDpr,fbFullDpr);
+}
+let fbFullResizeT;
+window.addEventListener('resize',()=>{ clearTimeout(fbFullResizeT); fbFullResizeT=setTimeout(fbFullFit,150); });
+
+async function openFlipbookFullBook(){
+  const ov=document.getElementById('flipbook-full-overlay');
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+  if(!fbFullBuilt && !fbFullBuilding){ try{ await fbFullBuildBook(); }catch(err){ fbFullShowError(err); } }
+  else { fbFullFit(); }
+}
+async function fbFullBuildBook(){
+  fbFullBuilding=true;
+  const loading=document.getElementById('fb-full-loading');
+  const loadingText=document.getElementById('fb-full-loading-text');
+  loading.style.display='flex';
+  await Promise.all([fbLoadScript(FB_PDFJS), fbLoadScript(FB_PAGEFLIP)]);
+  const pdfjsLib=window['pdfjsLib'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc=FB_PDFJS_WORKER;
+  const pdf=await pdfjsLib.getDocument(FB_FULL_PDF_URL).promise;
+  const n=pdf.numPages;
+  const FB_TARGET_LONG_SIDE=2200;
+  const images=[];
+  for(let i=1;i<=n;i++){
+    const page=await pdf.getPage(i);
+    const base=page.getViewport({scale:1});
+    if(i===1 && base.width>0){ fbFullPageRatio=base.width/base.height; }
+    const scale=Math.min(5,Math.max(2.5,FB_TARGET_LONG_SIDE/Math.max(base.width,base.height)));
+    const viewport=page.getViewport({scale});
+    const canvas=document.createElement('canvas');
+    canvas.width=viewport.width; canvas.height=viewport.height;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    await page.render({canvasContext:ctx,viewport}).promise;
+    images.push(canvas.toDataURL('image/jpeg',0.93));
+    loadingText.textContent='Đang mở sách… '+i+'/'+n;
+  }
+  const baseH=800, baseW=Math.round(baseH*fbFullPageRatio);
+  fbFullFit();
+  fbFullSetupRetinaCanvas();
+  const St=window.St;
+  fbFullPageFlip=new St.PageFlip(document.getElementById('flipbook-full-book'),{
+    width:baseW, height:baseH, size:'stretch',
+    minWidth:240, maxWidth:1100, minHeight:320, maxHeight:1500,
+    maxShadowOpacity:0.5, showCover:true, mobileScrollSupport:false,
+    usePortrait:true, drawShadow:true
+  });
+  fbFullPageFlip.loadFromImages(images);
+  fbFullPageFlip.on('flip', fbFullUpdateIndicator);
+  fbFullPageFlip.on('changeState', fbFullUpdateIndicator);
+  fbFullPageFlip.on('changeOrientation', fbFullUpdateIndicator);
+  fbFullBuilt=true; fbFullBuilding=false;
+  loading.style.display='none';
+  fbFullFit();
+  fbFullUpdateIndicator();
+}
+function fbFullUpdateIndicator(){
+  if(!fbFullPageFlip) return;
+  const el=document.getElementById('fb-full-page-indicator');
+  if(el) el.textContent=(fbFullPageFlip.getCurrentPageIndex()+1)+' / '+fbFullPageFlip.getPageCount();
+}
+function fbFullPrev(){ if(fbFullPageFlip) fbFullPageFlip.flipPrev(); }
+function fbFullNext(){ if(fbFullPageFlip) fbFullPageFlip.flipNext(); }
+function fbFullShowError(err){
+  fbFullBuilding=false;
+  const loading=document.getElementById('fb-full-loading');
+  loading.innerHTML='<span style="max-width:320px;line-height:1.55">Không mở được sách. Vui lòng kiểm tra kết nối và thử lại.<br><small style="opacity:.6">'+((err&&err.message)||'')+'</small></span>';
+}
+function closeFlipbookFullBook(){
+  document.getElementById('flipbook-full-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('flipbook-full-overlay').classList.contains('open')) return;
+  if(e.key==='ArrowLeft') fbFullPrev();
+  else if(e.key==='ArrowRight') fbFullNext();
+});
 
 // ===== AI CHAT WIDGET (Gemini brain dùng chung với bot Telegram, khác persona — xem api/website-chat.js) =====
 let _aiChatOpen=false;
@@ -9909,7 +10046,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
       <!-- HỒ SƠ CEO FULL — sách lật trả phí 199k, KHÔNG phải hồ sơ CEO thật nên đặt riêng
            ngoài .ceo-grid (grid này bị renderCeoGrid() ghi đè innerHTML mỗi lần render) -->
       <div class="fb-full-feature">
-        <div class="fb-full-feature-label">📖 Sản phẩm sách lật</div>
+        <div class="fb-full-feature-label">Hồ Sơ CEO</div>
         <div class="ceo-card fb-full-card" id="fb-full-card" onclick="openFlipbookFullPaywall()">
           <div class="ceo-card-img" data-img="fb-full-cover" onclick="if(window.adminMode){event.stopPropagation();adminUpload('fb-full-cover')}">
             <span class="ceo-emoji">📖</span>
@@ -9917,10 +10054,7 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
             <span class="ceo-card-status locked" id="fb-full-card-status">🔒 Chưa mua</span>
           </div>
           <div class="ceo-card-body">
-            <div class="ceo-card-name">Hồ Sơ CEO full</div>
-            <div class="ceo-card-role">Sách lật đầy đủ — xem toàn bộ nội dung chi tiết</div>
-            <div class="ceo-card-footer">
-              <span class="ceo-loc">📘 Ebook / Sách lật</span>
+            <div class="ceo-card-footer" style="justify-content:flex-end">
               <button class="ceo-btn connect" id="fb-full-card-btn" onclick="event.stopPropagation();openFlipbookFullPaywall()">Mua 199.000đ</button>
             </div>
           </div>
@@ -10443,6 +10577,22 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
     <p>Bạn đã mua <strong>Hồ Sơ CEO full</strong> — bấm nút bên dưới để mở sách lật, xem được trên cả máy tính và điện thoại.</p>
     <button class="success-ceo-btn" onclick="openFlipbookFullReader()">📖 Mở Sách Lật Ngay</button>
     <button class="success-ceo-close" onclick="closeFlipbookFullSuccessModal()">Đóng</button>
+  </div>
+</div>
+
+<!-- FLIPBOOK "Hồ Sơ CEO full" — TỰ CHỦ (PDF.js + StPageFlip), độc lập hoàn toàn với
+     #flipbook-overlay (sách Điều Kiện Tham Gia) ở trên, không dính FlipHTML5 nữa -->
+<div id="flipbook-full-overlay">
+  <div id="fb-full-loading"><div class="fb-spinner"></div><span id="fb-full-loading-text">Đang mở sách…</span></div>
+  <div id="flipbook-full-stage"><div id="flipbook-full-book"></div></div>
+  <button class="fb-home-btn" onclick="closeFlipbookFullBook()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    ← Đóng
+  </button>
+  <div class="fb-nav">
+    <button onclick="fbFullPrev()" aria-label="Trang trước">‹</button>
+    <span id="fb-full-page-indicator">– / –</span>
+    <button onclick="fbFullNext()" aria-label="Trang sau">›</button>
   </div>
 </div>
 
