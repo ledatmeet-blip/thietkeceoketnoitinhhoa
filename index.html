@@ -1099,6 +1099,12 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 .ceo-btn.connect{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a}
 .ceo-btn.connect:hover{box-shadow:0 3px 12px rgba(34,197,94,.4)}
 .ceo-btn.connected{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);cursor:default}
+/* Khối riêng "Hồ Sơ CEO full" (sách lật trả phí) — KHÔNG phải hồ sơ CEO thật, đặt ngoài
+   .ceo-grid nên dùng .fb-full-card để _initCeoUnlocks()/filterCeos()/searchCeos() bỏ qua nó
+   (3 hàm đó dùng querySelectorAll('.ceo-card:not(.fb-full-card)')) dù tái dùng chung style .ceo-card. */
+.fb-full-feature{margin-bottom:20px}
+.fb-full-feature-label{font-size:.78rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.fb-full-card{max-width:240px}
 /* CEO Card Quick-Edit (admin mode) */
 .ceo-card-edit-btn{position:absolute;bottom:8px;right:8px;z-index:10;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--gold);border-radius:8px;padding:4px 9px;font-size:.68rem;font-weight:800;cursor:pointer;opacity:0;transition:.2s;backdrop-filter:blur(4px);display:none}
 .admin-mode .ceo-card-edit-btn{display:block}
@@ -1135,6 +1141,8 @@ footer{background:var(--dark);border-top:none;padding:0;position:relative;overfl
 /* CEO SUCCESS MODAL */
 #ceo-success-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9102;display:none;align-items:center;justify-content:center;padding:20px}
 #ceo-success-modal.open{display:flex}
+#fb-full-success-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9102;display:none;align-items:center;justify-content:center;padding:20px}
+#fb-full-success-modal.open{display:flex}
 #join-status-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1010;display:none;align-items:center;justify-content:center;padding:20px}
 #join-status-modal.open{display:flex}
 .success-ceo-box{background:var(--dark3);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:36px 28px;width:min(400px,100%);text-align:center}
@@ -6089,7 +6097,11 @@ function loginSuccess(user){
   } else if(_pendingLoginAction==='diamond'){
     _pendingLoginAction=null;
     setTimeout(()=>openMembershipModal('diamond'), 200);
+  } else if(_pendingLoginAction==='fbfull'){
+    _pendingLoginAction=null;
+    setTimeout(openFlipbookFullPaywall, 200);
   } else { _pendingLoginAction=null; }
+  if(typeof _fbFullRenderCardState==='function')_fbFullRenderCardState();
 }
 
 function updateUserUI(user){
@@ -7039,6 +7051,7 @@ function _reRenderAllDynamicSections(){
   renderPricingInfo();
   applyDesign();
   initImages();
+  _fbFullRenderCardState();
   // _ccRefreshAll (không phải initGallery) — initGallery() gọi _ccRegister lại từ đầu, tạo instance
   // MỚI và làm "mồ côi" các thẻ DOM cũ mà instance cũ đang theo dõi (không bao giờ bị dọn nữa,
   // kể cả thẻ ứng với nội dung đã xoá) — đây chính là nguyên nhân "ảnh xoá rồi vẫn hiện lại khi
@@ -7701,7 +7714,7 @@ function _isCeoUnlockedAnywhere(id){
   });
 }
 function _initCeoUnlocks(){
-  document.querySelectorAll('.ceo-card').forEach(function(card){
+  document.querySelectorAll('.ceo-card:not(.fb-full-card)').forEach(function(card){
     const id=card.dataset.ceoId;
     if(_isCeoUnlockedForUser(id,currentUser?.email)){_setCeoUnlockedUI(card);}
     else{_setCeoLockedUI(card);}
@@ -7905,6 +7918,84 @@ function closeSuccessModal(){
   document.getElementById('ceo-success-modal').classList.remove('open');
   _unlockCeoName='';_unlockCeoId=null;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HỒ SƠ CEO FULL — sách lật (ebook) trả phí 199.000đ, luồng thứ 4 dùng chung hệ
+// thống thanh toán QR SePay ở trên (_pf/pfCreateRef/pfConfirmPaid/pfVerifyCode).
+// Khác với "Kết nối CEO" (chỉ nhớ 24h, không đồng bộ server): sản phẩm này khách
+// trả tiền 1 lần nên trạng thái "đã mua" phải nhớ VĨNH VIỄN và nhớ ở MỌI thiết bị
+// theo email — ghi thẳng qua _dbWrite() (giống _saveLeads()) thay vì chỉ localStorage,
+// mỗi người mua 1 key riêng để tránh 2 người mua cùng lúc ghi đè nhau.
+// ═══════════════════════════════════════════════════════════════════════════
+const FB_FULL_PRICE=199000;
+const FB_FULL_URL='https://online.fliphtml5.com/mxtoi/oefq/';
+const FB_FULL_LABEL='Hồ Sơ CEO full';
+function _fbFullPurchaseKey(email){
+  const e=(email||'').trim().toLowerCase();
+  return e?'ceo-flipbook-full-purchase::'+e:null;
+}
+function _fbFullIsPurchased(email){
+  const k=_fbFullPurchaseKey(email);
+  return !!(k&&localStorage.getItem(k));
+}
+function _fbFullMarkPurchased(email){
+  const k=_fbFullPurchaseKey(email);if(!k)return;
+  const value=JSON.stringify({at:Date.now()});
+  localStorage.setItem(k,value);
+  _dbWrite(k,value); // lưu thật lên server — khách đổi trình duyệt/máy khác vẫn thấy đã mua
+}
+function _fbFullRenderCardState(){
+  const btn=document.getElementById('fb-full-card-btn');
+  if(!btn)return;
+  const badge=document.getElementById('fb-full-card-status');
+  const bought=_fbFullIsPurchased(currentUser?.email);
+  if(bought){
+    btn.textContent='📖 Mở sách lật';
+    btn.className='ceo-btn connected';
+    btn.onclick=function(e){e.stopPropagation();openFlipbookFullReader();};
+    if(badge){badge.textContent='✓ Đã mua';badge.className='ceo-card-status unlocked';}
+  }else{
+    btn.textContent='Mua 199.000đ';
+    btn.className='ceo-btn connect';
+    btn.onclick=function(e){e.stopPropagation();openFlipbookFullPaywall();};
+    if(badge){badge.textContent='🔒 Chưa mua';badge.className='ceo-card-status locked';}
+  }
+}
+function openFlipbookFullPaywall(){
+  if(!currentUser){ _pendingLoginAction='fbfull'; openLogin(); return; }
+  if(_fbFullIsPurchased(currentUser.email)){ openFlipbookFullReader(); return; }
+  _fbFullStartPayment();
+}
+async function _fbFullStartPayment(){
+  document.getElementById('pay-content').textContent='Đang tạo mã...';
+  document.getElementById('pay-amount').textContent='199,000đ';
+  document.getElementById('ceo-payment-modal').classList.add('open');
+  _pfPendingCtx={
+    type:'flipbook',
+    itemLabel:FB_FULL_LABEL,
+    amount:FB_FULL_PRICE,
+    leadSource:'flipbook_full',
+    tgPaidEvent:'flipbook_full_paid',
+    tgSuccessEvent:'flipbook_full_activated',
+    codeInputId:'activate-code-inp',
+    onSuccess:()=>{
+      _fbFullMarkPurchased(currentUser?.email);
+      _fbFullRenderCardState();
+      document.getElementById('fb-full-success-modal').classList.add('open');
+    }
+  };
+  const ref=await pfCreateRef('flipbook',FB_FULL_LABEL,FB_FULL_PRICE);
+  document.getElementById('pay-content').textContent=ref||'Lỗi tạo mã — vui lòng thử lại';
+  if(_pfPendingCtx)_pfPendingCtx.ref=ref;
+}
+function openFlipbookFullReader(){
+  closeFlipbookFullSuccessModal();
+  window.open(FB_FULL_URL,'_blank');
+}
+function closeFlipbookFullSuccessModal(){
+  document.getElementById('fb-full-success-modal')?.classList.remove('open');
+}
+
 // ===== DANH MỤC NGÀNH NGHỀ (bộ lọc Hồ Sơ CEO) — admin có thể chủ động thêm/sửa/xoá =====
 const CEO_FILTER_CATS_KEY='ceo-filter-cats-v1';
 const DEFAULT_CEO_FILTER_CATS=[
@@ -7928,7 +8019,7 @@ function renderCeoFilterTabs(){
 function filterCeos(btn,tag){
   document.querySelectorAll('.ceo-filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('.ceo-card').forEach(function(card){
+  document.querySelectorAll('.ceo-card:not(.fb-full-card)').forEach(function(card){
     if(tag==='all'){card.style.display='';return;}
     card.style.display=(card.dataset.tags||'').toLowerCase().includes(tag.toLowerCase())?'':'none';
   });
@@ -7981,7 +8072,7 @@ function ceoCatSave(){
 }
 function searchCeos(val){
   const q=val.toLowerCase().trim();
-  document.querySelectorAll('.ceo-card').forEach(function(card){
+  document.querySelectorAll('.ceo-card:not(.fb-full-card)').forEach(function(card){
     card.style.display=(!q||card.textContent.toLowerCase().includes(q))?'':'none';
   });
 }
@@ -9633,7 +9724,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') fbPrev();
   else if(e.key==='ArrowRight') fbNext();
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeFlipbook(); document.getElementById('gal-lightbox')?.classList.remove('open'); closeVideoModal(); closeAlbumViewer(); closeCarouselVideoLightbox(); closeUnlockModal(); closePaymentModal(); closeActivateModal(); closeSuccessModal(); closeFlipbookFullSuccessModal(); closeMembershipModal(); closeGooglePicker(); closeEventsAdmin(); closeAdminLogin(); closeCeoEditor(); closeShowcaseModal(); closeCatEditor(); closeProductDetail(); } });
 
 // ===== AI CHAT WIDGET (Gemini brain dùng chung với bot Telegram, khác persona — xem api/website-chat.js) =====
 let _aiChatOpen=false;
@@ -9811,6 +9902,28 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
           <input type="text" placeholder="Tìm kiếm CEO..." oninput="searchCeos(this.value)">
         </div>
       </div>
+
+      <!-- HỒ SƠ CEO FULL — sách lật trả phí 199k, KHÔNG phải hồ sơ CEO thật nên đặt riêng
+           ngoài .ceo-grid (grid này bị renderCeoGrid() ghi đè innerHTML mỗi lần render) -->
+      <div class="fb-full-feature">
+        <div class="fb-full-feature-label">📖 Sản phẩm sách lật</div>
+        <div class="ceo-card fb-full-card" id="fb-full-card" onclick="openFlipbookFullPaywall()">
+          <div class="ceo-card-img" data-img="fb-full-cover" onclick="if(window.adminMode){event.stopPropagation();adminUpload('fb-full-cover')}">
+            <span class="ceo-emoji">📖</span>
+            <img src="" alt="" style="display:none" onload="this.style.display='block';this.previousElementSibling&&(this.previousElementSibling.style.display='none')">
+            <span class="ceo-card-status locked" id="fb-full-card-status">🔒 Chưa mua</span>
+          </div>
+          <div class="ceo-card-body">
+            <div class="ceo-card-name">Hồ Sơ CEO full</div>
+            <div class="ceo-card-role">Sách lật đầy đủ — xem toàn bộ nội dung chi tiết</div>
+            <div class="ceo-card-footer">
+              <span class="ceo-loc">📘 Ebook / Sách lật</span>
+              <button class="ceo-btn connect" id="fb-full-card-btn" onclick="event.stopPropagation();openFlipbookFullPaywall()">Mua 199.000đ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="ceo-grid">
 
         <div class="ceo-card" data-ceo-id="c1" data-tags="công nghệ,saas,ai" onclick="clickCeoCard(this)">
@@ -10316,6 +10429,17 @@ document.addEventListener('DOMContentLoaded',_initBgMusic);
     <p>Bạn đã kết nối thành công với <strong id="success-ceo-name-display">CEO</strong>.<br>Hồ sơ đầy đủ và thông tin liên hệ đã được mở khóa trong <strong>24 giờ</strong>.</p>
     <button class="success-ceo-btn" onclick="closeSuccessModal()">🤝 Xem Hồ Sơ CEO</button>
     <button class="success-ceo-close" onclick="closeSuccessModal()">Đóng</button>
+  </div>
+</div>
+
+<!-- FLIPBOOK FULL SUCCESS MODAL (sau khi mua "Hồ Sơ CEO full" 199k) -->
+<div id="fb-full-success-modal">
+  <div class="success-ceo-box">
+    <div class="success-ceo-icon">🎉</div>
+    <h3>Thanh toán thành công!</h3>
+    <p>Bạn đã mua <strong>Hồ Sơ CEO full</strong> — bấm nút bên dưới để mở sách lật, xem được trên cả máy tính và điện thoại.</p>
+    <button class="success-ceo-btn" onclick="openFlipbookFullReader()">📖 Mở Sách Lật Ngay</button>
+    <button class="success-ceo-close" onclick="closeFlipbookFullSuccessModal()">Đóng</button>
   </div>
 </div>
 
