@@ -3530,6 +3530,9 @@ const DEFAULT_IMGS={
   'author':      'images/author.jpg',
   'chapter-5':   'images/chapter-5.png',
   'logo-badge':  'images/logo-tron-ceo.jpg',
+  // Ảnh bìa gốc của link sách lật (lấy từ og:image của chính link fliphtml5) — hiện mặc định
+  // cho tới khi admin upload ảnh bìa riêng (ghi đè bình thường qua adminUpload('fb-full-cover')).
+  'fb-full-cover':'https://online.fliphtml5.com/mxtoi/oefq/files/shot.jpg?v=2',
 };
 function initImages(){
   document.querySelectorAll('[data-img]').forEach(el=>{
