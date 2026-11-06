@@ -10,7 +10,7 @@ const { BOT_TOKEN, tgNotifyAll } = require('../lib/telegram');
 const router = express.Router();
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
 
 let _liveCache = { text: '', at: 0 };
 const LIVE_TTL_MS = 3 * 60 * 1000;

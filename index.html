@@ -4858,7 +4858,7 @@ function saveApContact(){
   const c=loadContact();
   c.phone=(document.getElementById('ap-ct-phone').value||'').trim();
   c.phone_href='tel:'+c.phone.replace(/\D/g,'');
-  c.zalo_href=(document.getElementById('ap-ct-zalo').value||'').trim();
+  c.zalo_href=_fixZaloLink(document.getElementById('ap-ct-zalo').value);
   c.email=(document.getElementById('ap-ct-email').value||'').trim();
   c.fb_href=(document.getElementById('ap-ct-fb').value||'').trim();
   saveContact(c);renderFooterContact();
@@ -4870,7 +4870,7 @@ function saveApSocials(){
   c.youtube=(document.getElementById('ap-ct-yt').value||'').trim();
   c.fb_href=(document.getElementById('ap-ct-fb2').value||'').trim();
   c.tiktok=(document.getElementById('ap-ct-tk').value||'').trim();
-  c.zalo_url=(document.getElementById('ap-ct-zl2').value||'').trim();
+  c.zalo_url=_fixZaloLink(document.getElementById('ap-ct-zl2').value);
   saveContact(c);renderFooterContact();
 }
 
@@ -5567,13 +5567,21 @@ function renderFooterContact(){
 }
 const CONTACT_PROMPTS={
   phone:['Số điện thoại (VD: 0909 123 456)','phone'],
-  zalo:['Link Zalo (VD: https://zalo.me/0909123456)','zalo_href'],
+  zalo:['Link Zalo — PHẢI bỏ số 0 đầu, thêm 84 (VD số 0909123456 → https://zalo.me/84909123456). Dùng nguyên số 0 Zalo báo "tài khoản không tồn tại".','zalo_href'],
   email:['Địa chỉ Email','email'],
   fb:['Link Facebook Page','fb_href'],
   youtube:['Link YouTube Channel','youtube'],
   tiktok:['Link TikTok','tiktok'],
-  zalo_url:['Link Zalo (cho icon mạng xã hội)','zalo_url']
+  zalo_url:['Link Zalo (cho icon mạng xã hội) — cùng định dạng 84xxx như trên','zalo_url']
 };
+// Zalo chỉ nhận link dạng zalo.me/84xxxxxxxxx (84 + số, bỏ số 0 đầu) — dùng nguyên số nội địa
+// 0xxx thì Zalo báo "tài khoản không tồn tại". Tự sửa nếu admin lỡ dán sai định dạng, dù đã
+// ghi rõ trong gợi ý (xem CONTACT_PROMPTS) — tránh lặp lại lỗi "chưa kết nối được" đã gặp.
+function _fixZaloLink(v){
+  v=(v||'').trim();
+  const m=v.match(/^(?:https?:\/\/zalo\.me\/)?0(\d{9,10})$/);
+  return m?'https://zalo.me/84'+m[1]:v;
+}
 function adminEditContact(field){
   if(!window.adminMode)return;
   const c=loadContact();
@@ -5582,7 +5590,8 @@ function adminEditContact(field){
   if(newVal===null)return;
   c[info[1]]=newVal.trim();
   if(field==='phone')c.phone_href='tel:'+newVal.replace(/\D/g,'');
-  if(field==='zalo'){c.zalo_href=newVal.trim();c.zalo='Chat Zalo ngay';}
+  if(field==='zalo'){c.zalo_href=_fixZaloLink(newVal);c.zalo='Chat Zalo ngay';}
+  if(field==='zalo_url')c.zalo_url=_fixZaloLink(newVal);
   saveContact(c);
   renderFooterContact();
 }
