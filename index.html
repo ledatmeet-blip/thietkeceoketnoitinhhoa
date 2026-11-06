@@ -4169,7 +4169,7 @@ function saveCeoProfiles(arr){
 async function _syncedProfilesUpdate(mutatorFn){
   let profiles;
   try{
-    const r=await fetch('/api/read',{cache:'no-store'});
+    const r=await fetch(API_BASE+'/read',{cache:'no-store'});
     const d=await r.json();
     profiles=JSON.parse(d[CEO_PROFILES_KEY]||'[]');
   }catch(e){
@@ -5163,6 +5163,9 @@ function disableAdmin(){
 
 // ===== DATABASE + BLOB SYNC LAYER =====
 const _IS_LIVE = !['localhost','127.0.0.1',''].includes(window.location.hostname);
+// Backend đã di dời từ Vercel/Supabase sang VPS riêng — mọi gọi /api/* (trừ /api/deploy, hook
+// deploy Vercel cũ không còn ý nghĩa, để nguyên vô hại) giờ trỏ sang domain API mới này.
+const API_BASE='https://api.ceoketnoitinhhoa.vn';
 const _DB_SYNC_RE = [
   /^ceo-profiles-v2$/,
   /^ceo-showcase-cats-v1$/,
@@ -5213,7 +5216,7 @@ function _applyDbData(data){
 // cho phiên đó dù server đã trả lời xong. Giờ dữ liệu về muộn vẫn được áp dụng + trang tự render
 // lại các phần dữ liệu-động, thay vì bỏ qua.
 const _dbFetchPromise = _IS_LIVE
-  ? fetch('/api/read').then(r => r.ok ? r.json() : null).catch(() => null)
+  ? fetch(API_BASE+'/read').then(r => r.ok ? r.json() : null).catch(() => null)
   : Promise.resolve(null);
 const _dbReady = _IS_LIVE
   ? Promise.race([
@@ -5265,7 +5268,7 @@ async function saveDesignNow(){
   applyDesign(merged);
   if(_IS_LIVE){
     try{
-      const res=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:_AE,adminPass:_AP,key:DESIGN_KEY,value:merged})});
+      const res=await fetch(API_BASE+'/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:_AE,adminPass:_AP,key:DESIGN_KEY,value:merged})});
       if(!res.ok)throw new Error(await res.text());
       _clearLoadingToasts();
       showToast('✅ Đã lưu thiết kế vào database!','success');
@@ -5290,7 +5293,7 @@ let _deployDebounceTimer=null;
 async function _tgNotify(event,data={}){
   if(!_IS_LIVE)return;
   try{
-    await fetch('/api/telegram-notify',{
+    await fetch(API_BASE+'/telegram-notify',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({adminEmail:_AE,adminPass:_AP,event,data})
@@ -5376,7 +5379,7 @@ async function _dbWrite(key, value) {
       showToast('❌ Upload ảnh lên CDN thất bại — CHƯA lưu, thử lại giúp mình','error',5500);
       return;
     }
-    const res = await fetch('/api/admin', {
+    const res = await fetch(API_BASE+'/admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminEmail: _AE, adminPass: _AP, key, value: sanitized })
@@ -5457,43 +5460,22 @@ function _isAdminEmail(email){ return !!_findAdmin(email); }
 const _AE = _ADMINS[0].email;
 const _AP = _ADMINS[0].pass;
 
-// ===== SUPABASE DIRECT UPLOAD (bypasses Vercel's ~4.5MB function body limit) =====
-// The anon key is meant to be public — safe to ship in client JS, same as any Supabase web app.
-const _SUPABASE_URL='https://urmpxjyobrreqiwysqxe.supabase.co';
-const _SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybXB4anlvYnJyZXFpd3lzcXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTA3NDcsImV4cCI6MjA5OTc4Njc0N30.hCV_tNQ3lGbedHGqfowWF3hKG-X4VfbP8QTrNtl-75s';
-const SUPABASE_JS_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
-let _sbClient=null;
-function _loadScriptOnce(src){
-  return new Promise((resolve,reject)=>{
-    if(document.querySelector('script[data-src="'+src+'"]')){resolve();return;}
-    const s=document.createElement('script');s.src=src;s.setAttribute('data-src',src);
-    s.onload=()=>resolve();s.onerror=()=>reject(new Error('Không tải được thư viện upload'));
-    document.head.appendChild(s);
-  });
-}
-async function _getSbClient(){
-  if(_sbClient)return _sbClient;
-  await _loadScriptOnce(SUPABASE_JS_CDN);
-  _sbClient=window.supabase.createClient(_SUPABASE_URL,_SUPABASE_ANON_KEY);
-  return _sbClient;
-}
-// Ask the server for a signed upload URL (tiny JSON request, no file bytes), then upload the
-// actual bytes straight from the browser to Supabase Storage — works for files of any size,
-// unlike routing them through /api/upload which is capped at a few MB by the platform.
+// ===== UPLOAD LÊN VPS (thay cho Supabase Storage signed-URL cũ) =====
+// Backend VPS không có giới hạn body ~4.5MB như Vercel function nữa, nên upload thẳng
+// (multipart) vào /upload là đủ — không cần signed URL/SDK bên thứ 3 nào nữa.
 async function _uploadDirect(key,file){
   if(!_IS_LIVE||!file)return null;
   try{
     const ext=(file.name&&file.name.includes('.')?file.name.split('.').pop():(file.type||'').split('/')[1])||'bin';
     const filename=key.replace(/[^a-z0-9]/gi,'-').toLowerCase().slice(0,60)+'.'+ext.toLowerCase().replace('jpeg','jpg');
-    const res=await fetch('/api/upload-url',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({adminEmail:_AE,adminPass:_AP,filename})
-    });
+    const fd=new FormData();
+    fd.append('adminEmail',_AE);
+    fd.append('adminPass',_AP);
+    fd.append('filename',filename);
+    fd.append('file',file);
+    const res=await fetch(API_BASE+'/upload',{method:'POST',body:fd});
     if(!res.ok)return null;
-    const{path,token,publicUrl}=await res.json();
-    const sb=await _getSbClient();
-    const{error}=await sb.storage.from('ceo-site').uploadToSignedUrl(path,token,file,{contentType:file.type||undefined,upsert:true});
-    if(error)return null;
+    const{publicUrl}=await res.json();
     return publicUrl;
   }catch(e){console.warn('[Upload] direct upload failed:',e.message);return null;}
 }
@@ -7229,7 +7211,7 @@ function _chatAvatarHtml(member,size){
 // Toàn bộ thao tác chat gộp vào 1 endpoint /api/chat (dispatch qua "op") — Vercel Hobby giới
 // hạn tối đa 12 Serverless Functions/deployment nên không tách file riêng cho từng thao tác.
 async function _chatApi(op,payload){
-  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op,...payload})});
+  const r=await fetch(API_BASE+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op,...payload})});
   return r.json();
 }
 // ── Trạng thái chat toàn cục ─────────────────────────────────────────────────────────
@@ -7774,7 +7756,7 @@ const PF_MASTER_CODE='TINHHOA2025'; // mã tổng cho admin test nhanh, dùng đ
 // thật) — gọi ngay khi mở màn thanh toán, để hiển thị làm "Nội dung CK" trước khi khách chuyển tiền.
 async function pfCreateRef(type,itemLabel,amount){
   try{
-    const r=await fetch('/api/payment-create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,itemLabel,amount})});
+    const r=await fetch(API_BASE+'/payment-create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,itemLabel,amount})});
     const d=await r.json();
     return d.ref||null;
   }catch(e){return null;}
@@ -7804,7 +7786,7 @@ function _pfStartPolling(){
   window._pfPollTimer=setInterval(async()=>{
     if(!_pf||_pf.ref!==ref){clearInterval(window._pfPollTimer);return;}
     try{
-      const r=await fetch('/api/payment-status?ref='+encodeURIComponent(ref));
+      const r=await fetch(API_BASE+'/payment-status?ref='+encodeURIComponent(ref));
       const d=await r.json();
       if(d.status==='confirmed'&&_pf&&_pf.ref===ref){
         clearInterval(window._pfPollTimer);
@@ -7824,7 +7806,7 @@ async function pfVerifyCode(inputId,errId){
   if(code===PF_MASTER_CODE)return _pfFinishSuccess();
   err.textContent='Đang kiểm tra...';
   try{
-    const r=await fetch('/api/payment-status?ref='+encodeURIComponent(_pf.ref));
+    const r=await fetch(API_BASE+'/payment-status?ref='+encodeURIComponent(_pf.ref));
     const d=await r.json();
     if(d.status==='confirmed'&&d.code===code)return _pfFinishSuccess();
     err.textContent=d.status==='confirmed'
@@ -8102,7 +8084,7 @@ let _cpoCurrentId=null;
 async function _refreshJoinStatusFromServer(){
   if(!_IS_LIVE)return;
   try{
-    const r=await fetch('/api/read',{cache:'no-store'});
+    const r=await fetch(API_BASE+'/read',{cache:'no-store'});
     if(!r.ok)return;
     const d=await r.json();
     const raw=d[JOIN_REQ_KEY];
@@ -8863,7 +8845,7 @@ function _pdStartPaymentPolling(ref,leadId,info){
   clearInterval(_pdPollTimer);
   _pdPollTimer=setInterval(async()=>{
     try{
-      const r=await fetch('/api/payment-status?ref='+encodeURIComponent(ref));
+      const r=await fetch(API_BASE+'/payment-status?ref='+encodeURIComponent(ref));
       const d=await r.json();
       if(d.status==='confirmed'){
         clearInterval(_pdPollTimer);
@@ -9077,7 +9059,7 @@ async function renderApProductsTab(){
   // dựa vào cache cục bộ của tab (dễ bị thiếu sản phẩm người khác vừa thêm ở máy/tab khác).
   let profiles;
   try{
-    const r=await fetch('/api/read',{cache:'no-store'});
+    const r=await fetch(API_BASE+'/read',{cache:'no-store'});
     const d=await r.json();
     profiles=JSON.parse(d[CEO_PROFILES_KEY]||'[]');
     _lsSet(CEO_PROFILES_KEY,JSON.stringify(profiles)); // chỉ cập nhật cache cục bộ, KHÔNG ghi ngược lên server (chỉ đang xem, chưa đổi gì)
@@ -9900,7 +9882,7 @@ async function sendAiChat(){
   _aiChatSending=true;
   const typingEl=_aiChatAppendMsg('Đang trả lời…','bot typing');
   try{
-    const r=await fetch('/api/website-chat',{
+    const r=await fetch(API_BASE+'/website-chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({message:msg,history:_aiChatHistory,isFirstMessage:!_aiChatFirstSent}),
