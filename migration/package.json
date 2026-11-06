@@ -1,0 +1,12 @@
+{
+  "name": "ceoketnoitinhhoa-migration",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Script backup 100% dữ liệu Supabase (DB + Storage) để chuẩn bị di dời sang VPS. Không deploy lên Vercel.",
+  "scripts": {
+    "backup": "node backup-supabase.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.7"
+  }
+}

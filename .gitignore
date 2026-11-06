@@ -1,5 +1,8 @@
 node_modules/
+.DS_Store
 .env.local
 .env*.local
 .vercel
 .env*
+!migration/.env.example
+migration/backup/
